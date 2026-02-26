@@ -1,26 +1,304 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Landing page styles (CSS custom properties, no Tailwind conflicts) */
+@import "../styles/landing-theme.css";
+@import "../styles/landing-animations.css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --radius: 0.75rem;
+
+  /* ── Core palette ── */
+  --background: #080b12;
+  --foreground: #e2e8f0;
+  --card: rgba(15, 19, 30, 0.7);
+  --card-foreground: #e2e8f0;
+  --popover: #0f131e;
+  --popover-foreground: #e2e8f0;
+
+  /* ── Brand accent ── */
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+
+  /* ── Surface layers ── */
+  --secondary: #111827;
+  --secondary-foreground: #e2e8f0;
+  --muted: #0f1420;
+  --muted-foreground: #64748b;
+  --accent: #141c2e;
+  --accent-foreground: #e2e8f0;
+
+  /* ── Semantic ── */
+  --destructive: #ef4444;
+  --border: rgba(56, 79, 125, 0.25);
+  --input: rgba(56, 79, 125, 0.2);
+  --ring: #3b82f6;
+
+  /* ── Sidebar ── */
+  --sidebar: #060910;
+  --sidebar-foreground: #7a8baa;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(59, 130, 246, 0.08);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(56, 79, 125, 0.15);
+  --sidebar-ring: #3b82f6;
+
+  /* ── Extended palette ── */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --info: #06b6d4;
+
+  /* ── Glow ── */
+  --glow-blue: rgba(59, 130, 246, 0.35);
+  --glow-cyan: rgba(6, 182, 212, 0.35);
+  --glow-green: rgba(16, 185, 129, 0.35);
+  --glow-red: rgba(239, 68, 68, 0.3);
+  --glow-violet: rgba(139, 92, 246, 0.3);
+  --glow-orange: rgba(245, 158, 11, 0.3);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.5);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ── Utility classes ── */
+@layer utilities {
+  .glass {
+    background: rgba(15, 19, 30, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(56, 79, 125, 0.2);
+  }
+
+  .glass-strong {
+    background: rgba(15, 19, 30, 0.8);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(56, 79, 125, 0.25);
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 20px var(--glow-blue), 0 0 60px rgba(59, 130, 246, 0.1);
+  }
+
+  .glow-cyan {
+    box-shadow: 0 0 20px var(--glow-cyan), 0 0 60px rgba(6, 182, 212, 0.1);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 20px var(--glow-green), 0 0 60px rgba(16, 185, 129, 0.1);
+  }
+
+  .glow-red {
+    box-shadow: 0 0 20px var(--glow-red);
+  }
+
+  .glow-violet {
+    box-shadow: 0 0 20px var(--glow-violet);
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 20px var(--glow-orange);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gradient-border {
+    position: relative;
+  }
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(139, 92, 246, 0.3), rgba(6, 182, 212, 0.2));
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+  }
+
+  .animate-glow {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Casino overlay animations ── */
+@keyframes spin-chip {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes carousel-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes progress-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.6), 0 0 20px rgba(239, 68, 68, 0.2); }
+  50% { box-shadow: 0 0 16px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.4); }
+}
+
+@keyframes progress-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-value {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+@keyframes float-up {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes border-rotate {
+  0% { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-spin-chip {
+  animation: spin-chip 6s linear infinite;
+}
+
+.animate-carousel {
+  animation: carousel-scroll 15s linear infinite;
+}
+
+.animate-progress-glow {
+  animation: progress-glow 2s ease-in-out infinite;
+}
+
+.animate-progress-shimmer {
+  background-size: 200% 100%;
+  animation: progress-shimmer 2s linear infinite;
+}
+
+.animate-pulse-value {
+  animation: pulse-value 3s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float-up 3s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
+/* ── Modal animations ── */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+  0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes tabSlide {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+@keyframes casinoItemIn {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
 }

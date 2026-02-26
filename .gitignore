@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# Landing page source (ported into main project)
+Landingpage Pulseframelabs/
+
 # vercel
 .vercel
 

@@ -1,0 +1,316 @@
+/* ═══════════════════════════════════════════════════════
+   THEME SYSTEM — Elegant Luxury Casino
+   Gold / Dark — Refined, Premium, High-End
+   ═══════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+  --bg-primary: #09090b;
+  --bg-secondary: #0f0e12;
+  --bg-tertiary: #15131a;
+  --bg-elevated: #1a1820;
+  --bg-card: rgba(212, 175, 55, 0.03);
+  --bg-card-hover: rgba(212, 175, 55, 0.06);
+  --bg-glass: rgba(20, 18, 26, 0.7);
+  --bg-glass-border: rgba(212, 175, 55, 0.1);
+
+  --text-primary: #f5f0e8;
+  --text-secondary: rgba(245, 240, 232, 0.55);
+  --text-tertiary: rgba(245, 240, 232, 0.3);
+  --text-inverse: #09090b;
+
+  --gold: #c9a84c;
+  --gold-light: #e2cc7e;
+  --gold-dark: #8b6d1f;
+  --silver: #a8a4a0;
+  --champagne: #d4c5a9;
+  --rose: #b76e79;
+
+  --accent-primary: var(--gold);
+  --accent-secondary: var(--champagne);
+  --accent-tertiary: var(--rose);
+  --accent-glow: rgba(201, 168, 76, 0.08);
+  --accent-glow-strong: rgba(201, 168, 76, 0.16);
+
+  --gradient-primary: linear-gradient(135deg, #8b6d1f 0%, #c9a84c 40%, #e2cc7e 60%, #c9a84c 100%);
+  --gradient-gold: linear-gradient(135deg, #c9a84c, #e2cc7e);
+  --gradient-subtle: linear-gradient(135deg, rgba(201, 168, 76, 0.06) 0%, rgba(212, 197, 169, 0.04) 100%);
+  --gradient-radial: radial-gradient(ellipse at center, rgba(201, 168, 76, 0.06) 0%, transparent 70%);
+
+  --border-subtle: rgba(245, 240, 232, 0.05);
+  --border-medium: rgba(245, 240, 232, 0.1);
+  --border-gold: rgba(201, 168, 76, 0.2);
+  --border-accent: var(--border-gold);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 40px rgba(201, 168, 76, 0.06);
+  --shadow-glow-accent: 0 4px 40px rgba(201, 168, 76, 0.1);
+
+  --noise-opacity: 0.025;
+  --overlay-dark: rgba(9, 9, 11, 0.85);
+  --overlay-blur: rgba(9, 9, 11, 0.6);
+
+  --nav-bg: rgba(9, 9, 11, 0.75);
+  --nav-border: rgba(245, 240, 232, 0.05);
+
+  --pricing-popular-bg: rgba(201, 168, 76, 0.04);
+  --pricing-popular-border: rgba(201, 168, 76, 0.2);
+
+  --divider: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+}
+
+[data-theme="light"] {
+  --bg-primary: #faf8f4;
+  --bg-secondary: #f3f0ea;
+  --bg-tertiary: #eae6de;
+  --bg-elevated: #ffffff;
+  --bg-card: rgba(139, 109, 31, 0.03);
+  --bg-card-hover: rgba(139, 109, 31, 0.06);
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --bg-glass-border: rgba(139, 109, 31, 0.12);
+
+  --text-primary: #1a1714;
+  --text-secondary: rgba(26, 23, 20, 0.55);
+  --text-tertiary: rgba(26, 23, 20, 0.3);
+  --text-inverse: #faf8f4;
+
+  --gold: #8b6d1f;
+  --gold-light: #a88a35;
+  --gold-dark: #6b5215;
+  --silver: #6b6560;
+  --champagne: #7a6e55;
+  --rose: #8b4550;
+
+  --accent-primary: var(--gold);
+  --accent-secondary: var(--champagne);
+  --accent-tertiary: var(--rose);
+  --accent-glow: rgba(139, 109, 31, 0.06);
+  --accent-glow-strong: rgba(139, 109, 31, 0.12);
+
+  --gradient-primary: linear-gradient(135deg, #6b5215 0%, #8b6d1f 40%, #a88a35 60%, #8b6d1f 100%);
+  --gradient-gold: linear-gradient(135deg, #8b6d1f, #a88a35);
+  --gradient-subtle: linear-gradient(135deg, rgba(139, 109, 31, 0.04) 0%, rgba(122, 110, 85, 0.03) 100%);
+  --gradient-radial: radial-gradient(ellipse at center, rgba(139, 109, 31, 0.04) 0%, transparent 70%);
+
+  --border-subtle: rgba(26, 23, 20, 0.06);
+  --border-medium: rgba(26, 23, 20, 0.1);
+  --border-gold: rgba(139, 109, 31, 0.15);
+  --border-accent: var(--border-gold);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.08);
+  --shadow-glow: 0 0 40px rgba(139, 109, 31, 0.04);
+  --shadow-glow-accent: 0 4px 40px rgba(139, 109, 31, 0.08);
+
+  --noise-opacity: 0.012;
+  --overlay-dark: rgba(250, 248, 244, 0.85);
+  --overlay-blur: rgba(250, 248, 244, 0.6);
+
+  --nav-bg: rgba(250, 248, 244, 0.75);
+  --nav-border: rgba(26, 23, 20, 0.06);
+
+  --pricing-popular-bg: rgba(139, 109, 31, 0.04);
+  --pricing-popular-border: rgba(139, 109, 31, 0.2);
+
+  --divider: linear-gradient(90deg, transparent, var(--border-gold), transparent);
+}
+
+[data-theme] {
+  transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme] *,
+[data-theme] *::before,
+[data-theme] *::after {
+  transition:
+    color 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.no-theme-transition,
+.no-theme-transition * {
+  transition: none !important;
+}
+
+/* ── Responsive Utilities ──────────────────────────────── */
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+}
+@media (min-width: 769px) {
+  .hide-desktop { display: none !important; }
+}
+
+/* ── Landing Page Typography ───────────────────────────── */
+[data-theme] .font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+[data-theme] .font-body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+[data-theme] .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+[data-theme] h1,
+[data-theme] h2,
+[data-theme] h3,
+[data-theme] h4,
+[data-theme] h5,
+[data-theme] h6 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+[data-theme] .text-hero {
+  font-size: clamp(3rem, 8vw, 7.5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+[data-theme] .text-display {
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  line-height: 1.05;
+}
+
+[data-theme] .text-heading {
+  font-size: clamp(1.3rem, 3vw, 2.5rem);
+  line-height: 1.15;
+}
+
+[data-theme] .text-body {
+  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+  line-height: 1.7;
+}
+
+[data-theme] .text-small {
+  font-size: clamp(0.8rem, 0.9vw, 0.875rem);
+  line-height: 1.6;
+}
+
+[data-theme] .text-label {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: clamp(0.65rem, 0.75vw, 0.75rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+[data-theme] .text-gradient {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme] .text-gold { color: var(--gold); }
+[data-theme] .text-accent { color: var(--accent-primary); }
+
+/* ── Landing Page Layout ───────────────────────────────── */
+[data-theme] .section {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  overflow: hidden;
+}
+
+[data-theme] .container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 4vw, 4rem);
+}
+
+[data-theme] .container-wide {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 4vw, 4rem);
+}
+
+[data-theme] .container-narrow {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 clamp(1.5rem, 4vw, 4rem);
+}
+
+[data-theme] .divider {
+  width: 60px;
+  height: 1px;
+  background: var(--gradient-gold);
+  border: none;
+  opacity: 0.6;
+}
+
+[data-theme] .divider-wide {
+  width: 100%;
+  height: 1px;
+  background: var(--divider);
+  border: none;
+}
+
+/* ── Landing Page Base Resets ──────────────────────────── */
+[data-theme] {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme] a {
+  color: inherit;
+  text-decoration: none;
+}
+
+[data-theme] button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+[data-theme] img {
+  max-width: 100%;
+  display: block;
+}
+
+[data-theme] ::selection {
+  background: var(--gold);
+  color: var(--text-inverse);
+}
+
+[data-theme] main {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme] footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Landing Page Scrollbar ────────────────────────────── */
+[data-theme] ::-webkit-scrollbar { width: 4px; }
+[data-theme] ::-webkit-scrollbar-track { background: var(--bg-primary); }
+[data-theme] ::-webkit-scrollbar-thumb { background: var(--border-gold); border-radius: 2px; }
+[data-theme] ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
