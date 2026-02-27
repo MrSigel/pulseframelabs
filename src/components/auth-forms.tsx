@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,14 @@ interface AuthFormsProps {
 }
 
 export function AuthForms({ initialMode }: AuthFormsProps) {
+  return (
+    <Suspense fallback={null}>
+      <AuthFormsInner initialMode={initialMode} />
+    </Suspense>
+  );
+}
+
+function AuthFormsInner({ initialMode }: AuthFormsProps) {
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const { t } = useLanguage();
   const auth = t.auth;
@@ -278,6 +286,17 @@ function LoginFormContent({
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Show error from callback redirect (expired link, etc.)
+  useEffect(() => {
+    const urlError = searchParams.get("error");
+    if (urlError === "confirmation_expired") {
+      setError(auth.confirmationExpired || "Confirmation link expired. Please register again.");
+    } else if (urlError === "auth_callback_failed") {
+      setError(auth.callbackFailed || "Authentication failed. Please try again.");
+    }
+  }, [searchParams, auth]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -494,40 +513,7 @@ function RegisterFormContent({
 
   if (success) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        style={{ textAlign: "center", padding: "20px 0" }}
-      >
-        <div
-          style={{
-            width: "56px",
-            height: "56px",
-            borderRadius: "50%",
-            background: "linear-gradient(135deg, var(--gold), var(--gold-light, #e2cc7e))",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: "0 auto 20px",
-          }}
-        >
-          <Check size={28} style={{ color: "var(--bg-primary, #09090b)" }} />
-        </div>
-        <h3
-          style={{
-            fontFamily: "'Playfair Display', Georgia, serif",
-            fontSize: "1.3rem",
-            fontWeight: 700,
-            color: "var(--text-primary)",
-            marginBottom: "10px",
-          }}
-        >
-          {auth.checkEmailTitle || "Check your email"}
-        </h3>
-        <p style={{ fontSize: "0.85rem", color: "var(--text-tertiary)", lineHeight: 1.6 }}>
-          {auth.checkEmailMessage || `We sent a confirmation link to ${email}. Please check your inbox and click the link to activate your account.`}
-        </p>
-      </motion.div>
+      <EmailConfirmationView auth={auth} email={email} />
     );
   }
 
@@ -651,5 +637,151 @@ function RegisterFormContent({
         </button>
       </p>
     </div>
+  );
+}
+
+/* ── Email Confirmation View ──────────────────────────── */
+
+function EmailConfirmationView({
+  auth,
+  email,
+}: {
+  auth: Record<string, string>;
+  email: string;
+}) {
+  const [resending, setResending] = useState(false);
+  const [resent, setResent] = useState(false);
+  const [resendError, setResendError] = useState<string | null>(null);
+
+  async function handleResend() {
+    setResending(true);
+    setResendError(null);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        setResendError(error.message);
+      } else {
+        setResent(true);
+      }
+    } catch {
+      setResendError("Failed to resend. Please try again.");
+    }
+    setResending(false);
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      style={{ textAlign: "center", padding: "20px 0" }}
+    >
+      {/* Animated icon */}
+      <motion.div
+        animate={{ y: [0, -6, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        style={{
+          width: "64px",
+          height: "64px",
+          borderRadius: "50%",
+          background: "linear-gradient(135deg, var(--gold), var(--gold-light, #e2cc7e))",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 24px",
+          boxShadow: "0 8px 32px rgba(201, 168, 76, 0.2)",
+        }}
+      >
+        <Check size={30} style={{ color: "var(--bg-primary, #09090b)" }} />
+      </motion.div>
+
+      <h3
+        style={{
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontSize: "1.3rem",
+          fontWeight: 700,
+          color: "var(--text-primary)",
+          marginBottom: "12px",
+        }}
+      >
+        {auth.checkEmailTitle || "Check your email"}
+      </h3>
+
+      <p style={{ fontSize: "0.85rem", color: "var(--text-tertiary)", lineHeight: 1.7, marginBottom: "8px" }}>
+        {auth.checkEmailMessage || "We sent a confirmation link to your email. Please check your inbox and click the link to activate your account."}
+      </p>
+
+      {/* Show the email address */}
+      <p
+        style={{
+          fontSize: "0.85rem",
+          fontWeight: 600,
+          color: "var(--gold)",
+          marginBottom: "24px",
+        }}
+      >
+        {email}
+      </p>
+
+      {/* Resend button */}
+      {resent ? (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          style={{
+            fontSize: "0.8rem",
+            color: "rgba(16, 185, 129, 0.8)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "6px",
+          }}
+        >
+          <Check size={14} />
+          {auth.resendSuccess || "Email sent again!"}
+        </motion.p>
+      ) : (
+        <button
+          onClick={handleResend}
+          disabled={resending}
+          style={{
+            background: "none",
+            border: "1px solid var(--border-medium)",
+            borderRadius: "8px",
+            padding: "10px 20px",
+            fontSize: "0.8rem",
+            fontWeight: 600,
+            color: "var(--text-secondary)",
+            cursor: resending ? "not-allowed" : "pointer",
+            transition: "all 0.3s",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            opacity: resending ? 0.5 : 1,
+          }}
+        >
+          {resending && <Loader2 size={14} className="animate-spin" />}
+          {resending
+            ? (auth.resending || "Sending...")
+            : (auth.resendEmail || "Resend email")}
+        </button>
+      )}
+
+      {resendError && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          style={{ fontSize: "0.8rem", color: "#ef4444", marginTop: "12px" }}
+        >
+          {resendError}
+        </motion.p>
+      )}
+    </motion.div>
   );
 }
