@@ -1,5 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#09090b"/>
-  <path d="M7 8l7 8-7 8" stroke="#c9a84c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M16 8l7 8-7 8" stroke="#c9a84c" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c9a84c"/>
+      <stop offset="100%" stop-color="#e2cc7e"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="1.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="32" height="32" rx="7" fill="#09090b"/>
+  <rect x="1" y="1" width="30" height="30" rx="6" fill="none" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
+  <!-- Pulse/heartbeat line -->
+  <polyline
+    points="3,16 9,16 11,10 13,22 15,6 17,26 19,14 21,18 23,16 29,16"
+    stroke="url(#gold)" stroke-width="2" fill="none"
+    stroke-linecap="round" stroke-linejoin="round"
+    filter="url(#glow)"
+    stroke-dasharray="60"
+    stroke-dashoffset="60"
+  >
+    <animate attributeName="stroke-dashoffset" values="60;0;0;60" dur="3s" repeatCount="indefinite" keyTimes="0;0.4;0.7;1"/>
+  </polyline>
+  <!-- Static subtle baseline -->
+  <line x1="3" y1="16" x2="29" y2="16" stroke="#c9a84c" stroke-width="0.5" opacity="0.15"/>
 </svg>

@@ -8,8 +8,8 @@ import type {
   QuickGuessEntry, QuickGuessHistoryEntry, RaffleHistoryEntry,
   SlotBattle, SlotBattleEntry, SlotRequest, SlotRequestSettings,
   SlideshowItem, SpinnerPrize, SpinnerHistoryEntry, StoreItem,
-  StoreRedemption, StoreSettings, StreamPointsConfig, StreamViewer,
-  ThemeSettings, Tournament, UserProfile, WagerSession,
+  StoreRedemption, StoreSettings, StreamerPageSettings, StreamPointsConfig,
+  StreamViewer, ThemeSettings, Tournament, UserProfile, WagerSession,
 } from "./types";
 
 // ============================================================
@@ -579,4 +579,24 @@ export const themeSettingsDb = {
   get: () => selectSingleByUser<ThemeSettings>("theme_settings"),
   update: (updates: Partial<ThemeSettings>) =>
     upsertSingleton<ThemeSettings>("theme_settings", updates),
+};
+
+// ============================================================
+// Streamer Page Settings (singleton)
+// ============================================================
+export const streamerPage = {
+  get: () => selectSingleByUser<StreamerPageSettings>("streamer_page_settings"),
+  update: (updates: Partial<StreamerPageSettings>) =>
+    upsertSingleton<StreamerPageSettings>("streamer_page_settings", updates),
+  getBySlug: async (slug: string): Promise<StreamerPageSettings | null> => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("streamer_page_settings")
+      .select("*")
+      .eq("slug", slug)
+      .eq("is_public", true)
+      .maybeSingle();
+    if (error) throw error;
+    return data as StreamerPageSettings | null;
+  },
 };

@@ -473,6 +473,28 @@ export interface ThemeSettings {
   updated_at: string;
 }
 
+export interface StreamerPageSettings {
+  id: string;
+  user_id: string;
+  slug: string;
+  display_name: string;
+  bio: string;
+  avatar_url: string | null;
+  banner_url: string | null;
+  twitch_url: string | null;
+  kick_url: string | null;
+  youtube_url: string | null;
+  twitter_url: string | null;
+  discord_url: string | null;
+  instagram_url: string | null;
+  tiktok_url: string | null;
+  website_url: string | null;
+  is_public: boolean;
+  accent_color: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // ============================================================
 // Database interface for Supabase client typing
 // ============================================================
@@ -526,6 +548,7 @@ export interface Database {
       stream_points_config: TableDef<StreamPointsConfig>;
       promotions: TableDef<Promotion>;
       theme_settings: TableDef<ThemeSettings>;
+      streamer_page_settings: TableDef<StreamerPageSettings>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

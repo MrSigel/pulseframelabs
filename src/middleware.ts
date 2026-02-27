@@ -13,7 +13,8 @@ export const config = {
      * - favicon.ico
      * - Static assets (svg, png, jpg, etc.)
      * - /overlay/* routes (OBS browser sources, must stay public)
+     * - /s/* routes (public streamer pages)
      */
-    "/((?!_next/static|_next/image|favicon.ico|overlay|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|overlay|s/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

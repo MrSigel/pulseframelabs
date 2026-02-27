@@ -26,6 +26,7 @@ import {
   Star,
   Target,
   Settings,
+  Globe,
   type LucideIcon,
 } from "lucide-react";
 
@@ -61,6 +62,7 @@ const casinos: NavItem[] = [
 ];
 
 const stream: NavItem[] = [
+  { name: "Streamer Page", href: "/streamer-page", icon: Globe },
   { name: "Store", href: "/store", icon: Store },
   { name: "Loyalty", href: "/loyalty", icon: Star },
   { name: "Points Battle", href: "/points-battle", icon: Target },
@@ -122,8 +124,15 @@ export function Sidebar() {
       <Link href="/dashboard" className="flex items-center gap-2.5 px-5 py-5 group transition-all duration-300 hover:opacity-90">
         <div className="relative">
           <svg width="28" height="28" viewBox="0 0 32 32" fill="none" className="transition-transform duration-300 group-hover:scale-110" style={{ filter: 'drop-shadow(0 0 8px var(--glow-gold))' }}>
-            <path d="M7 8l7 8-7 8" stroke="var(--primary)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M16 8l7 8-7 8" stroke="var(--primary)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
+            <rect width="32" height="32" rx="7" fill="var(--sidebar)" />
+            <rect x="1" y="1" width="30" height="30" rx="6" fill="none" stroke="var(--primary)" strokeWidth="0.5" opacity="0.4"/>
+            <polyline
+              points="3,16 9,16 11,10 13,22 15,6 17,26 19,14 21,18 23,16 29,16"
+              stroke="var(--primary)" strokeWidth="2" fill="none"
+              strokeLinecap="round" strokeLinejoin="round"
+              className="sidebar-pulse-line"
+            />
+            <line x1="3" y1="16" x2="29" y2="16" stroke="var(--primary)" strokeWidth="0.5" opacity="0.15"/>
           </svg>
         </div>
         <div className="leading-tight">
