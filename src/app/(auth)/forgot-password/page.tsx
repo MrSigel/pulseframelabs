@@ -21,9 +21,13 @@ export default function ForgotPasswordPage() {
     setError(null);
 
     try {
+      // Store redirect destination in cookie (avoids query params in redirect_to
+      // which can cause Supabase redirect URL matching to fail)
+      document.cookie = "sb-auth-next=/reset-password; path=/; max-age=3600; SameSite=Lax";
+
       const supabase = createClient();
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+        redirectTo: `${window.location.origin}/auth/callback`,
       });
 
       if (error) {
