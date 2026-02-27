@@ -1,9 +1,12 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  // Use nextUrl.origin which correctly resolves x-forwarded-host/proto
+  // behind reverse proxies (Render.com runs on internal localhost:10000)
+  const origin = request.nextUrl.origin;
   const code = searchParams.get("code");
   const next = searchParams.get("next");
 
