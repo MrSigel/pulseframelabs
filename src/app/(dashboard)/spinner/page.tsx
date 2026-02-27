@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { OverlayLink } from "@/components/overlay-link";
 import { spinner as spinnerDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import type { SpinnerPrize } from "@/lib/supabase/types";
 import { Plus, Shuffle, Save, Play, Trash2, Monitor, X, Loader2 } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -50,6 +51,7 @@ function PokerChip({ size = 48 }: { size?: number }) {
 }
 
 export default function SpinnerPage() {
+  const uid = useAuthUid();
   const [prizes, setPrizes] = useState<PrizeRow[]>([
     { id: 1, prize: "", color: "#f43f5e" },
     { id: 2, prize: "", color: "#3b82f6" },
@@ -77,7 +79,7 @@ export default function SpinnerPage() {
     if (typeof window === "undefined") return "";
     const names = activePrizes.map((p) => p.prize).join(",");
     const cols = activePrizes.map((p) => p.color).join(",");
-    return `${window.location.origin}/overlay/spinner?prizes=${encodeURIComponent(names)}&colors=${encodeURIComponent(cols)}`;
+    return `${window.location.origin}/overlay/spinner?uid=${uid || ""}&prizes=${encodeURIComponent(names)}&colors=${encodeURIComponent(cols)}`;
   }, [activePrizes]);
 
   async function handleAddPrize() {

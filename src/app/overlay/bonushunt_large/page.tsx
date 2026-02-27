@@ -2,17 +2,71 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+import type { Bonushunt, BonushuntEntry } from "@/lib/supabase/types";
+
+const currencySymbol = (code: string | undefined) =>
+  ({ USD: "$", EUR: "\u20ac", GBP: "\u00a3", CAD: "C$", AUD: "A$" }[code || ""] || code || "$");
 
 function BonushuntLargeContent() {
   const params = useSearchParams();
-  const title = params.get("title") || "%TITLE%";
-  const hunt = params.get("hunt") || "HUNT #000";
-  const slots = params.get("slots") || "0";
-  const total = params.get("total") || "0";
-  const buyin = params.get("buyin") || "$0K";
-  const start = params.get("start") || "$0";
-  const bestX = params.get("bestx") || "0X+";
-  const avgX = params.get("avgx") || "0X";
+  const uid = useOverlayUid();
+
+  /* ---- Supabase realtime data ---- */
+  const { data: hunt } = useOverlayData<Bonushunt>({
+    table: "bonushunts",
+    userId: uid,
+    filter: { status: "active" },
+    single: true,
+  });
+
+  const { data: allEntries } = useOverlayData<BonushuntEntry[]>({
+    table: "bonushunt_entries",
+    userId: uid,
+    orderBy: "position",
+    ascending: true,
+  });
+
+  /* ---- Compute values from Supabase data ---- */
+  const entries = hunt && allEntries
+    ? allEntries.filter((e) => e.bonushunt_id === hunt.id)
+    : [];
+
+  const sym = hunt ? currencySymbol(hunt.currency) : "$";
+  const slotsCount = entries.length;
+  const totalBuyIn = entries.reduce((s, e) => s + e.buy_in, 0);
+  const totalWins = entries.reduce((s, e) => s + e.win_amount, 0);
+  const nonZeroMults = entries.filter((e) => e.multiplier > 0);
+  const bestMultiplier = nonZeroMults.length ? Math.max(...nonZeroMults.map((e) => e.multiplier)) : 0;
+  const avgMultiplier = nonZeroMults.length
+    ? nonZeroMults.reduce((s, e) => s + e.multiplier, 0) / nonZeroMults.length
+    : 0;
+
+  /* ---- Top / Worst entries for leaderboard ---- */
+  const sortedByMult = [...entries].sort((a, b) => b.multiplier - a.multiplier);
+  const bestEntry = sortedByMult[0] ?? null;
+  const worstEntry = sortedByMult.length > 0 ? sortedByMult[sortedByMult.length - 1] : null;
+
+  const fmtAmount = (n: number) =>
+    n >= 1000 ? `${sym}${(n / 1000).toFixed(1)}K` : `${sym}${n.toFixed(0)}`;
+
+  /* ---- Resolve display values: Supabase → URL fallback ---- */
+  const title = uid && hunt ? hunt.name : (params.get("title") || "%TITLE%");
+  const huntLabel = uid && hunt ? `HUNT #${hunt.id.slice(0, 3).toUpperCase()}` : (params.get("hunt") || "HUNT #000");
+  const slots = uid ? String(slotsCount) : (params.get("slots") || "0");
+  const total = uid ? String(totalWins) : (params.get("total") || "0");
+  const buyin = uid ? fmtAmount(totalBuyIn) : (params.get("buyin") || "$0K");
+  const start = uid && hunt ? `${sym}${hunt.start_balance.toLocaleString()}` : (params.get("start") || "$0");
+  const bestX = uid ? `${bestMultiplier.toFixed(1)}X+` : (params.get("bestx") || "0X+");
+  const avgX = uid ? `${avgMultiplier.toFixed(1)}X` : (params.get("avgx") || "0X");
+
+  const bestLabel = bestEntry
+    ? `${bestEntry.game_name} — ${bestEntry.multiplier.toFixed(1)}X`
+    : "0.";
+  const worstLabel = worstEntry
+    ? `${worstEntry.game_name} — ${worstEntry.multiplier.toFixed(1)}X`
+    : "0.";
 
   return (
     <div className="inline-block animate-fade-in-up">
@@ -54,7 +108,7 @@ function BonushuntLargeContent() {
               >
                 {title}
               </span>
-              <span className="text-[10px] font-semibold text-slate-500">{hunt}</span>
+              <span className="text-[10px] font-semibold text-slate-500">{huntLabel}</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -126,7 +180,7 @@ function BonushuntLargeContent() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="none">
               <path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7L2 9.4h7.6z" />
             </svg>
-            <span className="text-slate-400 text-xs font-semibold">0.</span>
+            <span className="text-slate-400 text-xs font-semibold">{bestLabel}</span>
           </div>
           <div
             className="flex items-center gap-2 px-3 py-2 rounded-lg"
@@ -135,7 +189,7 @@ function BonushuntLargeContent() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="none">
               <path d="M12 2C8 6 4 9.5 4 13a8 8 0 0016 0c0-3.5-4-7-8-11z" />
             </svg>
-            <span className="text-slate-400 text-xs font-semibold">0.</span>
+            <span className="text-slate-400 text-xs font-semibold">{worstLabel}</span>
           </div>
         </div>
       </div>

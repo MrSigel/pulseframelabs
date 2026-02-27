@@ -1,8 +1,38 @@
 "use client";
 
 import { Suspense } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+import type { ChatMessage } from "@/lib/supabase/types";
+
+const roleColor: Record<string, { text: string; bg: string; letter: string }> = {
+  viewer:     { text: "text-blue-400",   bg: "bg-blue-500/20",   letter: "V" },
+  moderator:  { text: "text-green-400",  bg: "bg-green-500/20",  letter: "M" },
+  subscriber: { text: "text-purple-400", bg: "bg-purple-500/20", letter: "S" },
+};
+
+const fallbackMessages = [
+  { username: "Viewer1",    user_role: "viewer"     as const, message: "Hello chat!" },
+  { username: "Moderator",  user_role: "moderator"  as const, message: "Welcome everyone!" },
+  { username: "Subscriber", user_role: "subscriber" as const, message: "Let\u2019s go!" },
+];
 
 function ChatNormalContent() {
+  const uid = useOverlayUid();
+
+  /* ---- Supabase realtime data ---- */
+  const { data: messages } = useOverlayData<ChatMessage[]>({
+    table: "chat_messages",
+    userId: uid,
+    orderBy: "sent_at",
+    ascending: false,
+  });
+
+  /* ---- Resolve: Supabase (last 10, reversed to chronological) or fallback ---- */
+  const displayMessages = uid && messages
+    ? messages.slice(0, 10).reverse()
+    : null;
+
   return (
     <div className="inline-block animate-fade-in-up">
       <div
@@ -26,33 +56,35 @@ function ChatNormalContent() {
           </div>
         </div>
         <div className="px-4 py-3 space-y-3 min-h-[180px]">
-          <div className="flex gap-2.5 items-start">
-            <div className="h-5 w-5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 mt-0.5">
-              <span className="text-[8px] font-bold text-blue-400">V</span>
-            </div>
-            <div>
-              <span className="text-[11px] font-bold text-blue-400">Viewer1</span>
-              <p className="text-[11px] text-slate-400 mt-0.5">Hello chat!</p>
-            </div>
-          </div>
-          <div className="flex gap-2.5 items-start">
-            <div className="h-5 w-5 rounded-full bg-green-500/20 flex items-center justify-center shrink-0 mt-0.5">
-              <span className="text-[8px] font-bold text-green-400">M</span>
-            </div>
-            <div>
-              <span className="text-[11px] font-bold text-green-400">Moderator</span>
-              <p className="text-[11px] text-slate-400 mt-0.5">Welcome everyone!</p>
-            </div>
-          </div>
-          <div className="flex gap-2.5 items-start">
-            <div className="h-5 w-5 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0 mt-0.5">
-              <span className="text-[8px] font-bold text-purple-400">S</span>
-            </div>
-            <div>
-              <span className="text-[11px] font-bold text-purple-400">Subscriber</span>
-              <p className="text-[11px] text-slate-400 mt-0.5">Let&apos;s go!</p>
-            </div>
-          </div>
+          {displayMessages
+            ? displayMessages.map((msg) => {
+                const rc = roleColor[msg.user_role] || roleColor.viewer;
+                return (
+                  <div key={msg.id} className="flex gap-2.5 items-start">
+                    <div className={`h-5 w-5 rounded-full ${rc.bg} flex items-center justify-center shrink-0 mt-0.5`}>
+                      <span className={`text-[8px] font-bold ${rc.text}`}>{rc.letter}</span>
+                    </div>
+                    <div>
+                      <span className={`text-[11px] font-bold ${rc.text}`}>{msg.username}</span>
+                      <p className="text-[11px] text-slate-400 mt-0.5">{msg.message}</p>
+                    </div>
+                  </div>
+                );
+              })
+            : fallbackMessages.map((msg, i) => {
+                const rc = roleColor[msg.user_role] || roleColor.viewer;
+                return (
+                  <div key={i} className="flex gap-2.5 items-start">
+                    <div className={`h-5 w-5 rounded-full ${rc.bg} flex items-center justify-center shrink-0 mt-0.5`}>
+                      <span className={`text-[8px] font-bold ${rc.text}`}>{rc.letter}</span>
+                    </div>
+                    <div>
+                      <span className={`text-[11px] font-bold ${rc.text}`}>{msg.username}</span>
+                      <p className="text-[11px] text-slate-400 mt-0.5">{msg.message}</p>
+                    </div>
+                  </div>
+                );
+              })}
         </div>
       </div>
     </div>

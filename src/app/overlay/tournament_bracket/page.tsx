@@ -2,14 +2,61 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+
+interface TournamentRow {
+  name: string;
+  description: string | null;
+  participant_count: number;
+  bracket_data: BracketData | null;
+  status: string;
+}
+
+interface BracketData {
+  rounds?: BracketRound[];
+  winner?: string;
+}
+
+interface BracketRound {
+  name: string;
+  matchups: BracketMatchup[];
+}
+
+interface BracketMatchup {
+  player1: string;
+  player2: string;
+}
 
 function TournamentBracketContent() {
   const params = useSearchParams();
-  const title = params.get("title") || "TOURNAMENT";
-  const participants = parseInt(params.get("participants") || "8");
+  const uid = useOverlayUid();
+
+  const { data: dbTournament, loading } = useOverlayData<TournamentRow>({
+    table: "tournaments",
+    userId: uid,
+    filter: { status: "ongoing" },
+    single: true,
+  });
+
+  // URL param fallback values
+  const fallbackTitle = params.get("title") || "TOURNAMENT";
+  const fallbackParticipants = parseInt(params.get("participants") || "8");
+
+  // Use DB data if available
+  const title = uid && dbTournament ? dbTournament.name : fallbackTitle;
+  const participants = uid && dbTournament ? dbTournament.participant_count : fallbackParticipants;
+  const bracketData = uid && dbTournament ? dbTournament.bracket_data : null;
 
   const rounds = Math.ceil(Math.log2(participants));
   const slots = Array.from({ length: participants }, (_, i) => `Player ${i + 1}`);
+
+  if (uid && loading) {
+    return <div className="text-white text-sm animate-pulse">Loading...</div>;
+  }
+
+  // If bracket_data is provided from DB, render from that
+  const hasBracketData = bracketData && bracketData.rounds && bracketData.rounds.length > 0;
 
   return (
     <div className="inline-block animate-fade-in-up">
@@ -54,73 +101,115 @@ function TournamentBracketContent() {
 
         {/* Bracket */}
         <div className="px-5 py-4 flex gap-6 overflow-x-auto">
-          {/* Round 1 */}
-          <div className="space-y-2 shrink-0">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600 block mb-2">Round 1</span>
-            {Array.from({ length: Math.floor(participants / 2) }).map((_, i) => (
-              <div key={i} className="space-y-0.5">
-                <div
-                  className="px-3 py-1.5 rounded-t text-[10px] font-semibold text-slate-400 w-28"
-                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
-                >
-                  {slots[i * 2] || "---"}
+          {hasBracketData ? (
+            <>
+              {bracketData.rounds!.map((round, rIdx) => (
+                <div key={rIdx} className="space-y-2 shrink-0" style={{ paddingTop: rIdx * 16 }}>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600 block mb-2">
+                    {round.name}
+                  </span>
+                  {round.matchups.map((matchup, mIdx) => (
+                    <div key={mIdx} className="space-y-0.5" style={{ marginTop: rIdx > 0 ? 12 : 0 }}>
+                      <div
+                        className="px-3 py-1.5 rounded-t text-[10px] font-semibold text-slate-400 w-28"
+                        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
+                      >
+                        {matchup.player1 || "---"}
+                      </div>
+                      <div
+                        className="px-3 py-1.5 rounded-b text-[10px] font-semibold text-slate-400 w-28"
+                        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
+                      >
+                        {matchup.player2 || "---"}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div
-                  className="px-3 py-1.5 rounded-b text-[10px] font-semibold text-slate-400 w-28"
-                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
-                >
-                  {slots[i * 2 + 1] || "---"}
+              ))}
+              {/* Winner box */}
+              {bracketData.winner && (
+                <div className="shrink-0" style={{ paddingTop: (bracketData.rounds!.length) * 16 }}>
+                  <div
+                    className="mt-3 px-3 py-2 rounded-md text-center"
+                    style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.15)" }}
+                  >
+                    <span className="text-[9px] uppercase tracking-widest text-slate-600 block">Winner</span>
+                    <span className="text-amber-400 font-bold text-[11px]">{bracketData.winner}</span>
+                  </div>
                 </div>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Round 1 */}
+              <div className="space-y-2 shrink-0">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600 block mb-2">Round 1</span>
+                {Array.from({ length: Math.floor(participants / 2) }).map((_, i) => (
+                  <div key={i} className="space-y-0.5">
+                    <div
+                      className="px-3 py-1.5 rounded-t text-[10px] font-semibold text-slate-400 w-28"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
+                    >
+                      {slots[i * 2] || "---"}
+                    </div>
+                    <div
+                      className="px-3 py-1.5 rounded-b text-[10px] font-semibold text-slate-400 w-28"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
+                    >
+                      {slots[i * 2 + 1] || "---"}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* Semis */}
-          <div className="space-y-2 shrink-0 pt-4">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600 block mb-2">Semis</span>
-            {Array.from({ length: Math.floor(participants / 4) }).map((_, i) => (
-              <div key={i} className="space-y-0.5 mt-3">
-                <div
-                  className="px-3 py-1.5 rounded-t text-[10px] font-semibold text-slate-500 w-28"
-                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
-                >
-                  ---
-                </div>
-                <div
-                  className="px-3 py-1.5 rounded-b text-[10px] font-semibold text-slate-500 w-28"
-                  style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
-                >
-                  ---
-                </div>
+              {/* Semis */}
+              <div className="space-y-2 shrink-0 pt-4">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600 block mb-2">Semis</span>
+                {Array.from({ length: Math.floor(participants / 4) }).map((_, i) => (
+                  <div key={i} className="space-y-0.5 mt-3">
+                    <div
+                      className="px-3 py-1.5 rounded-t text-[10px] font-semibold text-slate-500 w-28"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
+                    >
+                      ---
+                    </div>
+                    <div
+                      className="px-3 py-1.5 rounded-b text-[10px] font-semibold text-slate-500 w-28"
+                      style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
+                    >
+                      ---
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* Final */}
-          <div className="shrink-0 pt-10">
-            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600 block mb-2">Final</span>
-            <div className="space-y-0.5 mt-3">
-              <div
-                className="px-3 py-1.5 rounded-t text-[10px] font-semibold text-slate-500 w-28"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
-              >
-                ---
+              {/* Final */}
+              <div className="shrink-0 pt-10">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-600 block mb-2">Final</span>
+                <div className="space-y-0.5 mt-3">
+                  <div
+                    className="px-3 py-1.5 rounded-t text-[10px] font-semibold text-slate-500 w-28"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
+                  >
+                    ---
+                  </div>
+                  <div
+                    className="px-3 py-1.5 rounded-b text-[10px] font-semibold text-slate-500 w-28"
+                    style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
+                  >
+                    ---
+                  </div>
+                </div>
+                <div
+                  className="mt-3 px-3 py-2 rounded-md text-center"
+                  style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.15)" }}
+                >
+                  <span className="text-[9px] uppercase tracking-widest text-slate-600 block">Winner</span>
+                  <span className="text-amber-400 font-bold text-[11px]">---</span>
+                </div>
               </div>
-              <div
-                className="px-3 py-1.5 rounded-b text-[10px] font-semibold text-slate-500 w-28"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}
-              >
-                ---
-              </div>
-            </div>
-            <div
-              className="mt-3 px-3 py-2 rounded-md text-center"
-              style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.15)" }}
-            >
-              <span className="text-[9px] uppercase tracking-widest text-slate-600 block">Winner</span>
-              <span className="text-amber-400 font-bold text-[11px]">---</span>
-            </div>
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>

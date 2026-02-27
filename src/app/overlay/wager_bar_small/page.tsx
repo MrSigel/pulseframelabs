@@ -2,9 +2,67 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+
+interface WagerSession {
+  casino_name: string;
+  header_text: string;
+  wager_amount: number;
+  wagered_amount: number;
+  deposit_amount: number;
+  bonus_amount: number;
+  currency: string;
+}
+
+const currencySymbol = (code: string | null | undefined) =>
+  ({ USD: "$", EUR: "\u20ac", GBP: "\u00a3" }[code ?? ""] || code || "$");
 
 function WagerBarSmallContent() {
   const params = useSearchParams();
+  const uid = useOverlayUid();
+
+  const { data, loading } = useOverlayData<WagerSession>({
+    table: "wager_sessions",
+    userId: uid,
+    filter: { is_active: true },
+    single: true,
+  });
+
+  // Supabase realtime path
+  if (uid) {
+    if (loading) return null;
+
+    const casino = data?.casino_name || "CASINONAME";
+    const wager = data?.wager_amount || 0;
+    const wagered = data?.wagered_amount || 0;
+    const deposit = data?.deposit_amount || 0;
+    const bonus = data?.bonus_amount || 0;
+    const currency = currencySymbol(data?.currency);
+    const game = ""; // game/provider not in wager_sessions table
+    const provider = "";
+
+    const left = Math.max(0, wager - wagered);
+    const pct = wager > 0 ? Math.min(100, (wagered / wager) * 100) : 0;
+    const multiplier = deposit > 0 ? (wagered / deposit).toFixed(1) : "0.0";
+
+    return (
+      <WagerBarSmallView
+        casino={casino}
+        wager={wager}
+        wagered={wagered}
+        bonus={bonus}
+        left={left}
+        pct={pct}
+        multiplier={multiplier}
+        currency={currency}
+        game={game}
+        provider={provider}
+      />
+    );
+  }
+
+  // URL params fallback
   const casino = params.get("casino") || "CASINONAME";
   const wager = parseFloat(params.get("wager") || "0");
   const wagered = parseFloat(params.get("wagered") || "0");
@@ -18,6 +76,46 @@ function WagerBarSmallContent() {
   const pct = wager > 0 ? Math.min(100, (wagered / wager) * 100) : 0;
   const multiplier = deposit > 0 ? (wagered / deposit).toFixed(1) : "0.0";
 
+  return (
+    <WagerBarSmallView
+      casino={casino}
+      wager={wager}
+      wagered={wagered}
+      bonus={bonus}
+      left={left}
+      pct={pct}
+      multiplier={multiplier}
+      currency={currency}
+      game={game}
+      provider={provider}
+    />
+  );
+}
+
+/* ---------- pure visual component (unchanged layout) ---------- */
+function WagerBarSmallView({
+  casino,
+  wager,
+  wagered,
+  bonus,
+  left,
+  pct,
+  multiplier,
+  currency,
+  game,
+  provider,
+}: {
+  casino: string;
+  wager: number;
+  wagered: number;
+  bonus: number;
+  left: number;
+  pct: number;
+  multiplier: string;
+  currency: string;
+  game: string;
+  provider: string;
+}) {
   return (
     <div className="inline-block animate-fade-in-up">
       <div

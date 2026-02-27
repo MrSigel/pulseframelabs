@@ -17,6 +17,7 @@ import { Monitor, Settings2, Plus, Play, Lock, ArrowLeft, Trash2, X, Loader2 } f
 import { useEffect, useMemo, useState } from "react";
 import { pointsBattle as pbDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import type { PointsBattlePreset } from "@/lib/supabase/types";
 
 interface BetOption {
@@ -35,6 +36,7 @@ interface PBPreset {
 }
 
 export default function PointsBattlePage() {
+  const uid = useAuthUid();
   const [minPoints, setMinPoints] = useState("");
   const [maxPoints, setMaxPoints] = useState("");
 
@@ -55,7 +57,7 @@ export default function PointsBattlePage() {
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    return `${window.location.origin}/overlay/points_battle`;
+    return `${window.location.origin}/overlay/points_battle?uid=${uid || ""}`;
   }, []);
 
   // Create preset form

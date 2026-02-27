@@ -1,13 +1,110 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+
+interface SlotBattle {
+  id: string;
+  name: string;
+  status: string;
+}
+
+interface SlotBattleEntry {
+  id: string;
+  battle_id: string;
+  game_name: string;
+  buy_in: number;
+  win_amount: number;
+  multiplier: number;
+}
 
 function SlotBattleContent() {
   const params = useSearchParams();
-  const title = params.get("title") || "SLOT BATTLE";
+  const uid = useOverlayUid();
+
+  // Fetch active battle
+  const { data: dbBattle, loading: loadingBattle } = useOverlayData<SlotBattle>({
+    table: "slot_battles",
+    userId: uid,
+    filter: { status: "active" },
+    single: true,
+  });
+
+  // Fetch all entries for user (we filter client-side by battle_id)
+  const { data: allEntries, loading: loadingEntries } = useOverlayData<SlotBattleEntry[]>({
+    table: "slot_battle_entries",
+    userId: uid,
+  });
+
+  // Filter entries for the active battle
+  const entries = useMemo(() => {
+    if (!dbBattle || !allEntries) return [];
+    return allEntries.filter((e) => e.battle_id === dbBattle.id);
+  }, [dbBattle, allEntries]);
+
+  // DB values or URL param fallback
+  const title = uid && dbBattle ? dbBattle.name : (params.get("title") || "SLOT BATTLE");
   const bonus = params.get("bonus") || "0/0";
   const start = params.get("start") || "0$";
+
+  const loading = uid && (loadingBattle || loadingEntries);
+
+  // Compute stats from entries when using DB
+  const hasDbData = uid && dbBattle && entries.length > 0;
+
+  // Split entries into two "sides" for the VS display
+  const leftEntries = hasDbData ? entries.filter((_, i) => i % 2 === 0) : [];
+  const rightEntries = hasDbData ? entries.filter((_, i) => i % 2 === 1) : [];
+
+  const leftStats = useMemo(() => {
+    if (!hasDbData) return { bonus: "0/0", cost: "0$", bestWin: "0$", bestX: "0X", score: "0.00", gameName: "Slot", provider: "" };
+    const totalBuyIn = leftEntries.reduce((s, e) => s + (e.buy_in || 0), 0);
+    const bestWin = Math.max(...leftEntries.map((e) => e.win_amount || 0), 0);
+    const bestX = Math.max(...leftEntries.map((e) => e.multiplier || 0), 0);
+    const totalWin = leftEntries.reduce((s, e) => s + (e.win_amount || 0), 0);
+    const score = totalBuyIn > 0 ? (totalWin / totalBuyIn).toFixed(2) : "0.00";
+    return {
+      bonus: `${leftEntries.length}/${leftEntries.length}`,
+      cost: `${totalBuyIn}$`,
+      bestWin: `${bestWin}$`,
+      bestX: `${bestX.toFixed(1)}X`,
+      score,
+      gameName: leftEntries[0]?.game_name || "Slot",
+      provider: "",
+    };
+  }, [hasDbData, leftEntries]);
+
+  const rightStats = useMemo(() => {
+    if (!hasDbData) return { bonus: "0/0", cost: "0$", bestWin: "0$", bestX: "0X", score: "0.00", gameName: "Slot", provider: "" };
+    const totalBuyIn = rightEntries.reduce((s, e) => s + (e.buy_in || 0), 0);
+    const bestWin = Math.max(...rightEntries.map((e) => e.win_amount || 0), 0);
+    const bestX = Math.max(...rightEntries.map((e) => e.multiplier || 0), 0);
+    const totalWin = rightEntries.reduce((s, e) => s + (e.win_amount || 0), 0);
+    const score = totalBuyIn > 0 ? (totalWin / totalBuyIn).toFixed(2) : "0.00";
+    return {
+      bonus: `${rightEntries.length}/${rightEntries.length}`,
+      cost: `${totalBuyIn}$`,
+      bestWin: `${bestWin}$`,
+      bestX: `${bestX.toFixed(1)}X`,
+      score,
+      gameName: rightEntries[0]?.game_name || "Slot",
+      provider: "",
+    };
+  }, [hasDbData, rightEntries]);
+
+  if (loading) {
+    return <div className="text-white text-sm animate-pulse">Loading...</div>;
+  }
+
+  const statsRows = [
+    { left: hasDbData ? leftStats.bonus : "0/0", label: "# BONUS", right: hasDbData ? rightStats.bonus : "0/0" },
+    { left: hasDbData ? leftStats.cost : "0$", label: "COST", right: hasDbData ? rightStats.cost : "0$" },
+    { left: hasDbData ? leftStats.bestWin : "0$", label: "BEST WIN", right: hasDbData ? rightStats.bestWin : "0$" },
+    { left: hasDbData ? leftStats.bestX : "0X", label: "BEST X", right: hasDbData ? rightStats.bestX : "0X" },
+    { left: hasDbData ? leftStats.score : "0.00", label: "SCORE", right: hasDbData ? rightStats.score : "0.00", highlight: true },
+  ];
 
   return (
     <div className="inline-block animate-fade-in-up">
@@ -60,7 +157,7 @@ function SlotBattleContent() {
                 </svg>
               </div>
               <div>
-                <span className="text-white font-bold text-xs block">Slot</span>
+                <span className="text-white font-bold text-xs block">{hasDbData ? leftStats.gameName : "Slot"}</span>
                 <span className="text-[9px] text-slate-500">Sub</span>
                 <span className="text-[9px] text-slate-500 block">Provider</span>
               </div>
@@ -78,7 +175,7 @@ function SlotBattleContent() {
               }}
             >
               <div className="text-right">
-                <span className="text-white font-bold text-xs block">Slot</span>
+                <span className="text-white font-bold text-xs block">{hasDbData ? rightStats.gameName : "Slot"}</span>
                 <span className="text-[9px] text-slate-500">Sub</span>
                 <span className="text-[9px] text-slate-500 block">Provider</span>
               </div>
@@ -96,13 +193,7 @@ function SlotBattleContent() {
 
         {/* Stats Table */}
         <div className="px-4 pb-3">
-          {[
-            { left: "0/0", label: "# BONUS", right: "0/0" },
-            { left: "0$", label: "COST", right: "0$" },
-            { left: "0$", label: "BEST WIN", right: "0$" },
-            { left: "0X", label: "BEST X", right: "0X" },
-            { left: "0.00", label: "SCORE", right: "0.00", highlight: true },
-          ].map((row, i) => (
+          {statsRows.map((row, i) => (
             <div
               key={i}
               className="flex items-center justify-between py-2 px-3"

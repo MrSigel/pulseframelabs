@@ -2,12 +2,34 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+
+interface GameRow {
+  name: string;
+  provider: string;
+  image_url: string | null;
+}
 
 function NowPlayingSmallContent() {
   const params = useSearchParams();
-  const game = params.get("game") || "Sweet Bonanza";
-  const provider = params.get("provider") || "PRAGMATIC PLAY";
-  const image = params.get("image") || "";
+  const uid = useOverlayUid();
+
+  const { data: dbGame, loading } = useOverlayData<GameRow>({
+    table: "games",
+    userId: uid,
+    filter: { is_playing: true },
+    single: true,
+  });
+
+  // DB values (when uid present and data loaded) or URL param fallback
+  const game = uid && dbGame ? dbGame.name : (params.get("game") || "Sweet Bonanza");
+  const provider = uid && dbGame ? dbGame.provider : (params.get("provider") || "PRAGMATIC PLAY");
+  const image = uid && dbGame ? (dbGame.image_url || "") : (params.get("image") || "");
+
+  if (uid && loading) {
+    return <div className="text-white text-sm animate-pulse">Loading...</div>;
+  }
 
   return (
     <div className="inline-block animate-fade-in-up">

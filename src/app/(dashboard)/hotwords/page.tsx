@@ -10,9 +10,11 @@ import { Trash2, Monitor, Save, Eye, X, Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { hotwords as hotwordsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import type { HotwordSettings, HotwordEntry } from "@/lib/supabase/types";
 
 export default function HotwordsPage() {
+  const uid = useAuthUid();
   const [overlayOpen, setOverlayOpen] = useState(false);
 
   // Form state
@@ -22,7 +24,7 @@ export default function HotwordsPage() {
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    return `${window.location.origin}/overlay/hotwords`;
+    return `${window.location.origin}/overlay/hotwords?uid=${uid || ""}`;
   }, []);
 
   // --- Supabase queries ---

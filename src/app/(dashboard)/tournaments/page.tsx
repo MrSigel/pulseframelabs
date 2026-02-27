@@ -17,6 +17,7 @@ import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2, Loa
 import { useState, useMemo } from "react";
 import { tournaments as tournamentsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import type { Tournament } from "@/lib/supabase/types";
 
 const overlayTabs = [
@@ -27,6 +28,7 @@ const overlayTabs = [
 type OverlayTab = (typeof overlayTabs)[number]["key"];
 
 export default function TournamentsPage() {
+  const uid = useAuthUid();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<OverlayTab>("normal");
@@ -70,8 +72,8 @@ export default function TournamentsPage() {
     if (typeof window === "undefined") return {} as Record<OverlayTab, string>;
     const base = window.location.origin;
     return {
-      normal: `${base}/overlay/tournament_normal?title=SLOT%20BATTLE&status=TOURNAMENT%20FINISHED`,
-      bracket: `${base}/overlay/tournament_bracket?title=TOURNAMENT&participants=8`,
+      normal: `${base}/overlay/tournament_normal?uid=${uid || ""}&title=SLOT%20BATTLE&status=TOURNAMENT%20FINISHED`,
+      bracket: `${base}/overlay/tournament_bracket?uid=${uid || ""}&title=TOURNAMENT&participants=8`,
     };
   }, []);
 

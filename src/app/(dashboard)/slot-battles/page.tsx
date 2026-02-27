@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OverlayLink } from "@/components/overlay-link";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import {
   Select,
   SelectContent,
@@ -31,6 +32,7 @@ const currencies = [
 const tableColumns = ["Slot Battle", "Start", "Number of Buys", "Status", "Created", "Last Update", "Manage"];
 
 export default function SlotBattlesPage() {
+  const uid = useAuthUid();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState("");
@@ -73,7 +75,7 @@ export default function SlotBattlesPage() {
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    return `${window.location.origin}/overlay/slot_battle_normal?title=SLOT%20BATTLE`;
+    return `${window.location.origin}/overlay/slot_battle_normal?uid=${uid || ""}&title=SLOT%20BATTLE`;
   }, []);
 
   return (

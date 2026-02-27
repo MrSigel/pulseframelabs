@@ -17,6 +17,7 @@ import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2, Loa
 import { useState, useMemo } from "react";
 import { bonushunts as bonushuntsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import type { Bonushunt } from "@/lib/supabase/types";
 
 const overlayTabs = [
@@ -43,6 +44,7 @@ const currencies = [
 ];
 
 export default function BonushuntsPage() {
+  const uid = useAuthUid();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<OverlayTab>("large");
@@ -90,11 +92,11 @@ export default function BonushuntsPage() {
     if (typeof window === "undefined") return {} as Record<OverlayTab, string>;
     const base = window.location.origin;
     return {
-      large: `${base}/overlay/bonushunt_large?title=%25TITLE%25&hunt=HUNT%20%23000`,
-      small: `${base}/overlay/bonushunt_small?title=%25TITLE%25&hunt=HUNT%20%23000`,
-      horizontal: `${base}/overlay/bonushunt_horizontal?title=%25TITLE%25&hunt=HUNT%20%23000`,
-      topworse: `${base}/overlay/bonushunt_topworse?title=%25TITLE%25`,
-      guess: `${base}/overlay/bonushunt_guess?title=%25TITLE%25&balance=%240.00`,
+      large: `${base}/overlay/bonushunt_large?uid=${uid || ""}&title=%25TITLE%25&hunt=HUNT%20%23000`,
+      small: `${base}/overlay/bonushunt_small?uid=${uid || ""}&title=%25TITLE%25&hunt=HUNT%20%23000`,
+      horizontal: `${base}/overlay/bonushunt_horizontal?uid=${uid || ""}&title=%25TITLE%25&hunt=HUNT%20%23000`,
+      topworse: `${base}/overlay/bonushunt_topworse?uid=${uid || ""}&title=%25TITLE%25`,
+      guess: `${base}/overlay/bonushunt_guess?uid=${uid || ""}&title=%25TITLE%25&balance=%240.00`,
     };
   }, []);
 

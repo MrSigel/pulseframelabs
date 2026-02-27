@@ -8,6 +8,7 @@ import { MessageCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 import { chatMessages as chatDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import type { ChatMessage } from "@/lib/supabase/types";
 
 const tabs = [
@@ -18,6 +19,7 @@ const tabs = [
 type TabKey = (typeof tabs)[number]["key"];
 
 export default function ChatPage() {
+  const uid = useAuthUid();
   const [activeTab, setActiveTab] = useState<TabKey>("small");
   const { data: dbMessages } = useDbQuery<ChatMessage[]>(() => chatDb.list(), []);
 
@@ -25,8 +27,8 @@ export default function ChatPage() {
     if (typeof window === "undefined") return { small: "", normal: "" };
     const origin = window.location.origin;
     return {
-      small: `${origin}/overlay/chat_small`,
-      normal: `${origin}/overlay/chat_normal`,
+      small: `${origin}/overlay/chat_small?uid=${uid || ""}`,
+      normal: `${origin}/overlay/chat_normal?uid=${uid || ""}`,
     };
   }, []);
 

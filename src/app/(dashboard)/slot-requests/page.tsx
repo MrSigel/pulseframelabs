@@ -17,11 +17,13 @@ import { Monitor, History, Settings, Gift, MessageSquare, Trash2, Link, X, Save,
 import { useState, useMemo, useEffect } from "react";
 import { slotRequests as srDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import type { SlotRequestSettings, SlotRequest, RaffleHistoryEntry } from "@/lib/supabase/types";
 
 const defaultEmojis = ["❓", "❓", "❓", "❓", "❓", "❓", "⭐", "✨", "🤩"];
 
 export default function SlotRequestsPage() {
+  const uid = useAuthUid();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [raffleOpen, setRaffleOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
@@ -29,7 +31,7 @@ export default function SlotRequestsPage() {
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    return `${window.location.origin}/overlay/slot_requests`;
+    return `${window.location.origin}/overlay/slot_requests?uid=${uid || ""}`;
   }, []);
 
   // Settings state

@@ -2,14 +2,37 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+
+interface TournamentRow {
+  name: string;
+  description: string | null;
+  participant_count: number;
+  status: string;
+}
 
 function TournamentNormalContent() {
   const params = useSearchParams();
-  const title = params.get("title") || "SLOT BATTLE";
-  const status = params.get("status") || "TOURNAMENT FINISHED";
+  const uid = useOverlayUid();
+
+  const { data: dbTournament, loading } = useOverlayData<TournamentRow>({
+    table: "tournaments",
+    userId: uid,
+    filter: { status: "ongoing" },
+    single: true,
+  });
+
+  // DB values or URL param fallback
+  const title = uid && dbTournament ? dbTournament.name : (params.get("title") || "SLOT BATTLE");
+  const status = uid && dbTournament ? dbTournament.status.toUpperCase() : (params.get("status") || "TOURNAMENT FINISHED");
   const winner = params.get("winner") || "WINNER";
   const subtitle = params.get("subtitle") || "HIGHEST X-FACTOR";
   const multiplier = params.get("multiplier") || "0X";
+
+  if (uid && loading) {
+    return <div className="text-white text-sm animate-pulse">Loading...</div>;
+  }
 
   return (
     <div className="inline-block animate-fade-in-up">

@@ -2,14 +2,79 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+
+interface BalanceProfile {
+  deposits: number;
+  deposits_add: number;
+  withdrawals: number;
+  withdrawals_add: number;
+  leftover: number;
+  leftover_add: number;
+  currency: string;
+}
+
+const currencySymbol = (code: string | null | undefined) =>
+  ({ USD: "$", EUR: "\u20ac", GBP: "\u00a3" }[code ?? ""] || code || "$");
 
 function BalanceLargeContent() {
   const params = useSearchParams();
+  const uid = useOverlayUid();
+
+  const { data, loading } = useOverlayData<BalanceProfile>({
+    table: "balance_profiles",
+    userId: uid,
+    single: true,
+  });
+
+  // Supabase realtime path
+  if (uid) {
+    if (loading) return null;
+
+    const deposits = data ? data.deposits + data.deposits_add : 0;
+    const withdrawals = data ? data.withdrawals + data.withdrawals_add : 0;
+    const leftover = data ? data.leftover + data.leftover_add : 0;
+    const currency = currencySymbol(data?.currency);
+
+    return (
+      <BalanceLargeView
+        deposits={deposits}
+        withdrawals={withdrawals}
+        leftover={leftover}
+        currency={currency}
+      />
+    );
+  }
+
+  // URL params fallback
   const deposits = parseFloat(params.get("deposits") || "0");
   const withdrawals = parseFloat(params.get("withdrawals") || "0");
   const leftover = parseFloat(params.get("leftover") || "0");
   const currency = params.get("currency") || "$";
 
+  return (
+    <BalanceLargeView
+      deposits={deposits}
+      withdrawals={withdrawals}
+      leftover={leftover}
+      currency={currency}
+    />
+  );
+}
+
+/* ---------- pure visual component (unchanged layout) ---------- */
+function BalanceLargeView({
+  deposits,
+  withdrawals,
+  leftover,
+  currency,
+}: {
+  deposits: number;
+  withdrawals: number;
+  leftover: number;
+  currency: string;
+}) {
   return (
     <div className="inline-block animate-fade-in-up">
       <div

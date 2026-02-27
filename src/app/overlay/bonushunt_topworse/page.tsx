@@ -2,10 +2,40 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+import type { Bonushunt, BonushuntEntry } from "@/lib/supabase/types";
 
 function BonushuntTopWorseContent() {
   const params = useSearchParams();
-  const title = params.get("title") || "%TITLE%";
+  const uid = useOverlayUid();
+
+  /* ---- Supabase realtime data ---- */
+  const { data: hunt } = useOverlayData<Bonushunt>({
+    table: "bonushunts",
+    userId: uid,
+    filter: { status: "active" },
+    single: true,
+  });
+
+  const { data: allEntries } = useOverlayData<BonushuntEntry[]>({
+    table: "bonushunt_entries",
+    userId: uid,
+    orderBy: "position",
+    ascending: true,
+  });
+
+  /* ---- Compute top / worst entries ---- */
+  const entries = hunt && allEntries
+    ? allEntries.filter((e) => e.bonushunt_id === hunt.id)
+    : [];
+
+  const sortedDesc = [...entries].sort((a, b) => b.multiplier - a.multiplier);
+  const top3 = sortedDesc.slice(0, 3);
+  const worst3 = [...entries].sort((a, b) => a.multiplier - b.multiplier).slice(0, 3);
+
+  /* ---- Resolve display values: Supabase -> URL fallback ---- */
+  const title = uid && hunt ? hunt.name : (params.get("title") || "%TITLE%");
 
   return (
     <div className="inline-block animate-fade-in-up">
@@ -47,14 +77,16 @@ function BonushuntTopWorseContent() {
             <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/80">Top Wins</span>
           </div>
           <div className="space-y-1">
-            {[1, 2, 3].map((n) => (
+            {(uid && top3.length > 0 ? top3 : [null, null, null]).map((entry, n) => (
               <div
                 key={n}
                 className="flex items-center justify-between px-3 py-1.5 rounded-md"
                 style={{ background: "rgba(255,255,255,0.02)" }}
               >
-                <span className="text-slate-500 text-[10px] font-semibold">#{n}</span>
-                <span className="text-slate-600 text-[10px]">---</span>
+                <span className="text-slate-500 text-[10px] font-semibold">#{n + 1}</span>
+                <span className="text-slate-600 text-[10px]">
+                  {entry ? `${entry.game_name} — ${entry.multiplier.toFixed(1)}X` : "---"}
+                </span>
               </div>
             ))}
           </div>
@@ -69,14 +101,16 @@ function BonushuntTopWorseContent() {
             <span className="text-[10px] font-bold uppercase tracking-wider text-red-400/80">Worst</span>
           </div>
           <div className="space-y-1">
-            {[1, 2, 3].map((n) => (
+            {(uid && worst3.length > 0 ? worst3 : [null, null, null]).map((entry, n) => (
               <div
                 key={n}
                 className="flex items-center justify-between px-3 py-1.5 rounded-md"
                 style={{ background: "rgba(255,255,255,0.02)" }}
               >
-                <span className="text-slate-500 text-[10px] font-semibold">#{n}</span>
-                <span className="text-slate-600 text-[10px]">---</span>
+                <span className="text-slate-500 text-[10px] font-semibold">#{n + 1}</span>
+                <span className="text-slate-600 text-[10px]">
+                  {entry ? `${entry.game_name} — ${entry.multiplier.toFixed(1)}X` : "---"}
+                </span>
               </div>
             ))}
           </div>

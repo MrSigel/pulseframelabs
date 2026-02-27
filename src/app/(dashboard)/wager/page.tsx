@@ -18,9 +18,11 @@ import { Loader2, RotateCcw, Save } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { wagerSessions } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import type { WagerSession } from "@/lib/supabase/types";
 
 export default function WagerPage() {
+  const uid = useAuthUid();
   const [casinoName, setCasinoName] = useState("Casinoname");
   const [headerText, setHeaderText] = useState("PULSEFRAMELABS.COM");
   const [bonusType, setBonusType] = useState("sticky");
@@ -217,7 +219,7 @@ export default function WagerPage() {
 
               {/* Overlay Small */}
               <TabsContent value="small" className="mt-4 space-y-4">
-                <OverlayLink url={`${overlayBaseUrl}/overlay/wager_bar_small`} />
+                <OverlayLink url={`${overlayBaseUrl}/overlay/wager_bar_small?uid=${uid || ""}`} />
 
                 <div className="rounded-xl p-6 flex items-center justify-center" style={{ background: "radial-gradient(ellipse at center, rgba(59,130,246,0.05) 0%, transparent 70%)" }}>
                   <div
@@ -309,7 +311,7 @@ export default function WagerPage() {
 
               {/* Overlay Normal */}
               <TabsContent value="normal" className="mt-4 space-y-4">
-                <OverlayLink url={`${overlayBaseUrl}/overlay/wager_bar_normal`} />
+                <OverlayLink url={`${overlayBaseUrl}/overlay/wager_bar_normal?uid=${uid || ""}`} />
 
                 <div className="rounded-xl p-6 flex items-center justify-center" style={{ background: "radial-gradient(ellipse at center, rgba(59,130,246,0.05) 0%, transparent 70%)" }}>
                   <div

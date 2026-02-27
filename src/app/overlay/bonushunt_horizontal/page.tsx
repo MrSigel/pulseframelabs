@@ -2,17 +2,58 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+import type { Bonushunt, BonushuntEntry } from "@/lib/supabase/types";
+
+const currencySymbol = (code: string | undefined) =>
+  ({ USD: "$", EUR: "\u20ac", GBP: "\u00a3", CAD: "C$", AUD: "A$" }[code || ""] || code || "$");
 
 function BonushuntHorizontalContent() {
   const params = useSearchParams();
-  const title = params.get("title") || "%TITLE%";
-  const hunt = params.get("hunt") || "HUNT #000";
-  const slots = params.get("slots") || "0";
-  const total = params.get("total") || "0";
-  const buyin = params.get("buyin") || "$0K";
-  const start = params.get("start") || "$0";
-  const bestX = params.get("bestx") || "0X+";
-  const avgX = params.get("avgx") || "0X";
+  const uid = useOverlayUid();
+
+  /* ---- Supabase realtime data ---- */
+  const { data: hunt } = useOverlayData<Bonushunt>({
+    table: "bonushunts",
+    userId: uid,
+    filter: { status: "active" },
+    single: true,
+  });
+
+  const { data: allEntries } = useOverlayData<BonushuntEntry[]>({
+    table: "bonushunt_entries",
+    userId: uid,
+    orderBy: "position",
+    ascending: true,
+  });
+
+  /* ---- Compute values from Supabase data ---- */
+  const entries = hunt && allEntries
+    ? allEntries.filter((e) => e.bonushunt_id === hunt.id)
+    : [];
+
+  const sym = hunt ? currencySymbol(hunt.currency) : "$";
+  const slotsCount = entries.length;
+  const totalBuyIn = entries.reduce((s, e) => s + e.buy_in, 0);
+  const nonZeroMults = entries.filter((e) => e.multiplier > 0);
+  const bestMultiplier = nonZeroMults.length ? Math.max(...nonZeroMults.map((e) => e.multiplier)) : 0;
+  const avgMultiplier = nonZeroMults.length
+    ? nonZeroMults.reduce((s, e) => s + e.multiplier, 0) / nonZeroMults.length
+    : 0;
+
+  const fmtAmount = (n: number) =>
+    n >= 1000 ? `${sym}${(n / 1000).toFixed(1)}K` : `${sym}${n.toFixed(0)}`;
+
+  /* ---- Resolve display values: Supabase -> URL fallback ---- */
+  const title = uid && hunt ? hunt.name : (params.get("title") || "%TITLE%");
+  const huntLabel = uid && hunt ? `HUNT #${hunt.id.slice(0, 3).toUpperCase()}` : (params.get("hunt") || "HUNT #000");
+  const slots = uid ? String(slotsCount) : (params.get("slots") || "0");
+  const total = uid ? String(entries.length) : (params.get("total") || "0");
+  const buyin = uid ? fmtAmount(totalBuyIn) : (params.get("buyin") || "$0K");
+  const start = uid && hunt ? `${sym}${hunt.start_balance.toLocaleString()}` : (params.get("start") || "$0");
+  const bestX = uid ? `${bestMultiplier.toFixed(1)}X+` : (params.get("bestx") || "0X+");
+  const avgX = uid ? `${avgMultiplier.toFixed(1)}X` : (params.get("avgx") || "0X");
 
   return (
     <div className="inline-block animate-fade-in-up">
@@ -50,7 +91,7 @@ function BonushuntHorizontalContent() {
               >
                 {title}
               </span>
-              <span className="text-[9px] font-semibold text-slate-500">{hunt}</span>
+              <span className="text-[9px] font-semibold text-slate-500">{huntLabel}</span>
             </div>
           </div>
 

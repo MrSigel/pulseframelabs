@@ -11,6 +11,7 @@ import { Monitor, RotateCcw, RefreshCw, Gift, Plus, Save, Trash2, X, Loader2 } f
 import { useState, useMemo, useEffect } from "react";
 import { duelSessions } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import type { DuelSession, DuelPlayer as DuelPlayerType } from "@/lib/supabase/types";
 
 interface DuelPlayer {
@@ -23,6 +24,7 @@ interface DuelPlayer {
 }
 
 export default function DuelPage() {
+  const uid = useAuthUid();
   const [maxPlayers, setMaxPlayers] = useState("10");
   const [rafflePool, setRafflePool] = useState(false);
   const [overlayOpen, setOverlayOpen] = useState(false);
@@ -61,7 +63,7 @@ export default function DuelPage() {
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    return `${window.location.origin}/overlay/duel_normal?title=DUEL`;
+    return `${window.location.origin}/overlay/duel_normal?uid=${uid || ""}&title=DUEL`;
   }, []);
 
   async function handleAddPlayer() {

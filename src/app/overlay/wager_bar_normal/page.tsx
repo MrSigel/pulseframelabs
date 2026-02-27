@@ -2,9 +2,64 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+
+interface WagerSession {
+  casino_name: string;
+  header_text: string;
+  wager_amount: number;
+  wagered_amount: number;
+  deposit_amount: number;
+  bonus_amount: number;
+  currency: string;
+}
+
+const currencySymbol = (code: string | null | undefined) =>
+  ({ USD: "$", EUR: "\u20ac", GBP: "\u00a3" }[code ?? ""] || code || "$");
 
 function WagerBarNormalContent() {
   const params = useSearchParams();
+  const uid = useOverlayUid();
+
+  const { data, loading } = useOverlayData<WagerSession>({
+    table: "wager_sessions",
+    userId: uid,
+    filter: { is_active: true },
+    single: true,
+  });
+
+  // Supabase realtime path
+  if (uid) {
+    if (loading) return null;
+
+    const casino = data?.casino_name || "CASINONAME";
+    const header = data?.header_text || "PULSEFRAMELABS.COM";
+    const wager = data?.wager_amount || 0;
+    const wagered = data?.wagered_amount || 0;
+    const deposit = data?.deposit_amount || 0;
+    const bonus = data?.bonus_amount || 0;
+    const currency = currencySymbol(data?.currency);
+
+    const left = Math.max(0, wager - wagered);
+    const pct = wager > 0 ? Math.min(100, (wagered / wager) * 100) : 0;
+    const start = deposit + bonus;
+
+    return (
+      <WagerBarNormalView
+        casino={casino}
+        header={header}
+        wager={wager}
+        wagered={wagered}
+        left={left}
+        pct={pct}
+        start={start}
+        currency={currency}
+      />
+    );
+  }
+
+  // URL params fallback
   const casino = params.get("casino") || "CASINONAME";
   const header = params.get("header") || "PULSEFRAMELABS.COM";
   const wager = parseFloat(params.get("wager") || "0");
@@ -17,6 +72,40 @@ function WagerBarNormalContent() {
   const pct = wager > 0 ? Math.min(100, (wagered / wager) * 100) : 0;
   const start = deposit + bonus;
 
+  return (
+    <WagerBarNormalView
+      casino={casino}
+      header={header}
+      wager={wager}
+      wagered={wagered}
+      left={left}
+      pct={pct}
+      start={start}
+      currency={currency}
+    />
+  );
+}
+
+/* ---------- pure visual component (unchanged layout) ---------- */
+function WagerBarNormalView({
+  casino,
+  header,
+  wager,
+  wagered,
+  left,
+  pct,
+  start,
+  currency,
+}: {
+  casino: string;
+  header: string;
+  wager: number;
+  wagered: number;
+  left: number;
+  pct: number;
+  start: number;
+  currency: string;
+}) {
   return (
     <div className="inline-block animate-fade-in-up">
       <div

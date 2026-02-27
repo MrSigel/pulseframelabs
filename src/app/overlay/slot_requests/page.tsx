@@ -2,11 +2,40 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+
+interface SlotRequest {
+  id: string;
+  viewer_username: string;
+  slot_name: string;
+  status: string;
+  requested_at: string;
+}
 
 function SlotRequestsOverlayContent() {
   const params = useSearchParams();
+  const uid = useOverlayUid();
+
+  const { data: dbRequests, loading } = useOverlayData<SlotRequest[]>({
+    table: "slot_requests",
+    userId: uid,
+    filter: { status: "pending" },
+    orderBy: "requested_at",
+    ascending: true,
+  });
+
+  // URL param fallback
   const title = params.get("title") || "!SR SLOT";
-  const participants = parseInt(params.get("participants") || "0");
+  const fallbackParticipants = parseInt(params.get("participants") || "0");
+
+  // Use DB data if available
+  const requests = uid && dbRequests ? dbRequests : [];
+  const participants = uid && dbRequests ? dbRequests.length : fallbackParticipants;
+
+  if (uid && loading) {
+    return <div className="text-white text-sm animate-pulse">Loading...</div>;
+  }
 
   return (
     <div className="inline-block animate-fade-in-up">
@@ -76,7 +105,27 @@ function SlotRequestsOverlayContent() {
             </div>
           ) : (
             <div className="space-y-1.5">
-              {/* Placeholder for participant entries */}
+              {requests.map((req, i) => (
+                <div
+                  key={req.id || i}
+                  className="flex items-center justify-between px-3 py-2 rounded-lg"
+                  style={{
+                    background: "rgba(255,255,255,0.02)",
+                    border: "1px solid rgba(255,255,255,0.04)",
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold"
+                      style={{ background: "rgba(239,68,68,0.12)", color: "#ef4444" }}
+                    >
+                      {i + 1}
+                    </div>
+                    <span className="text-white text-xs font-semibold">{req.viewer_username}</span>
+                  </div>
+                  <span className="text-[11px] font-medium text-slate-400">{req.slot_name}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>

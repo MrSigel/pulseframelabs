@@ -2,11 +2,47 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+import type { Bonushunt, BonushuntEntry } from "@/lib/supabase/types";
+
+const currencySymbol = (code: string | undefined) =>
+  ({ USD: "$", EUR: "\u20ac", GBP: "\u00a3", CAD: "C$", AUD: "A$" }[code || ""] || code || "$");
 
 function BonushuntGuessContent() {
   const params = useSearchParams();
-  const title = params.get("title") || "%TITLE%";
-  const balance = params.get("balance") || "$0.00";
+  const uid = useOverlayUid();
+
+  /* ---- Supabase realtime data ---- */
+  const { data: hunt } = useOverlayData<Bonushunt>({
+    table: "bonushunts",
+    userId: uid,
+    filter: { status: "active" },
+    single: true,
+  });
+
+  const { data: allEntries } = useOverlayData<BonushuntEntry[]>({
+    table: "bonushunt_entries",
+    userId: uid,
+    orderBy: "position",
+    ascending: true,
+  });
+
+  /* ---- Compute balance from Supabase data ---- */
+  const entries = hunt && allEntries
+    ? allEntries.filter((e) => e.bonushunt_id === hunt.id)
+    : [];
+
+  const sym = hunt ? currencySymbol(hunt.currency) : "$";
+  const totalWins = entries.reduce((s, e) => s + e.win_amount, 0);
+  const startBal = hunt ? hunt.start_balance : 0;
+  const currentBalance = startBal + totalWins;
+
+  /* ---- Resolve display values: Supabase -> URL fallback ---- */
+  const title = uid && hunt ? hunt.name : (params.get("title") || "%TITLE%");
+  const balance = uid
+    ? `${sym}${currentBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+    : (params.get("balance") || "$0.00");
 
   return (
     <div className="inline-block animate-fade-in-up">

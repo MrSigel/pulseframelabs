@@ -2,13 +2,48 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+import type { Bonushunt, BonushuntEntry } from "@/lib/supabase/types";
+
+const currencySymbol = (code: string | undefined) =>
+  ({ USD: "$", EUR: "\u20ac", GBP: "\u00a3", CAD: "C$", AUD: "A$" }[code || ""] || code || "$");
 
 function BonushuntSmallContent() {
   const params = useSearchParams();
-  const title = params.get("title") || "%TITLE%";
-  const hunt = params.get("hunt") || "HUNT #000";
-  const slots = params.get("slots") || "0";
-  const total = params.get("total") || "0";
+  const uid = useOverlayUid();
+
+  /* ---- Supabase realtime data ---- */
+  const { data: hunt } = useOverlayData<Bonushunt>({
+    table: "bonushunts",
+    userId: uid,
+    filter: { status: "active" },
+    single: true,
+  });
+
+  const { data: allEntries } = useOverlayData<BonushuntEntry[]>({
+    table: "bonushunt_entries",
+    userId: uid,
+    orderBy: "position",
+    ascending: true,
+  });
+
+  /* ---- Derive computed values from Supabase data ---- */
+  const entries = hunt && allEntries
+    ? allEntries.filter((e) => e.bonushunt_id === hunt.id)
+    : [];
+
+  const sym = hunt ? currencySymbol(hunt.currency) : "$";
+  const slotsCount = entries.length;
+  const totalBuyIn = entries.reduce((s, e) => s + e.buy_in, 0);
+
+  /* ---- Resolve display values: Supabase → URL fallback ---- */
+  const title = uid && hunt ? hunt.name : (params.get("title") || "%TITLE%");
+  const huntLabel = uid && hunt ? `HUNT #${hunt.id.slice(0, 3).toUpperCase()}` : (params.get("hunt") || "HUNT #000");
+  const slots = uid ? String(slotsCount) : (params.get("slots") || "0");
+  const total = uid
+    ? `${sym}${totalBuyIn >= 1000 ? (totalBuyIn / 1000).toFixed(1) + "K" : totalBuyIn.toFixed(0)}`
+    : (params.get("total") || "0");
 
   return (
     <div className="inline-block animate-fade-in-up">
@@ -42,7 +77,7 @@ function BonushuntSmallContent() {
             >
               {title}
             </span>
-            <span className="text-[10px] font-semibold text-slate-600">{hunt}</span>
+            <span className="text-[10px] font-semibold text-slate-600">{huntLabel}</span>
           </div>
           <p className="text-[10px] font-semibold mt-0.5" style={{ color: "#64748b" }}>
             Slots: {slots}/{total}

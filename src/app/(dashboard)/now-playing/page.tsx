@@ -17,6 +17,7 @@ import { Monitor, Plus, Search, X, Play, Pause, Pencil, Save, Trash2 } from "luc
 import { useState, useMemo } from "react";
 import { games as gamesDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import type { Game } from "@/lib/supabase/types";
 
 interface GameInfo {
@@ -331,6 +332,7 @@ function GameImage({ src, name, providerColor }: { src: string | null; name: str
 }
 
 export default function NowPlayingPage() {
+  const uid = useAuthUid();
   const [selectedProvider, setSelectedProvider] = useState("pragmatic");
   const [selectedGameIndex, setSelectedGameIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -397,10 +399,10 @@ export default function NowPlayingPage() {
   }, []);
 
   const overlayUrls: Record<string, string> = {
-    normal: `${overlayBaseUrl}/overlay/now_playing_normal?game=${encodeURIComponent(currentGame?.name || "")}&provider=${encodeURIComponent(currentGame?.provider || "")}&image=${encodeURIComponent(currentGame?.image || "")}`,
-    small: `${overlayBaseUrl}/overlay/now_playing_small?game=${encodeURIComponent(currentGame?.name || "")}&provider=${encodeURIComponent(currentGame?.provider || "")}`,
-    playing_on: `${overlayBaseUrl}/overlay/now_playing_small?game=${encodeURIComponent(currentGame?.name || "")}&provider=${encodeURIComponent(currentGame?.provider || "")}`,
-    playing_on_image: `${overlayBaseUrl}/overlay/now_playing_normal?game=${encodeURIComponent(currentGame?.name || "")}&provider=${encodeURIComponent(currentGame?.provider || "")}&image=${encodeURIComponent(currentGame?.image || "")}`,
+    normal: `${overlayBaseUrl}/overlay/now_playing_normal?uid=${uid || ""}&game=${encodeURIComponent(currentGame?.name || "")}&provider=${encodeURIComponent(currentGame?.provider || "")}&image=${encodeURIComponent(currentGame?.image || "")}`,
+    small: `${overlayBaseUrl}/overlay/now_playing_small?uid=${uid || ""}&game=${encodeURIComponent(currentGame?.name || "")}&provider=${encodeURIComponent(currentGame?.provider || "")}`,
+    playing_on: `${overlayBaseUrl}/overlay/now_playing_small?uid=${uid || ""}&game=${encodeURIComponent(currentGame?.name || "")}&provider=${encodeURIComponent(currentGame?.provider || "")}`,
+    playing_on_image: `${overlayBaseUrl}/overlay/now_playing_normal?uid=${uid || ""}&game=${encodeURIComponent(currentGame?.name || "")}&provider=${encodeURIComponent(currentGame?.provider || "")}&image=${encodeURIComponent(currentGame?.image || "")}`,
   };
 
   const overlayTabs = [

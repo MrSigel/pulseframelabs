@@ -1,7 +1,15 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState, useCallback } from "react";
+import { Suspense, useState, useCallback, useMemo } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+
+interface SpinnerPrizeRow {
+  prize: string;
+  color: string;
+  position: number;
+}
 
 function PokerChipOverlay({ size = 60 }: { size?: number }) {
   return (
@@ -21,13 +29,32 @@ function PokerChipOverlay({ size = 60 }: { size?: number }) {
 
 function SpinnerOverlayContent() {
   const params = useSearchParams();
+  const uid = useOverlayUid();
+
+  const { data: dbPrizes, loading } = useOverlayData<SpinnerPrizeRow[]>({
+    table: "spinner_prizes",
+    userId: uid,
+    orderBy: "position",
+    ascending: true,
+  });
+
+  // URL param fallback
   const prizesParam = params.get("prizes") || "";
   const colorsParam = params.get("colors") || "";
 
-  const prizes = prizesParam ? prizesParam.split(",") : ["Prize 1", "Prize 2", "Prize 3", "Prize 4"];
-  const colors = colorsParam
-    ? colorsParam.split(",")
-    : ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"];
+  // Determine prizes and colors from DB or URL params
+  const { prizes, colors } = useMemo(() => {
+    if (uid && dbPrizes && dbPrizes.length > 0) {
+      return {
+        prizes: dbPrizes.map((p) => p.prize),
+        colors: dbPrizes.map((p) => p.color),
+      };
+    }
+    return {
+      prizes: prizesParam ? prizesParam.split(",") : ["Prize 1", "Prize 2", "Prize 3", "Prize 4"],
+      colors: colorsParam ? colorsParam.split(",") : ["#ef4444", "#3b82f6", "#10b981", "#f59e0b"],
+    };
+  }, [uid, dbPrizes, prizesParam, colorsParam]);
 
   const [rotation, setRotation] = useState(0);
   const [spinning, setSpinning] = useState(false);
@@ -69,6 +96,10 @@ function SpinnerOverlayContent() {
     const r = wheelCenter - 2;
     return { x2: wheelCenter + Math.cos(rad) * r, y2: wheelCenter + Math.sin(rad) * r };
   });
+
+  if (uid && loading) {
+    return <div className="text-white text-sm animate-pulse p-4">Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-6">

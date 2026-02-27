@@ -18,6 +18,7 @@ import { RotateCcw, RefreshCw, Settings2, Loader2, Save } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { balanceProfiles } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useAuthUid } from "@/hooks/useAuthUid";
 import type { BalanceProfile } from "@/lib/supabase/types";
 
 const currencies = [
@@ -60,6 +61,7 @@ const currencies = [
 ];
 
 export default function DepositWithdrawalsPage() {
+  const uid = useAuthUid();
   const [currency, setCurrency] = useState("usd");
   const [deposits, setDeposits] = useState("0");
   const [depositsAdd, setDepositsAdd] = useState("0");
@@ -263,7 +265,7 @@ export default function DepositWithdrawalsPage() {
 
               {/* Small */}
               <TabsContent value="small" className="mt-4 space-y-4">
-                <OverlayLink url={`${overlayBaseUrl}/overlay/balance_small`} />
+                <OverlayLink url={`${overlayBaseUrl}/overlay/balance_small?uid=${uid || ""}`} />
 
                 <div className="rounded-xl p-6 flex items-center justify-center" style={{ background: "radial-gradient(ellipse at center, rgba(59,130,246,0.05) 0%, transparent 70%)" }}>
                   <div
@@ -299,7 +301,7 @@ export default function DepositWithdrawalsPage() {
 
               {/* Normal */}
               <TabsContent value="normal" className="mt-4 space-y-4">
-                <OverlayLink url={`${overlayBaseUrl}/overlay/balance_normal`} />
+                <OverlayLink url={`${overlayBaseUrl}/overlay/balance_normal?uid=${uid || ""}`} />
 
                 <div className="rounded-xl p-6 flex items-center justify-center" style={{ background: "radial-gradient(ellipse at center, rgba(59,130,246,0.05) 0%, transparent 70%)" }}>
                   <div
@@ -345,7 +347,7 @@ export default function DepositWithdrawalsPage() {
 
               {/* Large */}
               <TabsContent value="large" className="mt-4 space-y-4">
-                <OverlayLink url={`${overlayBaseUrl}/overlay/balance_large`} />
+                <OverlayLink url={`${overlayBaseUrl}/overlay/balance_large?uid=${uid || ""}`} />
 
                 <div className="rounded-xl p-6 flex items-center justify-center" style={{ background: "radial-gradient(ellipse at center, rgba(59,130,246,0.05) 0%, transparent 70%)" }}>
                   <div

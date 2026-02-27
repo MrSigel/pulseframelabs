@@ -2,18 +2,42 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useOverlayData } from "@/hooks/useOverlayData";
+
+interface GameRow {
+  name: string;
+  provider: string;
+  image_url: string | null;
+}
 
 function NowPlayingNormalContent() {
   const params = useSearchParams();
-  const game = params.get("game") || "Sweet Bonanza";
-  const provider = params.get("provider") || "PRAGMATIC PLAY";
-  const image = params.get("image") || "";
+  const uid = useOverlayUid();
+
+  const { data: dbGame, loading } = useOverlayData<GameRow>({
+    table: "games",
+    userId: uid,
+    filter: { is_playing: true },
+    single: true,
+  });
+
+  // DB values (when uid present and data loaded) or URL param fallback
+  const game = uid && dbGame ? dbGame.name : (params.get("game") || "Sweet Bonanza");
+  const provider = uid && dbGame ? dbGame.provider : (params.get("provider") || "PRAGMATIC PLAY");
+  const image = uid && dbGame ? (dbGame.image_url || "") : (params.get("image") || "");
+
+  // Stats not in DB — always from URL params
   const potential = params.get("potential") || "21100X";
   const rtp = params.get("rtp") || "96.5%";
   const volatility = params.get("volatility") || "MEDIUM";
   const recordWin = params.get("win") || "0$";
   const recordX = params.get("x") || "0X";
   const avgWin = params.get("avg") || "0";
+
+  if (uid && loading) {
+    return <div className="text-white text-sm animate-pulse">Loading...</div>;
+  }
 
   return (
     <div className="inline-block animate-fade-in-up">
