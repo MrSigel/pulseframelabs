@@ -714,22 +714,69 @@ function HotWordsOverlay() {
   );
 }
 
-// ── Overlay Card wrapper with entrance + hover animation ──
-function OverlayCard({ children, label, index }) {
+// ── Overlay Card wrapper with banner + hover animation ──
+function OverlayCard({ children, label, icon, index }) {
+  const [hovered, setHovered] = useState(false);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -6, transition: { duration: 0.25 } }}
-      style={{ cursor: "default" }}
+      whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.3, ease: "easeOut" } }}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      style={{ cursor: "default", position: "relative" }}
     >
-      {children}
-      <div className="text-center mt-3">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.15em]" style={{ color: 'var(--text-tertiary)' }}>
+      {/* Banner above */}
+      <div
+        className="flex items-center gap-2 mb-3 px-1"
+        style={{ transition: "opacity 0.3s" }}
+      >
+        <div
+          className="flex items-center justify-center h-7 w-7 rounded-lg"
+          style={{
+            background: hovered ? "rgba(59, 130, 246, 0.15)" : "rgba(255,255,255,0.04)",
+            border: hovered ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid rgba(255,255,255,0.08)",
+            transition: "all 0.3s ease",
+          }}
+        >
+          <span style={{ fontSize: "14px", lineHeight: 1 }}>{icon}</span>
+        </div>
+        <span
+          className="text-xs font-bold uppercase tracking-[0.1em]"
+          style={{
+            color: hovered ? "var(--gold, #c9a84c)" : "var(--text-secondary, #94a3b8)",
+            transition: "color 0.3s ease",
+          }}
+        >
           {label}
         </span>
+        <div
+          style={{
+            flex: 1,
+            height: "1px",
+            background: hovered
+              ? "linear-gradient(90deg, rgba(59,130,246,0.3), transparent)"
+              : "linear-gradient(90deg, rgba(255,255,255,0.06), transparent)",
+            transition: "background 0.3s ease",
+          }}
+        />
+      </div>
+
+      {/* Overlay content with hover glow */}
+      <div
+        style={{
+          position: "relative",
+          borderRadius: "12px",
+          transition: "box-shadow 0.3s ease, transform 0.3s ease",
+          boxShadow: hovered
+            ? "0 8px 40px rgba(59, 130, 246, 0.12), 0 0 0 1px rgba(59, 130, 246, 0.15)"
+            : "0 4px 20px rgba(0,0,0,0.2)",
+        }}
+      >
+        {children}
       </div>
     </motion.div>
   );
@@ -791,19 +838,19 @@ export default function WidgetShowcase() {
           }}
         >
           {/* Row 1 */}
-          <OverlayCard label="Balance" index={0}><BalanceOverlay /></OverlayCard>
-          <OverlayCard label="Wager Bar" index={1}><WagerBarOverlay /></OverlayCard>
-          <OverlayCard label="Bonus Hunt" index={2}><BonushuntOverlay /></OverlayCard>
+          <OverlayCard label="Balance" icon="💰" index={0}><BalanceOverlay /></OverlayCard>
+          <OverlayCard label="Wager Bar" icon="📊" index={1}><WagerBarOverlay /></OverlayCard>
+          <OverlayCard label="Bonus Hunt" icon="🎯" index={2}><BonushuntOverlay /></OverlayCard>
 
           {/* Row 2 */}
-          <OverlayCard label="Slot Battle" index={3}><SlotBattleOverlay /></OverlayCard>
-          <OverlayCard label="Tournament" index={4}><TournamentOverlay /></OverlayCard>
-          <OverlayCard label="Now Playing" index={5}><NowPlayingOverlay /></OverlayCard>
+          <OverlayCard label="Slot Battle" icon="⚔️" index={3}><SlotBattleOverlay /></OverlayCard>
+          <OverlayCard label="Tournament" icon="🏆" index={4}><TournamentOverlay /></OverlayCard>
+          <OverlayCard label="Now Playing" icon="🎰" index={5}><NowPlayingOverlay /></OverlayCard>
 
           {/* Row 3 */}
-          <OverlayCard label="Live Chat" index={6}><ChatOverlay /></OverlayCard>
-          <OverlayCard label="Duel" index={7}><DuelOverlay /></OverlayCard>
-          <OverlayCard label="Hot Words" index={8}><HotWordsOverlay /></OverlayCard>
+          <OverlayCard label="Live Chat" icon="💬" index={6}><ChatOverlay /></OverlayCard>
+          <OverlayCard label="Duel" icon="🎲" index={7}><DuelOverlay /></OverlayCard>
+          <OverlayCard label="Hot Words" icon="🔥" index={8}><HotWordsOverlay /></OverlayCard>
         </div>
       </div>
     </section>
