@@ -14,20 +14,23 @@ import {
 } from "@/components/ui/select";
 import { OverlayLink } from "@/components/overlay-link";
 import { Monitor, History, Settings, Gift, MessageSquare, Trash2, Link, X, Save, Smile, Eraser, Loader2 } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { slotRequests as srDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
+import { useTwitchBot } from "@/contexts/TwitchBotContext";
 import type { SlotRequestSettings, SlotRequest, RaffleHistoryEntry } from "@/lib/supabase/types";
 
 const defaultEmojis = ["❓", "❓", "❓", "❓", "❓", "❓", "⭐", "✨", "🤩"];
 
 export default function SlotRequestsPage() {
   const uid = useAuthUid();
+  const { isConnected } = useTwitchBot();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [raffleOpen, setRaffleOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
   const [overlayOpen, setOverlayOpen] = useState(false);
+  const [slotRequestsOpen, setSlotRequestsOpen] = useState(false);
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -85,6 +88,27 @@ export default function SlotRequestsPage() {
     catch (err) { console.error(err); }
   }
 
+  const handleRaffleGame = useCallback(async () => {
+    if (!dbRequests || dbRequests.length === 0) return;
+    const pending = dbRequests.filter((r) => r.status === "pending" || !r.status);
+    if (pending.length === 0) return;
+    const winner = pending[Math.floor(Math.random() * pending.length)];
+    try {
+      await srDb.update(winner.id, { status: "raffled" });
+      await srDb.raffleHistory.create({
+        slot_name: winner.slot_name,
+        winner: winner.viewer_username,
+      });
+      await refetchRequests();
+    } catch (err) {
+      console.error("Failed to raffle:", err);
+    }
+  }, [dbRequests, refetchRequests]);
+
+  function handleToggleSlotRequests() {
+    setSlotRequestsOpen((prev) => !prev);
+  }
+
   return (
     <div>
       <PageHeader
@@ -116,13 +140,17 @@ export default function SlotRequestsPage() {
             </CardHeader>
             <CardContent>
               <div className="flex gap-3">
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={handleRaffleGame}>
                   <Gift className="h-4 w-4" />
                   Raffle a Game
                 </Button>
-                <Button variant="success" className="gap-2">
+                <Button
+                  variant={slotRequestsOpen ? "destructive" : "success"}
+                  className="gap-2"
+                  onClick={handleToggleSlotRequests}
+                >
                   <MessageSquare className="h-4 w-4" />
-                  Open Slot Requests
+                  {slotRequestsOpen ? "Close Slot Requests" : "Open Slot Requests"}
                 </Button>
                 <Button variant="destructive" className="gap-2" onClick={handleClearAll}>
                   <Trash2 className="h-4 w-4" />

@@ -13,11 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Monitor, Settings2, Plus, Play, Lock, ArrowLeft, Trash2, X, Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { pointsBattle as pbDb } from "@/lib/supabase/db";
+import { Monitor, Settings2, Plus, Play, Lock, ArrowLeft, Trash2, X, Loader2, Square } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { pointsBattle as pbDb, pointsBattleBets } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
+import { useTwitchBot } from "@/contexts/TwitchBotContext";
+import { createPointsBattleHandler } from "@/lib/twitch/handlers/points-battle-handler";
 import type { PointsBattlePreset } from "@/lib/supabase/types";
 
 interface BetOption {
@@ -51,6 +53,18 @@ export default function PointsBattlePage() {
   const [showPresetsModal, setShowPresetsModal] = useState(false);
   const [presetsView, setPresetsView] = useState<"main" | "create" | "manage">("main");
   const [selectedTime, setSelectedTime] = useState("30");
+
+  // Twitch bot
+  const { isConnected, addHandler, removeHandler } = useTwitchBot();
+
+  // Active prediction state
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(0);
+  const [participantCount, setParticipantCount] = useState<number>(0);
+  const [totalPointsWagered, setTotalPointsWagered] = useState<number>(0);
+  const [isPredictionActive, setIsPredictionActive] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Overlay modal
   const [showOverlayModal, setShowOverlayModal] = useState(false);
@@ -166,6 +180,115 @@ export default function PointsBattlePage() {
     setSelectedTime(preset.time);
     closePresetsModal();
   }
+
+  // --- Prediction lifecycle ---
+
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+  }, []);
+
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+  }, []);
+
+  const pollBets = useCallback(async (sessionId: string) => {
+    try {
+      const bets = await pointsBattleBets.list(sessionId);
+      setParticipantCount(bets.length);
+      setTotalPointsWagered(bets.reduce((sum, b) => sum + b.amount, 0));
+    } catch { /* ignore */ }
+  }, []);
+
+  async function handleStartPrediction() {
+    if (isPredictionActive) return;
+
+    const min = parseInt(minPoints) || 0;
+    const max = parseInt(maxPoints) || 0;
+    const duration = parseInt(selectedTime) || 30;
+
+    // Validate at least 2 options have keywords
+    const validOptions = predictionOptions.filter((o) => o.keyword.trim());
+    if (validOptions.length < 2) return;
+
+    try {
+      const session = await pbDb.sessions.create({
+        options: validOptions,
+        min_points: min,
+        max_points: max,
+        duration_seconds: duration,
+      });
+
+      setActiveSessionId(session.id);
+      setIsPredictionActive(true);
+      setRemainingSeconds(duration);
+      setParticipantCount(0);
+      setTotalPointsWagered(0);
+
+      // Register the Twitch chat handler
+      addHandler(
+        createPointsBattleHandler({
+          activeSessionId: session.id,
+          options: validOptions,
+          minPoints: min,
+          maxPoints: max,
+        }),
+      );
+
+      // Start countdown timer
+      timerRef.current = setInterval(() => {
+        setRemainingSeconds((prev) => {
+          if (prev <= 1) {
+            // Time is up — finish the prediction
+            finishPrediction(session.id);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      // Poll bets every 3 seconds for live stats
+      pollRef.current = setInterval(() => pollBets(session.id), 3000);
+    } catch (err) {
+      console.error("Failed to start prediction:", err);
+    }
+  }
+
+  async function finishPrediction(sessionId: string) {
+    stopTimer();
+    stopPolling();
+    removeHandler("points-battle");
+
+    try {
+      await pbDb.sessions.update(sessionId, { status: "finished" });
+      // Final poll to get accurate counts
+      await pollBets(sessionId);
+    } catch (err) {
+      console.error("Failed to finish prediction:", err);
+    }
+
+    setIsPredictionActive(false);
+  }
+
+  async function handleStopPrediction() {
+    if (!activeSessionId) return;
+    await finishPrediction(activeSessionId);
+  }
+
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      stopTimer();
+      stopPolling();
+    };
+  }, [stopTimer, stopPolling]);
+
+  // Format remaining time as mm:ss
+  const formattedTime = useMemo(() => {
+    if (!isPredictionActive && remainingSeconds === 0) return "--:--";
+    const m = Math.floor(remainingSeconds / 60);
+    const s = remainingSeconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  }, [isPredictionActive, remainingSeconds]);
 
   function updateOption(index: number, field: keyof BetOption, value: string) {
     setPredictionOptions((prev) => {
@@ -293,15 +416,15 @@ export default function PointsBattlePage() {
             <CardContent className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-500">Points in Prediction:</span>
-                <span className="text-white font-bold">0</span>
+                <span className="text-white font-bold">{totalPointsWagered.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Participants:</span>
-                <span className="text-white font-bold">0</span>
+                <span className="text-white font-bold">{participantCount}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Remaining Time:</span>
-                <span className="text-white font-bold">--:--</span>
+                <span className="text-white font-bold">{formattedTime}</span>
               </div>
             </CardContent>
           </Card>
@@ -334,10 +457,17 @@ export default function PointsBattlePage() {
                 </Select>
               </div>
 
-              <Button className="w-full gap-2 py-5">
-                <Play className="h-4 w-4" />
-                Start Prediction
-              </Button>
+              {isPredictionActive ? (
+                <Button className="w-full gap-2 py-5" variant="destructive" onClick={handleStopPrediction}>
+                  <Square className="h-4 w-4" />
+                  Stop Prediction
+                </Button>
+              ) : (
+                <Button className="w-full gap-2 py-5" onClick={handleStartPrediction}>
+                  <Play className="h-4 w-4" />
+                  Start Prediction
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>

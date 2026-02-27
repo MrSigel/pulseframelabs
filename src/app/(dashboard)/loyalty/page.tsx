@@ -13,9 +13,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Settings2, Play, RefreshCw, Search, ChevronLeft, ChevronRight, ArrowLeft, Plus, Trash2, X, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
-import { loyalty as loyaltyDb } from "@/lib/supabase/db";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { giveaways, loyalty as loyaltyDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useTwitchBot } from "@/contexts/TwitchBotContext";
+import { createLoyaltyHandler } from "@/lib/twitch/handlers";
 import type { LoyaltyPreset, GiveawayHistoryEntry } from "@/lib/supabase/types";
 
 interface Preset {
@@ -27,9 +29,15 @@ interface Preset {
 }
 
 export default function LoyaltyPage() {
+  const { isConnected, addHandler, removeHandler } = useTwitchBot();
   const [keyword, setKeyword] = useState("");
   const [pointsAmount, setPointsAmount] = useState("1");
   const [duration, setDuration] = useState("0");
+
+  // Giveaway active state
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Presets state
   const [presets, setPresets] = useState<Preset[]>([]);
@@ -115,6 +123,83 @@ export default function LoyaltyPage() {
     setDuration(String(preset.duration));
     closePresetsModal();
   }
+
+  const handleStartGiveaway = useCallback(async () => {
+    if (!keyword.trim()) return;
+    const pts = parseInt(pointsAmount) || 0;
+    const dur = parseInt(duration) || 60;
+
+    try {
+      // Create giveaway session
+      const session = await giveaways.sessions.create({
+        keyword: keyword.trim(),
+        points_amount: pts,
+        duration_seconds: dur,
+      });
+
+      setActiveSessionId(session.id);
+      setTimeRemaining(dur);
+
+      // Add loyalty handler so chat keyword entries are captured
+      const handler = createLoyaltyHandler({
+        activeSessionId: session.id,
+        keyword: keyword.trim(),
+        pointsAmount: pts,
+      });
+      addHandler(handler);
+
+      // Start countdown timer
+      timerRef.current = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            // Timer expired — clean up
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
+            }
+
+            // End the session asynchronously
+            (async () => {
+              try {
+                await giveaways.sessions.update(session.id, {
+                  status: "finished",
+                  ended_at: new Date().toISOString(),
+                });
+
+                const participantCount = await giveaways.participants.count(session.id);
+
+                await loyaltyDb.history.create({
+                  keyword: keyword.trim(),
+                  points_amount: pts,
+                  duration_seconds: dur,
+                  participant_count: participantCount,
+                });
+
+                removeHandler("loyalty");
+                setActiveSessionId(null);
+              } catch (err) {
+                console.error("Failed to finish giveaway:", err);
+              }
+            })();
+
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err) {
+      console.error("Failed to start giveaway:", err);
+    }
+  }, [keyword, pointsAmount, duration, addHandler, removeHandler]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div>
@@ -202,9 +287,14 @@ export default function LoyaltyPage() {
             <p className="text-xs text-slate-500 mt-1">The URL for your Streamdeck to trigger the giveaway.</p>
           </div>
 
-          <Button variant="success" className="w-full gap-2 py-5">
+          <Button
+            variant="success"
+            className="w-full gap-2 py-5"
+            onClick={handleStartGiveaway}
+            disabled={!!activeSessionId || !keyword.trim()}
+          >
             <Play className="h-4 w-4" />
-            Start Giveaway
+            {activeSessionId ? `Giveaway Active (${timeRemaining}s)` : "Start Giveaway"}
           </Button>
         </CardContent>
       </Card>

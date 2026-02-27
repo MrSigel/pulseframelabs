@@ -2,14 +2,16 @@ import { createClient } from "./client";
 import type {
   Bonushunt, BonushuntEntry, BalanceProfile, Casino, ChatMessage,
   DashboardStat, DuelSession, DuelPlayer, Game, GiveawayHistoryEntry,
+  GiveawaySession, GiveawayParticipant,
   HotwordSettings, HotwordEntry, LoyaltyPreset, Moderator,
-  PersonalBest, PointsBattlePreset, PointsBattleSession,
+  PersonalBest, PointsBattleBet, PointsBattlePreset, PointsBattleSession,
   PointsTransaction, Promotion, QuickGuessSettings, QuickGuessSession,
   QuickGuessEntry, QuickGuessHistoryEntry, RaffleHistoryEntry,
   SlotBattle, SlotBattleEntry, SlotRequest, SlotRequestSettings,
   SlideshowItem, SpinnerPrize, SpinnerHistoryEntry, StoreItem,
   StoreRedemption, StoreSettings, StreamerPageSettings, StreamPointsConfig,
-  StreamViewer, ThemeSettings, Tournament, UserProfile, WagerSession,
+  StreamViewer, ThemeSettings, Tournament, TwitchConnection, UserProfile,
+  WagerSession,
 } from "./types";
 
 // ============================================================
@@ -579,6 +581,86 @@ export const themeSettingsDb = {
   get: () => selectSingleByUser<ThemeSettings>("theme_settings"),
   update: (updates: Partial<ThemeSettings>) =>
     upsertSingleton<ThemeSettings>("theme_settings", updates),
+};
+
+// ============================================================
+// Twitch Connections (singleton per user)
+// ============================================================
+export const twitchConnections = {
+  get: () => selectSingleByUser<TwitchConnection>("twitch_connections"),
+  upsert: (data: { twitch_user_id: string; twitch_username: string; access_token: string; refresh_token: string; scopes?: string[] }) =>
+    upsertSingleton<TwitchConnection>("twitch_connections", data),
+  remove: async () => {
+    const supabase = getSupabase();
+    const userId = await getUserId();
+    const { error } = await supabase.from("twitch_connections").delete().eq("user_id", userId);
+    if (error) throw error;
+  },
+};
+
+// ============================================================
+// Points Battle Bets
+// ============================================================
+export const pointsBattleBets = {
+  list: async (sessionId: string) => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("points_battle_bets")
+      .select("*")
+      .eq("session_id", sessionId)
+      .order("placed_at");
+    if (error) throw error;
+    return (data ?? []) as PointsBattleBet[];
+  },
+  create: (data: { session_id: string; viewer_username: string; option_index: number; amount: number }) =>
+    insertRow<PointsBattleBet>("points_battle_bets", data),
+};
+
+// ============================================================
+// Giveaway Sessions & Participants
+// ============================================================
+export const giveaways = {
+  sessions: {
+    getActive: async () => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { data, error } = await supabase
+        .from("giveaway_sessions")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .maybeSingle();
+      if (error) throw error;
+      return data as GiveawaySession | null;
+    },
+    create: (data: { keyword: string; points_amount: number; duration_seconds: number }) =>
+      insertRow<GiveawaySession>("giveaway_sessions", data),
+    update: (id: string, updates: Partial<GiveawaySession>) =>
+      updateRow<GiveawaySession>("giveaway_sessions", id, updates),
+  },
+  participants: {
+    list: async (sessionId: string) => {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from("giveaway_participants")
+        .select("*")
+        .eq("session_id", sessionId)
+        .order("joined_at");
+      if (error) throw error;
+      return (data ?? []) as GiveawayParticipant[];
+    },
+    create: (data: { session_id: string; username: string }) =>
+      insertRow<GiveawayParticipant>("giveaway_participants", data),
+    count: async (sessionId: string) => {
+      const supabase = getSupabase();
+      const { count, error } = await supabase
+        .from("giveaway_participants")
+        .select("*", { count: "exact", head: true })
+        .eq("session_id", sessionId);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  },
 };
 
 // ============================================================

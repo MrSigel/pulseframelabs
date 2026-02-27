@@ -27,6 +27,7 @@ import {
   Target,
   Settings,
   Globe,
+  Bot,
   type LucideIcon,
 } from "lucide-react";
 
@@ -62,6 +63,7 @@ const casinos: NavItem[] = [
 ];
 
 const stream: NavItem[] = [
+  { name: "Twitch Bot", href: "/bot", icon: Bot },
   { name: "Streamer Page", href: "/streamer-page", icon: Globe },
   { name: "Store", href: "/store", icon: Store },
   { name: "Loyalty", href: "/loyalty", icon: Star },

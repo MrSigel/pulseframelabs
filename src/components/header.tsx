@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, LogOut, Moon, Sun, MonitorSmartphone, User as UserIcon, Shield, ExternalLink } from "lucide-react";
+import { ChevronDown, LogOut, Moon, Sun, MonitorSmartphone, User as UserIcon, Shield, ExternalLink, Bot } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useThemeContext } from "@/components/providers";
+import { useTwitchBot } from "@/contexts/TwitchBotContext";
 import type { User } from "@supabase/supabase-js";
 import type { UserProfile } from "@/lib/supabase/types";
 
@@ -124,6 +125,7 @@ export function Header() {
   const avatarUrl = profile?.avatar_url || null;
 
   const ThemeIcon = themeIcons[preference];
+  const { isConnected: botConnected, isConnecting: botConnecting } = useTwitchBot();
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-xl px-6">
@@ -135,6 +137,24 @@ export function Header() {
 
       {/* Right controls */}
       <div className="flex items-center gap-3">
+        {/* Bot Status */}
+        <div
+          className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] cursor-pointer transition-colors hover:bg-primary/5"
+          onClick={() => router.push("/bot")}
+          title={botConnected ? "Bot Connected" : botConnecting ? "Bot Connecting..." : "Bot Disconnected"}
+        >
+          <Bot className="h-3.5 w-3.5 text-muted-foreground" />
+          <span
+            className={`h-2 w-2 rounded-full ${
+              botConnected
+                ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]"
+                : botConnecting
+                  ? "bg-yellow-500 animate-pulse"
+                  : "bg-red-500/60"
+            }`}
+          />
+        </div>
+
         {/* Theme Toggle */}
         <motion.button
           onClick={cycleTheme}

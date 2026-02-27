@@ -4,6 +4,7 @@ import { type ReactNode } from "react";
 import { DashboardProviders } from "@/components/providers";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
+import { TwitchBotProvider } from "@/contexts/TwitchBotContext";
 import AnimatedBackground3D from "@/components/landing/background/AnimatedBackground3D";
 import LanguageWidget from "@/components/landing/ui/LanguageWidget";
 
@@ -11,6 +12,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   return (
     <DashboardProviders>
+      <TwitchBotProvider>
       <div className="flex min-h-screen bg-background">
         {/* Animated particle background (same as landing page) */}
         <AnimatedBackground3D />
@@ -34,6 +36,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         {/* Language widget (bottom-right, above z-index of content) */}
         <LanguageWidget />
       </div>
+      </TwitchBotProvider>
     </DashboardProviders>
   );
 }

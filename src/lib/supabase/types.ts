@@ -473,6 +473,47 @@ export interface ThemeSettings {
   updated_at: string;
 }
 
+export interface TwitchConnection {
+  id: string;
+  user_id: string;
+  twitch_user_id: string;
+  twitch_username: string;
+  access_token: string;
+  refresh_token: string;
+  scopes: string[];
+  connected_at: string;
+  updated_at: string;
+}
+
+export interface PointsBattleBet {
+  id: string;
+  user_id: string;
+  session_id: string;
+  viewer_username: string;
+  option_index: number;
+  amount: number;
+  placed_at: string;
+}
+
+export interface GiveawaySession {
+  id: string;
+  user_id: string;
+  keyword: string;
+  points_amount: number;
+  duration_seconds: number;
+  status: 'active' | 'finished' | 'cancelled';
+  started_at: string;
+  ended_at: string | null;
+}
+
+export interface GiveawayParticipant {
+  id: string;
+  user_id: string;
+  session_id: string;
+  username: string;
+  joined_at: string;
+}
+
 export interface StreamerPageSettings {
   id: string;
   user_id: string;
@@ -549,6 +590,10 @@ export interface Database {
       promotions: TableDef<Promotion>;
       theme_settings: TableDef<ThemeSettings>;
       streamer_page_settings: TableDef<StreamerPageSettings>;
+      twitch_connections: TableDef<TwitchConnection>;
+      points_battle_bets: TableDef<PointsBattleBet>;
+      giveaway_sessions: TableDef<GiveawaySession>;
+      giveaway_participants: TableDef<GiveawayParticipant>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

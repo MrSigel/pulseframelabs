@@ -9,12 +9,14 @@ import { OverlayLink } from "@/components/overlay-link";
 import { Trash2, Monitor, Save, Eye, X, Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { hotwords as hotwordsDb } from "@/lib/supabase/db";
+import { useTwitchBot } from "@/contexts/TwitchBotContext";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
 import type { HotwordSettings, HotwordEntry } from "@/lib/supabase/types";
 
 export default function HotwordsPage() {
   const uid = useAuthUid();
+  const { isConnected } = useTwitchBot();
   const [overlayOpen, setOverlayOpen] = useState(false);
 
   // Form state
@@ -82,7 +84,7 @@ export default function HotwordsPage() {
               </div>
               <div className="leading-tight">
                 <p className="text-xs text-white font-semibold">Twitch Bot</p>
-                <p className="text-[10px] text-green-400 font-bold">Online</p>
+                <p className={`text-[10px] font-bold ${isConnected ? "text-green-400" : "text-red-400"}`}>{isConnected ? "Online" : "Offline"}</p>
               </div>
             </div>
             <Button variant="destructive" className="gap-2" onClick={handleClearHotwords}>

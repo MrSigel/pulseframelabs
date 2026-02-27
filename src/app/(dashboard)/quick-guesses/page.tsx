@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Save, Trash2, Megaphone, X, History, Settings, Plus, ChevronLeft, ChevronRight, Inbox, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { quickGuesses as qgDb } from "@/lib/supabase/db";
+import { useTwitchBot } from "@/contexts/TwitchBotContext";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import type { QuickGuessSettings, QuickGuessSession, QuickGuessEntry, QuickGuessHistoryEntry } from "@/lib/supabase/types";
 
@@ -28,11 +29,14 @@ interface HistoryEntry {
 }
 
 export default function QuickGuessesPage() {
+  const { isConnected, addHandler, removeHandler } = useTwitchBot();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [twitchUsername, setTwitchUsername] = useState("");
   const [guesses, setGuesses] = useState<GuessEntry[]>([]);
-  const [guessesOpen, setGuessesOpen] = useState(true);
+  const [guessesOpen, setGuessesOpen] = useState(false);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [targetNumber, setTargetNumber] = useState("");
 
   // Settings state
   const [successMsg, setSuccessMsg] = useState("");
@@ -67,6 +71,35 @@ export default function QuickGuessesPage() {
     }
   }, [dbSettings]);
 
+  // Check for an active session on mount
+  useEffect(() => {
+    qgDb.sessions.getActive().then((session) => {
+      if (session) {
+        setSessionId(session.id);
+        setGuessesOpen(true);
+      }
+    }).catch(console.error);
+  }, []);
+
+  // Fetch entries whenever the active session changes
+  useEffect(() => {
+    if (!sessionId) {
+      setGuesses([]);
+      return;
+    }
+    qgDb.entries.list(sessionId).then((entries) => {
+      setGuesses(
+        entries.map((e, i) => ({
+          id: i,
+          username: e.username,
+          guess: e.guess,
+          guessedAt: e.guessed_at ? new Date(e.guessed_at).toLocaleTimeString() : "",
+          changedAt: e.changed_at ? new Date(e.changed_at).toLocaleTimeString() : "",
+        })),
+      );
+    }).catch(console.error);
+  }, [sessionId]);
+
   async function handleSaveSettings() {
     try {
       await qgDb.settings.update({
@@ -98,12 +131,87 @@ export default function QuickGuessesPage() {
     setCommands((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleClearGuesses = () => {
-    setGuesses([]);
+  const handleClearGuesses = async () => {
+    if (!sessionId) return;
+    try {
+      await qgDb.entries.clearSession(sessionId);
+      setGuesses([]);
+    } catch (err) {
+      console.error("Failed to clear guesses:", err);
+    }
   };
 
-  const handleCloseGuesses = () => {
-    setGuessesOpen(false);
+  const handleToggleGuesses = async () => {
+    try {
+      if (guessesOpen && sessionId) {
+        // Close the session
+        await qgDb.sessions.update(sessionId, {
+          is_open: false,
+          closed_at: new Date().toISOString(),
+        });
+        setGuessesOpen(false);
+        setSessionId(null);
+        setGuesses([]);
+      } else {
+        // Open a new session
+        const session = await qgDb.sessions.create();
+        setSessionId(session.id);
+        setGuessesOpen(true);
+        setGuesses([]);
+      }
+    } catch (err) {
+      console.error("Failed to toggle guesses:", err);
+    }
+  };
+
+  const handleAnnounceWinner = async () => {
+    if (!sessionId || guesses.length === 0) return;
+    const target = parseFloat(targetNumber);
+    if (isNaN(target)) {
+      const input = prompt("Enter the target number:");
+      if (!input) return;
+      const parsed = parseFloat(input);
+      if (isNaN(parsed)) return;
+      setTargetNumber(input);
+      await announceWinnerWithTarget(parsed);
+    } else {
+      await announceWinnerWithTarget(target);
+    }
+  };
+
+  const announceWinnerWithTarget = async (target: number) => {
+    if (!sessionId || guesses.length === 0) return;
+    try {
+      // Find the closest guess
+      let closest = guesses[0];
+      let closestDiff = Math.abs(parseFloat(closest.guess) - target);
+      for (const g of guesses) {
+        const diff = Math.abs(parseFloat(g.guess) - target);
+        if (diff < closestDiff) {
+          closest = g;
+          closestDiff = diff;
+        }
+      }
+      // Write to history
+      await qgDb.history.create({
+        participant_count: guesses.length,
+        winner: closest.username,
+        winning_guess: closest.guess,
+      });
+      // Close and clear the session
+      await qgDb.sessions.update(sessionId, {
+        is_open: false,
+        closed_at: new Date().toISOString(),
+        winner_username: closest.username,
+        winner_guess: closest.guess,
+      });
+      setGuessesOpen(false);
+      setSessionId(null);
+      setGuesses([]);
+      setTargetNumber("");
+    } catch (err) {
+      console.error("Failed to announce winner:", err);
+    }
   };
 
   return (
@@ -167,15 +275,15 @@ export default function QuickGuessesPage() {
             <p className="text-xs text-slate-500">
               If you clear the guesses, it will be saved in the Quick Guess History.
             </p>
-            <Button variant="destructive" className="w-full gap-2" onClick={handleClearGuesses}>
+            <Button variant="destructive" className="w-full gap-2" onClick={handleClearGuesses} disabled={!sessionId}>
               <Trash2 className="h-4 w-4" />
               Clear Guesses
             </Button>
-            <Button variant="success" className="w-full gap-2">
+            <Button variant="success" className="w-full gap-2" onClick={handleAnnounceWinner} disabled={!sessionId || guesses.length === 0}>
               <Megaphone className="h-4 w-4" />
               Announce Guess Winner to Chat
             </Button>
-            <Button variant="outline" className="w-full gap-2" onClick={handleCloseGuesses}>
+            <Button variant="outline" className="w-full gap-2" onClick={handleToggleGuesses}>
               <X className="h-4 w-4" />
               {guessesOpen ? "Close Guesses" : "Open Guesses"}
             </Button>

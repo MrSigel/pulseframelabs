@@ -15,6 +15,6 @@ export const config = {
      * - /overlay/* routes (OBS browser sources, must stay public)
      * - /s/* routes (public streamer pages)
      */
-    "/((?!_next/static|_next/image|favicon.ico|overlay|s/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|overlay|s/|api/twitch/callback|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
