@@ -356,6 +356,8 @@ function AuthLayoutInner({ children }: { children: React.ReactNode }) {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
+          maxHeight: "100vh",
+          overflowY: "auto",
           position: "relative",
           zIndex: 2,
           background: panelBg,
@@ -414,7 +416,7 @@ function AuthLayoutInner({ children }: { children: React.ReactNode }) {
         </motion.div>
 
         {/* Form Content */}
-        <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "32px" }}>
+        <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "safe center", justifyContent: "center", padding: "32px 32px 16px" }}>
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
