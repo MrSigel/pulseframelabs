@@ -1,6 +1,12 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+function getOrigin() {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) return siteUrl.replace(/\/+$/, "");
+  return "http://localhost:3000";
+}
+
 export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -38,14 +44,14 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const origin = getOrigin();
+
   // Protect dashboard routes — redirect to /login if not authenticated
   if (
     !user &&
     request.nextUrl.pathname.startsWith("/dashboard")
   ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(`${origin}/login`);
   }
 
   // Redirect authenticated users away from login/register
@@ -54,9 +60,7 @@ export async function updateSession(request: NextRequest) {
     (request.nextUrl.pathname === "/login" ||
       request.nextUrl.pathname === "/register")
   ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(`${origin}/dashboard`);
   }
 
   return supabaseResponse;

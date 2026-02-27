@@ -2,11 +2,15 @@ import { type NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
+function getOrigin() {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) return siteUrl.replace(/\/+$/, "");
+  return "http://localhost:3000";
+}
+
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  // Use NEXT_PUBLIC_SITE_URL env var for reliable origin on Render.com
-  // (reverse proxy makes request.url resolve to internal localhost:10000)
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin;
+  const origin = getOrigin();
   const code = searchParams.get("code");
   const next = searchParams.get("next");
 
