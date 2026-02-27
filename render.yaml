@@ -3,9 +3,13 @@ services:
     name: pulseframelabs
     runtime: node
     plan: starter
+    region: frankfurt
+    branch: main
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_SUPABASE_URL
@@ -13,4 +17,4 @@ services:
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         sync: false
       - key: NEXT_PUBLIC_SITE_URL
-        sync: false
+        value: https://pulseframelabs.onrender.com
