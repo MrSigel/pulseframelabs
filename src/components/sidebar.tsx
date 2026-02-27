@@ -28,8 +28,13 @@ import {
   Settings,
   Globe,
   Bot,
+  Wallet,
+  LayoutDashboard,
+  Users,
+  BarChart3,
   type LucideIcon,
 } from "lucide-react";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 
 interface NavItem {
   name: string;
@@ -60,6 +65,18 @@ const casinos: NavItem[] = [
   { name: "Casino Management", href: "/casino-management", icon: Building2 },
   { name: "Promo Management", href: "/promo-management", icon: Megaphone },
   { name: "Slideshow", href: "/slideshow", icon: Images },
+];
+
+const account: NavItem[] = [
+  { name: "Wallet & Credits", href: "/wallet", icon: Wallet },
+];
+
+const adminNav: NavItem[] = [
+  { name: "Overview", href: "/admin", icon: LayoutDashboard },
+  { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Wallets", href: "/admin/wallets", icon: Wallet },
+  { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { name: "Casino Deals", href: "/admin/deals", icon: Trophy },
 ];
 
 const stream: NavItem[] = [
@@ -119,6 +136,7 @@ function NavSection({ title, items, pathname }: { title?: string; items: NavItem
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { isAdmin } = useIsAdmin();
 
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-56 flex-col border-r border-sidebar-border bg-sidebar">
@@ -148,6 +166,10 @@ export function Sidebar() {
         <NavSection items={overlayApps} pathname={pathname} />
         <NavSection title="Casinos" items={casinos} pathname={pathname} />
         <NavSection title="Stream" items={stream} pathname={pathname} />
+        <NavSection title="Account" items={account} pathname={pathname} />
+        {isAdmin && (
+          <NavSection title="Admin" items={adminNav} pathname={pathname} />
+        )}
       </nav>
 
       {/* Footer */}

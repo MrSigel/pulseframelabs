@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 
 /* ── Theme types ── */
 type ThemePreference = "dark" | "light" | "system";
@@ -127,7 +128,9 @@ function ThemeProvider({ children }: { children: ReactNode }) {
 export function DashboardProviders({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider>
-      <LanguageProvider>{children}</LanguageProvider>
+      <LanguageProvider>
+        <SubscriptionProvider>{children}</SubscriptionProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

@@ -4,6 +4,7 @@ import type {
   DashboardStat, DuelSession, DuelPlayer, Game, GiveawayHistoryEntry,
   GiveawaySession, GiveawayParticipant,
   HotwordSettings, HotwordEntry, LoyaltyPreset, Moderator,
+  Package, PaymentRequest,
   PersonalBest, PointsBattleBet, PointsBattlePreset, PointsBattleSession,
   PointsTransaction, Promotion, QuickGuessSettings, QuickGuessSession,
   QuickGuessEntry, QuickGuessHistoryEntry, RaffleHistoryEntry,
@@ -11,7 +12,7 @@ import type {
   SlideshowItem, SpinnerPrize, SpinnerHistoryEntry, StoreItem,
   StoreRedemption, StoreSettings, StreamerPageSettings, StreamPointsConfig,
   StreamViewer, ThemeSettings, Tournament, TwitchConnection, UserProfile,
-  WagerSession,
+  UserSubscription, WagerSession, Wallet, WalletTransaction,
 } from "./types";
 
 // ============================================================
@@ -660,6 +661,82 @@ export const giveaways = {
       if (error) throw error;
       return count ?? 0;
     },
+  },
+};
+
+// ============================================================
+// Wallet (singleton per user)
+// ============================================================
+export const wallet = {
+  get: () => selectSingleByUser<Wallet>("wallets"),
+  getTransactions: async (limit = 50): Promise<WalletTransaction[]> => {
+    const supabase = getSupabase();
+    const userId = await getUserId();
+    const { data, error } = await supabase
+      .from("wallet_transactions")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []) as WalletTransaction[];
+  },
+};
+
+// ============================================================
+// Packages (public, no user_id filter)
+// ============================================================
+export const packages = {
+  list: async (): Promise<Package[]> => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("packages")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order");
+    if (error) throw error;
+    return (data ?? []) as Package[];
+  },
+};
+
+// ============================================================
+// User Subscriptions
+// ============================================================
+export const userSubscriptions = {
+  list: () => selectByUser<UserSubscription>("user_subscriptions", "created_at", false),
+  getActive: async (): Promise<UserSubscription | null> => {
+    const supabase = getSupabase();
+    const userId = await getUserId();
+    const { data, error } = await supabase
+      .from("user_subscriptions")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .gte("expires_at", new Date().toISOString())
+      .order("expires_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return data as UserSubscription | null;
+  },
+};
+
+// ============================================================
+// Payment Requests
+// ============================================================
+export const paymentRequests = {
+  list: () => selectByUser<PaymentRequest>("payment_requests", "created_at", false),
+  getPending: async (): Promise<PaymentRequest[]> => {
+    const supabase = getSupabase();
+    const userId = await getUserId();
+    const { data, error } = await supabase
+      .from("payment_requests")
+      .select("*")
+      .eq("user_id", userId)
+      .in("status", ["pending", "confirming"])
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as PaymentRequest[];
   },
 };
 

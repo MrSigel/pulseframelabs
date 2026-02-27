@@ -514,6 +514,79 @@ export interface GiveawayParticipant {
   joined_at: string;
 }
 
+export interface Wallet {
+  id: string;
+  user_id: string;
+  balance: number;
+  total_deposited: number;
+  total_spent: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WalletTransaction {
+  id: string;
+  user_id: string;
+  wallet_id: string;
+  type: 'topup' | 'purchase' | 'refund' | 'admin_credit' | 'admin_debit';
+  amount: number;
+  balance_after: number;
+  description: string;
+  reference_id: string | null;
+  created_at: string;
+}
+
+export interface Package {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  price_credits: number;
+  duration_days: number;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserSubscription {
+  id: string;
+  user_id: string;
+  package_id: string;
+  status: 'active' | 'expired' | 'cancelled';
+  starts_at: string;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentRequest {
+  id: string;
+  user_id: string;
+  coin: string;
+  amount_fiat: number;
+  amount_crypto: string | null;
+  address_in: string | null;
+  address_out: string;
+  callback_url: string;
+  txid: string | null;
+  confirmations: number;
+  status: 'pending' | 'confirming' | 'completed' | 'expired' | 'failed';
+  credits_to_add: number;
+  metadata: Json;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminAuditLog {
+  id: string;
+  admin_user_id: string;
+  action: string;
+  target_user_id: string | null;
+  details: Json;
+  created_at: string;
+}
+
 export interface StreamerPageSettings {
   id: string;
   user_id: string;
@@ -594,6 +667,12 @@ export interface Database {
       points_battle_bets: TableDef<PointsBattleBet>;
       giveaway_sessions: TableDef<GiveawaySession>;
       giveaway_participants: TableDef<GiveawayParticipant>;
+      wallets: TableDef<Wallet>;
+      wallet_transactions: TableDef<WalletTransaction>;
+      packages: TableDef<Package>;
+      user_subscriptions: TableDef<UserSubscription>;
+      payment_requests: TableDef<PaymentRequest>;
+      admin_audit_logs: TableDef<AdminAuditLog>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
