@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "@/context/LanguageContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Check, X, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 interface AuthFormsProps {
   initialMode: "login" | "register";
@@ -360,6 +361,23 @@ function LoginFormContent({
           label={auth.password}
           showToggle
         />
+
+        {/* Forgot password link */}
+        <div style={{ textAlign: "right", marginTop: "-4px", marginBottom: "12px" }}>
+          <Link
+            href="/forgot-password"
+            style={{
+              fontSize: "0.75rem",
+              color: "var(--text-tertiary)",
+              textDecoration: "none",
+              transition: "color 0.3s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--gold)")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-tertiary)")}
+          >
+            {auth.forgotPassword || "Forgot password?"}
+          </Link>
+        </div>
 
         <SubmitButton
           loading={loading}
