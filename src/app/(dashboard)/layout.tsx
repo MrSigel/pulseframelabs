@@ -3,6 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 
+// Dashboard requires auth — never statically prerender
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
   children,
 }: {
