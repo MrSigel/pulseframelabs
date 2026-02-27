@@ -88,17 +88,23 @@ function NavSection({ title, items, pathname }: { title?: string; items: NavItem
               className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-200 ${
                 isActive
                   ? "bg-gradient-to-r from-primary/15 to-primary/5 text-foreground"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground/80"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground/80 hover:translate-x-1 hover:shadow-[inset_0_0_20px_rgba(201,168,76,0.04)]"
               }`}
             >
               {/* Active gold indicator bar */}
               {isActive && (
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-gradient-to-b from-primary to-primary/60 shadow-[0_0_8px_var(--glow-gold)]" />
               )}
-              <Icon className={`h-4 w-4 shrink-0 transition-colors duration-200 ${
-                isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground/60"
+              {/* Hover glow bar (non-active only) */}
+              {!isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 h-0 w-[2px] rounded-r-full bg-primary/40 opacity-0 transition-all duration-300 group-hover:h-4 group-hover:opacity-100" />
+              )}
+              <Icon className={`h-4 w-4 shrink-0 transition-all duration-200 ${
+                isActive
+                  ? "text-primary"
+                  : "text-muted-foreground group-hover:text-primary/70 group-hover:scale-110"
               }`} />
-              <span>{item.name}</span>
+              <span className="transition-colors duration-200">{item.name}</span>
             </Link>
           );
         })}
@@ -113,16 +119,18 @@ export function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-56 flex-col border-r border-sidebar-border bg-sidebar">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" style={{ filter: 'drop-shadow(0 0 8px var(--glow-gold))' }}>
-          <path d="M6 8l6 8-6 8" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M14 8l6 8-6 8" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
-        </svg>
+      <Link href="/dashboard" className="flex items-center gap-2.5 px-5 py-5 group transition-all duration-300 hover:opacity-90">
+        <div className="relative">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" className="transition-transform duration-300 group-hover:scale-110" style={{ filter: 'drop-shadow(0 0 8px var(--glow-gold))' }}>
+            <path d="M7 8l7 8-7 8" stroke="var(--primary)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M16 8l7 8-7 8" stroke="var(--primary)" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
+          </svg>
+        </div>
         <div className="leading-tight">
           <div className="text-[13px] font-bold text-foreground tracking-wider">PULSEFRAME</div>
           <div className="text-[13px] font-bold text-primary tracking-wider">LABS</div>
         </div>
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-2 pb-4 scrollbar-thin">

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, LogOut, Moon, Sun, MonitorSmartphone } from "lucide-react";
+import { ChevronDown, LogOut, Moon, Sun, MonitorSmartphone, User as UserIcon, Shield, ExternalLink } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useThemeContext } from "@/components/providers";
@@ -19,6 +19,7 @@ const themeLabels = { dark: "Dark", light: "Light", system: "Auto" } as const;
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { preference, cycleTheme } = useThemeContext();
 
@@ -34,6 +35,19 @@ export function Header() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
+      }
+    }
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showDropdown]);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -81,7 +95,7 @@ export function Header() {
         </motion.button>
 
         {/* User dropdown */}
-        <div className="relative flex items-center">
+        <div className="relative flex items-center" ref={dropdownRef}>
           <div
             className="flex items-center gap-3 cursor-pointer rounded-xl px-3 py-2 transition-all duration-200 hover:bg-primary/5"
             onClick={() => setShowDropdown(!showDropdown)}
@@ -96,25 +110,76 @@ export function Header() {
               <div className="text-sm font-semibold text-foreground">{displayName}</div>
               <div className="text-[11px] text-muted-foreground">{user?.email || "Loading..."}</div>
             </div>
-            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            <motion.div
+              animate={{ rotate: showDropdown ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            </motion.div>
           </div>
 
           <AnimatePresence>
             {showDropdown && (
               <motion.div
-                initial={{ opacity: 0, y: -4, scale: 0.96 }}
+                initial={{ opacity: 0, y: -8, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                transition={{ duration: 0.15 }}
-                className="absolute top-full right-0 mt-1 w-48 rounded-lg border border-border bg-popover shadow-xl py-1 z-50 backdrop-blur-xl"
+                exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                className="absolute top-full right-0 mt-2 w-64 rounded-xl border border-border bg-popover/95 shadow-2xl shadow-black/20 z-50 backdrop-blur-2xl overflow-hidden"
               >
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-colors"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </button>
+                {/* User info header */}
+                <div className="px-4 py-3 border-b border-border/50">
+                  <div className="flex items-center gap-3">
+                    <div className="relative shrink-0">
+                      <div className="absolute -inset-0.5 rounded-full bg-gradient-to-br from-primary to-primary/60 opacity-40" />
+                      <div className="relative h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-base font-bold">
+                        {initial}
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-foreground truncate">{displayName}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">{user?.email || "Loading..."}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Menu items */}
+                <div className="py-1.5">
+                  <button
+                    onClick={() => { setShowDropdown(false); router.push("/settings"); }}
+                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-150"
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    Profile Settings
+                  </button>
+                  <button
+                    onClick={() => { setShowDropdown(false); router.push("/theme-settings"); }}
+                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-150"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Theme Settings
+                  </button>
+                  <a
+                    href="https://pulseframelabs.onrender.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-150"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Visit Website
+                  </a>
+                </div>
+
+                {/* Logout */}
+                <div className="border-t border-border/50 py-1.5">
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/5 transition-all duration-150"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </button>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

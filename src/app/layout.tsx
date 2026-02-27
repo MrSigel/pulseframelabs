@@ -44,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         {/* Prevent flash-of-incorrect-theme by reading localStorage before paint */}
         <script
           dangerouslySetInnerHTML={{

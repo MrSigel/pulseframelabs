@@ -234,12 +234,12 @@ export default function DepositWithdrawalsPage() {
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <Button className="w-full gap-2" onClick={handleSave} disabled={saving}>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button className="flex-1 gap-2" onClick={handleSave} disabled={saving}>
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 {saving ? "Saving..." : "Update Profile"}
               </Button>
-              <Button variant="destructive" className="gap-2" onClick={handleReset}>
+              <Button variant="destructive" className="flex-1 gap-2" onClick={handleReset}>
                 <RotateCcw className="h-4 w-4" />
                 Reset Current Profile
               </Button>
