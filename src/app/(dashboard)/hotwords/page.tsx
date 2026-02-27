@@ -6,16 +6,66 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OverlayLink } from "@/components/overlay-link";
-import { Trash2, Monitor, Save, Eye, X } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Trash2, Monitor, Save, Eye, X, Loader2 } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { hotwords as hotwordsDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { HotwordSettings, HotwordEntry } from "@/lib/supabase/types";
 
 export default function HotwordsPage() {
   const [overlayOpen, setOverlayOpen] = useState(false);
+
+  // Form state
+  const [twitchUsername, setTwitchUsername] = useState("");
+  const [kickUsername, setKickUsername] = useState("");
+  const [excludedWords, setExcludedWords] = useState("");
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
     return `${window.location.origin}/overlay/hotwords`;
   }, []);
+
+  // --- Supabase queries ---
+  const { data: dbSettings, refetch: refetchSettings } = useDbQuery<HotwordSettings | null>(
+    () => hotwordsDb.settings.get(),
+    [],
+  );
+  const { data: dbEntries, refetch: refetchEntries } = useDbQuery<HotwordEntry[]>(
+    () => hotwordsDb.entries.list(),
+    [],
+  );
+
+  useEffect(() => {
+    if (dbSettings) {
+      setTwitchUsername(dbSettings.twitch_username || "");
+      setKickUsername(dbSettings.kick_username || "");
+      if (Array.isArray(dbSettings.excluded_words)) {
+        setExcludedWords((dbSettings.excluded_words as string[]).join(", "));
+      }
+    }
+  }, [dbSettings]);
+
+  async function handleSaveSettings() {
+    try {
+      await hotwordsDb.settings.update({
+        twitch_username: twitchUsername,
+        kick_username: kickUsername,
+        excluded_words: excludedWords.split(",").map(w => w.trim()).filter(Boolean),
+      });
+      await refetchSettings();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleClearHotwords() {
+    try {
+      await hotwordsDb.entries.clearAll();
+      await refetchEntries();
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   return (
     <div>
@@ -33,7 +83,7 @@ export default function HotwordsPage() {
                 <p className="text-[10px] text-green-400 font-bold">Online</p>
               </div>
             </div>
-            <Button variant="destructive" className="gap-2">
+            <Button variant="destructive" className="gap-2" onClick={handleClearHotwords}>
               <Trash2 className="h-4 w-4" />
               Clear Hot Words
             </Button>
@@ -54,7 +104,22 @@ export default function HotwordsPage() {
               Live Hot Words
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 flex flex-col justify-end">
+          <CardContent className="flex-1 flex flex-col">
+            {dbEntries && dbEntries.length > 0 ? (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {dbEntries.map((entry) => (
+                  <span
+                    key={entry.id}
+                    className="px-3 py-1 rounded-full text-xs font-bold tracking-wide bg-blue-500/15 border border-blue-500/25 text-blue-400"
+                  >
+                    {entry.word} ({entry.count})
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-slate-500 text-sm mb-4">No hot words yet.</p>
+            )}
+            <div className="flex-1" />
             <Button variant="success" className="gap-2 w-full">
               <Eye className="h-4 w-4" />
               Open Live Preview
@@ -72,13 +137,17 @@ export default function HotwordsPage() {
           <CardContent className="flex-1 flex flex-col space-y-3">
             <div>
               <Label className="text-sm font-semibold text-white mb-2 block">Excluded Words</Label>
-              <Input placeholder="Enter words to exclude separated by comma" />
+              <Input
+                value={excludedWords}
+                onChange={(e) => setExcludedWords(e.target.value)}
+                placeholder="Enter words to exclude separated by comma"
+              />
               <p className="text-xs text-slate-500 mt-2">
                 &#9432; Enter words to exclude from hotwords. Separate words with a comma.
               </p>
             </div>
             <div className="flex-1" />
-            <Button variant="success" className="gap-2 w-full">
+            <Button variant="success" className="gap-2 w-full" onClick={handleSaveSettings}>
               <Save className="h-4 w-4" />
               Save
             </Button>
@@ -93,20 +162,28 @@ export default function HotwordsPage() {
           <CardContent className="flex-1 flex flex-col space-y-4">
             <div>
               <Label className="text-sm font-semibold text-white mb-2 block">Twitch Username</Label>
-              <Input placeholder="Enter your twitch username" />
+              <Input
+                value={twitchUsername}
+                onChange={(e) => setTwitchUsername(e.target.value)}
+                placeholder="Enter your twitch username"
+              />
               <p className="text-xs text-slate-500 mt-1">
                 &#9432; Enter your twitch username to enable live hotwords on twitch, leave blank to disable.
               </p>
             </div>
             <div>
               <Label className="text-sm font-semibold text-white mb-2 block">Kick Username</Label>
-              <Input placeholder="Enter your kick username" />
+              <Input
+                value={kickUsername}
+                onChange={(e) => setKickUsername(e.target.value)}
+                placeholder="Enter your kick username"
+              />
               <p className="text-xs text-slate-500 mt-1">
                 &#9432; Enter your kick username to enable live hotwords on kick, leave blank to disable.
               </p>
             </div>
             <div className="flex-1" />
-            <Button variant="success" className="gap-2 w-full">
+            <Button variant="success" className="gap-2 w-full" onClick={handleSaveSettings}>
               <Save className="h-4 w-4" />
               Save
             </Button>

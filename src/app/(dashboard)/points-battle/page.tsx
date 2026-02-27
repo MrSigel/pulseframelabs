@@ -13,8 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Monitor, Settings2, Plus, Play, Lock, ArrowLeft, Trash2, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Monitor, Settings2, Plus, Play, Lock, ArrowLeft, Trash2, X, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { pointsBattle as pbDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { PointsBattlePreset } from "@/lib/supabase/types";
 
 interface BetOption {
   command: string;
@@ -66,7 +69,30 @@ export default function PointsBattlePage() {
 
   const MAX_PRESETS = 4;
 
+  // Preset name for create form
+  const [presetName, setPresetName] = useState("");
+
+  // --- Supabase queries ---
+  const { data: dbPresets, refetch: refetchPresets } = useDbQuery<PointsBattlePreset[]>(
+    () => pbDb.presets.list(),
+    [],
+  );
+
+  useEffect(() => {
+    if (dbPresets) {
+      setPresets(dbPresets.map(p => ({
+        id: p.id,
+        name: p.name,
+        options: (p.options as any[]) || [],
+        minPoints: String(p.min_points),
+        maxPoints: String(p.max_points),
+        time: String(p.duration_seconds),
+      })));
+    }
+  }, [dbPresets]);
+
   function resetCreateForm() {
+    setPresetName("");
     setNewPresetOptions([
       { command: "!bet", keyword: "", description: "" },
       { command: "!bet", keyword: "", description: "" },
@@ -86,19 +112,23 @@ export default function PointsBattlePage() {
     resetCreateForm();
   }
 
-  function handleCreatePreset() {
+  async function handleCreatePreset() {
     if (presets.length >= MAX_PRESETS) return;
-    const preset: PBPreset = {
-      id: Date.now().toString(),
-      name: `Preset ${presets.length + 1}`,
-      options: newPresetOptions.map((o) => ({ ...o })),
-      minPoints: newPresetMin,
-      maxPoints: newPresetMax,
-      time: newPresetDuration || "30",
-    };
-    setPresets((prev) => [...prev, preset]);
-    resetCreateForm();
-    setPresetsView("manage");
+    const name = presetName.trim() || `Preset ${presets.length + 1}`;
+    try {
+      await pbDb.presets.create({
+        name,
+        options: newPresetOptions.map((o) => ({ ...o })),
+        min_points: parseInt(newPresetMin) || 0,
+        max_points: parseInt(newPresetMax) || 0,
+        duration_seconds: parseInt(newPresetDuration) || 30,
+      });
+      resetCreateForm();
+      await refetchPresets();
+      setPresetsView("manage");
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   function updateNewPresetOption(index: number, field: keyof BetOption, value: string) {
@@ -118,8 +148,13 @@ export default function PointsBattlePage() {
     setNewPresetOptions((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function handleDeletePreset(id: string) {
-    setPresets((prev) => prev.filter((p) => p.id !== id));
+  async function handleDeletePreset(id: string) {
+    try {
+      await pbDb.presets.remove(id);
+      await refetchPresets();
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   function handleLoadPreset(preset: PBPreset) {
@@ -432,6 +467,16 @@ export default function PointsBattlePage() {
                   </button>
                 </div>
                 <div className="p-5 space-y-5">
+                  {/* Preset Name */}
+                  <div>
+                    <Label className="text-white font-semibold mb-2 block text-sm">Preset Name</Label>
+                    <Input
+                      value={presetName}
+                      onChange={(e) => setPresetName(e.target.value)}
+                      placeholder="Enter preset name"
+                    />
+                  </div>
+
                   {/* Bet Options */}
                   <div>
                     <div className="flex items-center justify-between mb-3">

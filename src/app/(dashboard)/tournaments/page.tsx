@@ -2,7 +2,7 @@
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OverlayLink } from "@/components/overlay-link";
@@ -13,8 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Monitor, Plus, ChevronLeft, ChevronRight, Inbox, X } from "lucide-react";
+import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2, Loader2 } from "lucide-react";
 import { useState, useMemo } from "react";
+import { tournaments as tournamentsDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { Tournament } from "@/lib/supabase/types";
 
 const overlayTabs = [
   { key: "normal", label: "Overlay Normal" },
@@ -30,6 +33,38 @@ export default function TournamentsPage() {
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [participants, setParticipants] = useState("8");
+  const [creating, setCreating] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { data: tournamentsList, loading, refetch } = useDbQuery<Tournament[]>(() => tournamentsDb.list(), []);
+  const filteredTournaments = (tournamentsList ?? []).filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  async function handleCreate() {
+    if (!name.trim()) return;
+    setCreating(true);
+    try {
+      await tournamentsDb.create({
+        name: name.trim(),
+        description: desc.trim(),
+        participant_count: parseInt(participants) || 8,
+      });
+      setCreateOpen(false);
+      setName(""); setDesc(""); setParticipants("8");
+      await refetch();
+    } catch (err) {
+      console.error("Failed to create:", err);
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      await tournamentsDb.remove(id);
+      await refetch();
+    } catch (err) {
+      console.error("Failed to delete:", err);
+    }
+  }
 
   const overlayUrls = useMemo(() => {
     if (typeof window === "undefined") return {} as Record<OverlayTab, string>;
@@ -59,7 +94,14 @@ export default function TournamentsPage() {
       />
 
       <Card>
-        <CardContent className="pt-6">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-lg text-white">Tournaments</CardTitle>
+          <div className="relative">
+            <Input placeholder="Search for Tournament" className="w-64 pr-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+          </div>
+        </CardHeader>
+        <CardContent>
           {/* Table Header */}
           <div
             className="grid gap-4 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500"
@@ -81,11 +123,46 @@ export default function TournamentsPage() {
             <span className="text-right">Manage</span>
           </div>
 
-          {/* Empty state */}
-          <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-            <Inbox className="h-10 w-10 mb-3 text-slate-600" />
-            <p className="text-sm">No data available in table</p>
-          </div>
+          {/* Data rows */}
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="h-6 w-6 animate-spin text-slate-500" />
+            </div>
+          ) : filteredTournaments.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-slate-500">
+              <Inbox className="h-10 w-10 mb-3 text-slate-600" />
+              <p className="text-sm">No data available in table</p>
+            </div>
+          ) : (
+            <div>
+              {filteredTournaments.map((t) => (
+                <div
+                  key={t.id}
+                  className="grid gap-4 px-4 py-3 text-sm items-center hover:bg-white/[0.02] transition-colors"
+                  style={{
+                    gridTemplateColumns: "1.5fr 1.2fr 0.8fr 1fr 1fr 0.8fr",
+                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                  }}
+                >
+                  <div>
+                    <span className="font-semibold text-white">{t.name}</span>
+                    {t.description && <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{t.description}</p>}
+                  </div>
+                  <span className="text-slate-300">{t.participant_count}</span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit ${t.status === 'ongoing' ? 'bg-emerald-500/10 text-emerald-400' : t.status === 'pending' ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-500/10 text-slate-400'}`}>
+                    {t.status.toUpperCase()}
+                  </span>
+                  <span className="text-xs text-slate-500">{new Date(t.created_at).toLocaleDateString()}</span>
+                  <span className="text-xs text-slate-500">{new Date(t.updated_at).toLocaleDateString()}</span>
+                  <div className="flex justify-end">
+                    <button onClick={() => handleDelete(t.id)} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
@@ -100,7 +177,7 @@ export default function TournamentsPage() {
                   <SelectItem value="50">50</SelectItem>
                 </SelectContent>
               </Select>
-              <span className="text-xs text-slate-600">Showing no records</span>
+              <span className="text-xs text-slate-600">{filteredTournaments.length === 0 ? "Showing no records" : `Showing ${filteredTournaments.length} record${filteredTournaments.length !== 1 ? "s" : ""}`}</span>
             </div>
             <div className="flex items-center gap-1">
               <Button variant="outline" size="icon-sm" disabled>
@@ -280,14 +357,15 @@ export default function TournamentsPage() {
 
               <Button
                 className="w-full gap-2 py-5 text-sm font-semibold"
-                onClick={() => {
-                  setCreateOpen(false);
-                  setName("");
-                  setDesc("");
-                }}
+                onClick={handleCreate}
+                disabled={creating || !name.trim()}
               >
-                <Plus className="h-4 w-4" />
-                Create Tournament
+                {creating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                {creating ? "Creating..." : "Create Tournament"}
               </Button>
             </div>
           </div>
@@ -297,7 +375,7 @@ export default function TournamentsPage() {
   );
 }
 
-/* ── Overlay Preview Components ── */
+/* -- Overlay Preview Components -- */
 
 function NormalPreview() {
   return (

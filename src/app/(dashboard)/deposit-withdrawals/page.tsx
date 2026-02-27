@@ -14,8 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RotateCcw, RefreshCw, Settings2 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { RotateCcw, RefreshCw, Settings2, Loader2, Save } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { balanceProfiles } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { BalanceProfile } from "@/lib/supabase/types";
 
 const currencies = [
   { value: "usd", symbol: "$", label: "US Dollar (USD)" },
@@ -64,6 +67,58 @@ export default function DepositWithdrawalsPage() {
   const [withdrawalsAdd, setWithdrawalsAdd] = useState("0");
   const [leftover, setLeftover] = useState("0");
   const [leftoverAdd, setLeftoverAdd] = useState("0");
+  const [saving, setSaving] = useState(false);
+  const { data: profile, refetch } = useDbQuery<BalanceProfile | null>(
+    () => balanceProfiles.get(),
+    [],
+  );
+
+  useEffect(() => {
+    if (profile) {
+      setCurrency(profile.currency || "USD");
+      setDeposits(String(profile.deposits || 0));
+      setDepositsAdd(String(profile.deposits_add || 0));
+      setWithdrawals(String(profile.withdrawals || 0));
+      setWithdrawalsAdd(String(profile.withdrawals_add || 0));
+      setLeftover(String(profile.leftover || 0));
+      setLeftoverAdd(String(profile.leftover_add || 0));
+    }
+  }, [profile]);
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await balanceProfiles.update({
+        currency,
+        deposits: parseFloat(deposits) || 0,
+        deposits_add: parseFloat(depositsAdd) || 0,
+        withdrawals: parseFloat(withdrawals) || 0,
+        withdrawals_add: parseFloat(withdrawalsAdd) || 0,
+        leftover: parseFloat(leftover) || 0,
+        leftover_add: parseFloat(leftoverAdd) || 0,
+      });
+      await refetch();
+    } catch (err) {
+      console.error("Failed to save:", err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleReset() {
+    try {
+      await balanceProfiles.update({
+        deposits: 0, deposits_add: 0, withdrawals: 0, withdrawals_add: 0,
+        leftover: 0, leftover_add: 0,
+      });
+      await refetch();
+    } catch (err) {
+      console.error("Failed to reset:", err);
+    }
+    setDeposits("0"); setDepositsAdd("0");
+    setWithdrawals("0"); setWithdrawalsAdd("0");
+    setLeftover("0"); setLeftoverAdd("0");
+  }
 
   const currencyObj = currencies.find((c) => c.value === currency) || currencies[0];
   const currencySymbol = currencyObj.symbol;
@@ -179,10 +234,16 @@ export default function DepositWithdrawalsPage() {
               </div>
             </div>
 
-            <Button variant="destructive" className="gap-2">
-              <RotateCcw className="h-4 w-4" />
-              Reset Current Profile
-            </Button>
+            <div className="flex gap-3">
+              <Button className="w-full gap-2" onClick={handleSave} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                {saving ? "Saving..." : "Update Profile"}
+              </Button>
+              <Button variant="destructive" className="gap-2" onClick={handleReset}>
+                <RotateCcw className="h-4 w-4" />
+                Reset Current Profile
+              </Button>
+            </div>
           </CardContent>
         </Card>
 

@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Save, Trash2, Megaphone, X, History, Settings, Plus, ChevronLeft, ChevronRight, Inbox } from "lucide-react";
-import { useState } from "react";
+import { Save, Trash2, Megaphone, X, History, Settings, Plus, ChevronLeft, ChevronRight, Inbox, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { quickGuesses as qgDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { QuickGuessSettings, QuickGuessSession, QuickGuessEntry, QuickGuessHistoryEntry } from "@/lib/supabase/types";
 
 interface GuessEntry {
   id: number;
@@ -29,7 +32,6 @@ export default function QuickGuessesPage() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [twitchUsername, setTwitchUsername] = useState("");
   const [guesses, setGuesses] = useState<GuessEntry[]>([]);
-  const [history] = useState<HistoryEntry[]>([]);
   const [guessesOpen, setGuessesOpen] = useState(true);
 
   // Settings state
@@ -40,6 +42,49 @@ export default function QuickGuessesPage() {
   const [notActiveMsg, setNotActiveMsg] = useState("");
   const [winnerMsg, setWinnerMsg] = useState("");
   const [commands, setCommands] = useState(["!command"]);
+
+  const { data: dbSettings, refetch: refetchSettings } = useDbQuery<QuickGuessSettings | null>(
+    () => qgDb.settings.get(),
+    [],
+  );
+  const { data: dbHistory } = useDbQuery<QuickGuessHistoryEntry[]>(
+    () => qgDb.history.list(),
+    [],
+  );
+
+  useEffect(() => {
+    if (dbSettings) {
+      setTwitchUsername(dbSettings.twitch_username || "");
+      setSuccessMsg(dbSettings.success_msg || "");
+      setAlreadyInUseMsg(dbSettings.already_in_use_msg || "");
+      setGuessChangedMsg(dbSettings.guess_changed_msg || "");
+      setWrongNumbersMsg(dbSettings.wrong_numbers_msg || "");
+      setNotActiveMsg(dbSettings.not_active_msg || "");
+      setWinnerMsg(dbSettings.winner_msg || "");
+      if (Array.isArray(dbSettings.commands)) {
+        setCommands(dbSettings.commands as string[]);
+      }
+    }
+  }, [dbSettings]);
+
+  async function handleSaveSettings() {
+    try {
+      await qgDb.settings.update({
+        twitch_username: twitchUsername,
+        success_msg: successMsg,
+        already_in_use_msg: alreadyInUseMsg,
+        guess_changed_msg: guessChangedMsg,
+        wrong_numbers_msg: wrongNumbersMsg,
+        not_active_msg: notActiveMsg,
+        winner_msg: winnerMsg,
+        commands: commands,
+      });
+      await refetchSettings();
+      setSettingsOpen(false);
+    } catch (err) {
+      console.error("Failed to save settings:", err);
+    }
+  }
 
   const addCommand = () => {
     setCommands((prev) => [...prev, "!command"]);
@@ -327,7 +372,7 @@ export default function QuickGuessesPage() {
             {/* Footer */}
             <div className="px-6 py-4 border-t border-white/[0.06] flex justify-end gap-3">
               <Button variant="outline" onClick={() => setSettingsOpen(false)}>Close</Button>
-              <Button onClick={() => setSettingsOpen(false)}>Save changes</Button>
+              <Button onClick={handleSaveSettings}>Save changes</Button>
             </div>
           </div>
         </div>
@@ -376,14 +421,14 @@ export default function QuickGuessesPage() {
                 <span>Guess</span>
               </div>
 
-              {history.length === 0 ? (
+              {(!dbHistory || dbHistory.length === 0) ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-500">
                   <Inbox className="h-10 w-10 mb-3 text-slate-600" />
                   <p className="text-sm">No history available</p>
                 </div>
               ) : (
                 <div className="space-y-1">
-                  {history.map((h) => (
+                  {dbHistory.map((h) => (
                     <div
                       key={h.id}
                       className="grid gap-4 px-4 py-2.5 text-sm"
@@ -392,10 +437,10 @@ export default function QuickGuessesPage() {
                         borderBottom: "1px solid rgba(255,255,255,0.03)",
                       }}
                     >
-                      <span className="text-slate-400">{h.date}</span>
-                      <span className="text-white">{h.participants}</span>
+                      <span className="text-slate-400">{new Date(h.played_at).toLocaleDateString()}</span>
+                      <span className="text-white">{h.participant_count}</span>
                       <span className="text-emerald-400 font-medium">{h.winner}</span>
-                      <span className="text-white">{h.guess}</span>
+                      <span className="text-white">{h.winning_guess}</span>
                     </div>
                   ))}
                 </div>
@@ -403,7 +448,9 @@ export default function QuickGuessesPage() {
 
               {/* Pagination */}
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
-                <span className="text-xs text-slate-600">Showing no records</span>
+                <span className="text-xs text-slate-600">
+                  {dbHistory ? `Showing ${dbHistory.length} record${dbHistory.length !== 1 ? "s" : ""}` : "Showing no records"}
+                </span>
                 <div className="flex items-center gap-1">
                   <Button variant="outline" size="icon-sm" disabled>
                     <ChevronLeft className="h-4 w-4" />

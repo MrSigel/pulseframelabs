@@ -13,8 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X } from "lucide-react";
+import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2, Loader2 } from "lucide-react";
 import { useState, useMemo } from "react";
+import { bonushunts as bonushuntsDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { Bonushunt } from "@/lib/supabase/types";
 
 const overlayTabs = [
   { key: "large", label: "Overlay Large" },
@@ -47,6 +50,41 @@ export default function BonushuntsPage() {
   const [huntDesc, setHuntDesc] = useState("");
   const [startBalance, setStartBalance] = useState("");
   const [currency, setCurrency] = useState("USD");
+  const [creating, setCreating] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { data: huntsList, loading, refetch } = useDbQuery<Bonushunt[]>(() => bonushuntsDb.list(), []);
+  const hunts = (huntsList ?? []).filter(h => !searchQuery || h.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  async function handleCreateHunt() {
+    if (!huntName.trim()) return;
+    setCreating(true);
+    try {
+      await bonushuntsDb.create({
+        name: huntName.trim(),
+        description: huntDesc.trim(),
+        start_balance: parseFloat(startBalance) || 0,
+        currency,
+      });
+      setCreateOpen(false);
+      setHuntName("");
+      setHuntDesc("");
+      setStartBalance("");
+      await refetch();
+    } catch (err) {
+      console.error("Failed to create bonushunt:", err);
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleDeleteHunt(id: string) {
+    try {
+      await bonushuntsDb.remove(id);
+      await refetch();
+    } catch (err) {
+      console.error("Failed to delete bonushunt:", err);
+    }
+  }
 
   const overlayUrls = useMemo(() => {
     if (typeof window === "undefined") return {} as Record<OverlayTab, string>;
@@ -82,7 +120,7 @@ export default function BonushuntsPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg text-white">Bonushunts</CardTitle>
           <div className="relative">
-            <Input placeholder="Search for Bonushunt" className="w-64 pr-8" />
+            <Input placeholder="Search for Bonushunt" className="w-64 pr-8" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
           </div>
         </CardHeader>
@@ -93,10 +131,39 @@ export default function BonushuntsPage() {
             </div>
           </div>
 
-          <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-            <Inbox className="h-10 w-10 mb-3 text-slate-600" />
-            <p className="text-sm">No data available in table</p>
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="h-6 w-6 animate-spin text-slate-500" />
+            </div>
+          ) : hunts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-slate-500">
+              <Inbox className="h-10 w-10 mb-3 text-slate-600" />
+              <p className="text-sm">No data available in table</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {hunts.map((hunt) => (
+                <div key={hunt.id} className="flex items-center justify-between px-4 py-3 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-semibold text-white">{hunt.name}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${hunt.status === 'active' ? 'bg-emerald-500/10 text-emerald-400' : hunt.status === 'paused' ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-500/10 text-slate-400'}`}>
+                        {hunt.status.toUpperCase()}
+                      </span>
+                    </div>
+                    {hunt.description && <p className="text-xs text-slate-500 mt-0.5">{hunt.description}</p>}
+                    <div className="flex items-center gap-4 mt-1 text-[11px] text-slate-600">
+                      <span>Start: {hunt.currency} {hunt.start_balance}</span>
+                      <span>Created: {new Date(hunt.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                  <button onClick={() => handleDeleteHunt(hunt.id)} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
             <div className="flex items-center gap-2">
@@ -110,7 +177,7 @@ export default function BonushuntsPage() {
                   <SelectItem value="50">50</SelectItem>
                 </SelectContent>
               </Select>
-              <span className="text-xs text-slate-600">Showing no records</span>
+              <span className="text-xs text-slate-600">{hunts.length === 0 ? "Showing no records" : `Showing ${hunts.length} record${hunts.length !== 1 ? "s" : ""}`}</span>
             </div>
             <div className="flex items-center gap-1">
               <Button variant="outline" size="icon-sm" disabled>
@@ -306,15 +373,11 @@ export default function BonushuntsPage() {
               {/* Create Button */}
               <Button
                 className="w-full gap-2 py-5 text-sm font-semibold"
-                onClick={() => {
-                  setCreateOpen(false);
-                  setHuntName("");
-                  setHuntDesc("");
-                  setStartBalance("");
-                }}
+                disabled={creating || !huntName.trim()}
+                onClick={handleCreateHunt}
               >
-                <Plus className="h-4 w-4" />
-                Create Bonushunt
+                {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                {creating ? "Creating..." : "Create Bonushunt"}
               </Button>
             </div>
           </div>

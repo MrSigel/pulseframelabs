@@ -15,7 +15,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RotateCcw, Save, Check } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { themeSettingsDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { ThemeSettings } from "@/lib/supabase/types";
 
 const presets = [
   { name: "Your Custom", colors: ["#64748b", "#3b82f6", "#8b5cf6"], custom: true },
@@ -91,6 +94,50 @@ export default function ThemeSettingsPage() {
   const [selectedPreset, setSelectedPreset] = useState("Your Custom");
   const [page, setPage] = useState(0);
   const [previewOverlay, setPreviewOverlay] = useState("wager_bar_small");
+  const [saving, setSaving] = useState(false);
+
+  const { data: dbTheme, refetch } = useDbQuery<ThemeSettings | null>(() => themeSettingsDb.get(), []);
+
+  // Load saved theme settings from DB on first load
+  useEffect(() => {
+    if (dbTheme) {
+      setSelectedPreset(dbTheme.preset_name || "Your Custom");
+      if (dbTheme.colors && typeof dbTheme.colors === "object" && !Array.isArray(dbTheme.colors)) {
+        const c = dbTheme.colors as Record<string, unknown>;
+        if (c.bgColor) setBgColor(c.bgColor as string);
+        if (c.bgOpacity !== undefined) setBgOpacity(c.bgOpacity as number);
+        if (c.iconColor) setIconColor(c.iconColor as string);
+        if (c.highlightColor) setHighlightColor(c.highlightColor as string);
+        if (c.borderRadius !== undefined) setBorderRadius(c.borderRadius as number);
+        if (c.borderEnabled !== undefined) setBorderEnabled(c.borderEnabled as boolean);
+        if (c.shadowEnabled !== undefined) setShadowEnabled(c.shadowEnabled as boolean);
+      }
+    }
+  }, [dbTheme]);
+
+  async function handleSave() {
+    try {
+      setSaving(true);
+      await themeSettingsDb.update({
+        preset_name: selectedPreset,
+        is_custom: selectedPreset === "Your Custom",
+        colors: {
+          bgColor,
+          bgOpacity,
+          iconColor,
+          highlightColor,
+          borderRadius,
+          borderEnabled,
+          shadowEnabled,
+        },
+      });
+      await refetch();
+    } catch (err) {
+      console.error("Failed to save theme:", err);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   const totalPages = Math.ceil(presets.length / ITEMS_PER_PAGE);
   const pagedPresets = presets.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
@@ -190,9 +237,9 @@ export default function ThemeSettingsPage() {
                     <RotateCcw className="h-3.5 w-3.5" />
                     Reset
                   </Button>
-                  <Button className="gap-1">
+                  <Button className="gap-1" onClick={handleSave} disabled={saving}>
                     <Save className="h-3.5 w-3.5" />
-                    Save Changes
+                    {saving ? "Saving..." : "Save Changes"}
                   </Button>
                 </div>
               </CardContent>
@@ -250,9 +297,9 @@ export default function ThemeSettingsPage() {
                     <RotateCcw className="h-3.5 w-3.5" />
                     Reset
                   </Button>
-                  <Button className="gap-1">
+                  <Button className="gap-1" onClick={handleSave} disabled={saving}>
                     <Save className="h-3.5 w-3.5" />
-                    Save Changes
+                    {saving ? "Saving..." : "Save Changes"}
                   </Button>
                 </div>
               </CardContent>

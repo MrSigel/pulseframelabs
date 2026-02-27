@@ -13,8 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Monitor, Plus, Search, X, Play, Pause, Pencil, Save } from "lucide-react";
+import { Monitor, Plus, Search, X, Play, Pause, Pencil, Save, Trash2 } from "lucide-react";
 import { useState, useMemo } from "react";
+import { games as gamesDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { Game } from "@/lib/supabase/types";
 
 interface GameInfo {
   name: string;
@@ -342,6 +345,35 @@ export default function NowPlayingPage() {
   const [editCommand, setEditCommand] = useState("");
   const [activeCasinos, setActiveCasinos] = useState<Set<string>>(new Set());
 
+  const { data: dbGames, refetch } = useDbQuery<Game[]>(() => gamesDb.list(), []);
+
+  async function handleCreateGame(name: string, provider: string, image: string | null) {
+    try {
+      await gamesDb.create({ name, provider, image_url: image ?? undefined });
+      await refetch();
+    } catch (err) {
+      console.error("Failed to create game:", err);
+    }
+  }
+
+  async function handleDeleteGame(id: string) {
+    try {
+      await gamesDb.remove(id);
+      await refetch();
+    } catch (err) {
+      console.error("Failed to delete game:", err);
+    }
+  }
+
+  async function handleSetPlaying(id: string) {
+    try {
+      await gamesDb.setPlaying(id);
+      await refetch();
+    } catch (err) {
+      console.error("Failed to set playing:", err);
+    }
+  }
+
   const providerGames = games[selectedProvider] || [];
   const currentGame = providerGames[selectedGameIndex] || providerGames[0];
   const currentProvider = providers.find((p) => p.slug === selectedProvider);
@@ -478,7 +510,15 @@ export default function NowPlayingPage() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                  <Button variant="success" className="font-bold">Set</Button>
+                  <Button
+                    variant="success"
+                    className="font-bold"
+                    onClick={() => {
+                      if (currentGame) {
+                        handleCreateGame(currentGame.name, currentGame.provider, currentGame.image);
+                      }
+                    }}
+                  >Set</Button>
                 </div>
 
                 {searchQuery.trim() && filteredGames.length > 0 && (
@@ -552,15 +592,45 @@ export default function NowPlayingPage() {
 
             <div className="text-xs text-slate-500 grid grid-cols-6 gap-2 border-b border-white/[0.06] pb-2 mb-2">
               <span>DATE</span>
-              <span>CURRENCY</span>
-              <span>BET</span>
-              <span>WIN</span>
-              <span>MULTIPLIER</span>
+              <span>GAME</span>
+              <span>PROVIDER</span>
+              <span>PLAYING</span>
+              <span>CREATED</span>
               <span>ACTIONS</span>
             </div>
-            <div className="text-center py-8 text-slate-500 text-sm">
-              No records yet
-            </div>
+            {dbGames && dbGames.length > 0 ? (
+              <div className="space-y-1">
+                {dbGames.map((game) => (
+                  <div key={game.id} className="text-xs grid grid-cols-6 gap-2 items-center py-2 border-b border-white/[0.03]">
+                    <span className="text-slate-400">{new Date(game.created_at).toLocaleDateString()}</span>
+                    <span className="text-white font-medium truncate">{game.name}</span>
+                    <span className="text-slate-400 truncate">{game.provider}</span>
+                    <span>{game.is_playing ? <span className="text-green-400 font-semibold">Active</span> : <span className="text-slate-600">-</span>}</span>
+                    <span className="text-slate-500">{new Date(game.created_at).toLocaleTimeString()}</span>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => handleSetPlaying(game.id)}
+                        className="h-6 w-6 rounded flex items-center justify-center hover:bg-green-500/10 transition-colors"
+                        title="Set as playing"
+                      >
+                        <Play className="h-3 w-3 text-green-400" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteGame(game.id)}
+                        className="h-6 w-6 rounded flex items-center justify-center hover:bg-red-500/10 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-3 w-3 text-red-400" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-slate-500 text-sm">
+                No records yet
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

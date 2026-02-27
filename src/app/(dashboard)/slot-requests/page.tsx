@@ -13,8 +13,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { OverlayLink } from "@/components/overlay-link";
-import { Monitor, History, Settings, Gift, MessageSquare, Trash2, Link, X, Save, Smile, Eraser } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Monitor, History, Settings, Gift, MessageSquare, Trash2, Link, X, Save, Smile, Eraser, Loader2 } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { slotRequests as srDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { SlotRequestSettings, SlotRequest, RaffleHistoryEntry } from "@/lib/supabase/types";
 
 const defaultEmojis = ["❓", "❓", "❓", "❓", "❓", "❓", "⭐", "✨", "🤩"];
 
@@ -35,6 +38,50 @@ export default function SlotRequestsPage() {
   const [emojis, setEmojis] = useState<string[]>(defaultEmojis);
   const [emojiInput, setEmojiInput] = useState("");
   const [holdingTime, setHoldingTime] = useState("3000");
+
+  const { data: dbSettings, refetch: refetchSettings } = useDbQuery<SlotRequestSettings | null>(
+    () => srDb.settings.get(),
+    [],
+  );
+  const { data: dbRequests, loading: requestsLoading, refetch: refetchRequests } = useDbQuery<SlotRequest[]>(
+    () => srDb.list(),
+    [],
+  );
+  const { data: dbRaffleHistory } = useDbQuery<RaffleHistoryEntry[]>(
+    () => srDb.raffleHistory.list(),
+    [],
+  );
+
+  useEffect(() => {
+    if (dbSettings) {
+      setPointsCost(String(dbSettings.points_cost || 0));
+      setAllowMultiple(dbSettings.allow_multiple ? "yes" : "no");
+      if (Array.isArray(dbSettings.animation_emojis)) {
+        setEmojis(dbSettings.animation_emojis as string[]);
+      }
+      setHoldingTime(String(dbSettings.holding_time_ms || 5000));
+    }
+  }, [dbSettings]);
+
+  async function handleSaveSettings() {
+    try {
+      await srDb.settings.update({
+        points_cost: parseInt(pointsCost) || 0,
+        allow_multiple: allowMultiple === "yes",
+        animation_emojis: emojis,
+        holding_time_ms: parseInt(holdingTime) || 5000,
+      });
+      await refetchSettings();
+      setSettingsOpen(false);
+    } catch (err) {
+      console.error("Failed to save settings:", err);
+    }
+  }
+
+  async function handleClearAll() {
+    try { await srDb.clearAll(); await refetchRequests(); }
+    catch (err) { console.error(err); }
+  }
 
   return (
     <div>
@@ -75,7 +122,7 @@ export default function SlotRequestsPage() {
                   <MessageSquare className="h-4 w-4" />
                   Open Slot Requests
                 </Button>
-                <Button variant="destructive" className="gap-2">
+                <Button variant="destructive" className="gap-2" onClick={handleClearAll}>
                   <Trash2 className="h-4 w-4" />
                   Clear All Requests
                 </Button>
@@ -87,7 +134,7 @@ export default function SlotRequestsPage() {
           <Card>
             <CardContent className="pt-6">
               <p className="text-xs text-slate-500 font-semibold uppercase mb-4">
-                Slot Requests (0) - !SR &quot;GAME&quot;
+                Slot Requests ({dbRequests?.length ?? 0}) - !SR &quot;GAME&quot;
               </p>
               <div className="grid grid-cols-4 gap-3 text-xs text-slate-500 font-semibold uppercase border-b border-border pb-3 mb-3">
                 <span>Username</span>
@@ -95,9 +142,39 @@ export default function SlotRequestsPage() {
                 <span>Time</span>
                 <span>Actions</span>
               </div>
-              <div className="text-center py-8 text-slate-500 text-sm">
-                No requests yet
-              </div>
+              {requestsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-5 w-5 animate-spin text-slate-500" />
+                </div>
+              ) : (!dbRequests || dbRequests.length === 0) ? (
+                <div className="text-center py-8 text-slate-500 text-sm">
+                  No requests yet
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {dbRequests.map((r) => (
+                    <div key={r.id} className="grid grid-cols-4 gap-3 text-sm py-2 border-b border-white/[0.03]">
+                      <span className="text-white font-medium">{r.viewer_username}</span>
+                      <span className="text-slate-300">{r.slot_name}</span>
+                      <span className="text-slate-500">{new Date(r.requested_at).toLocaleTimeString()}</span>
+                      <span>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="h-7 text-xs gap-1"
+                          onClick={async () => {
+                            try { await srDb.remove(r.id); await refetchRequests(); }
+                            catch (err) { console.error(err); }
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          Remove
+                        </Button>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -275,7 +352,7 @@ export default function SlotRequestsPage() {
               <Button
                 variant="default"
                 className="gap-2 px-8"
-                onClick={() => setSettingsOpen(false)}
+                onClick={handleSaveSettings}
               >
                 <Save className="h-4 w-4" />
                 Save Settings
@@ -324,9 +401,28 @@ export default function SlotRequestsPage() {
                 className="min-h-[120px] max-h-[300px] overflow-y-auto"
                 style={{ scrollbarWidth: "thin", scrollbarColor: "#334155 transparent" }}
               >
-                <div className="flex items-center justify-center py-10">
-                  <p className="text-slate-500 text-sm">No raffle history yet</p>
-                </div>
+                {(!dbRaffleHistory || dbRaffleHistory.length === 0) ? (
+                  <div className="flex items-center justify-center py-10">
+                    <p className="text-slate-500 text-sm">No raffle history yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {dbRaffleHistory.map((r) => {
+                      const d = new Date(r.raffled_at);
+                      return (
+                        <div
+                          key={r.id}
+                          className="grid grid-cols-4 gap-3 text-sm py-2 border-b border-white/[0.03]"
+                        >
+                          <span className="text-slate-400">{d.toLocaleDateString()}</span>
+                          <span className="text-slate-400">{d.toLocaleTimeString()}</span>
+                          <span className="text-white">{r.slot_name}</span>
+                          <span className="text-emerald-400 font-medium">{r.winner}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 

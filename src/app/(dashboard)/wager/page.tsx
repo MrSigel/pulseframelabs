@@ -14,8 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RotateCcw, Save } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Loader2, RotateCcw, Save } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { wagerSessions } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { WagerSession } from "@/lib/supabase/types";
 
 export default function WagerPage() {
   const [casinoName, setCasinoName] = useState("Casinoname");
@@ -26,6 +29,25 @@ export default function WagerPage() {
   const [bonusAmount, setBonusAmount] = useState("0");
   const [wagerAmount, setWagerAmount] = useState("0");
   const [wageredAmount, setWageredAmount] = useState("0");
+  const [saving, setSaving] = useState(false);
+  const { data: activeSession, refetch } = useDbQuery<WagerSession | null>(
+    () => wagerSessions.getActive(),
+    [],
+  );
+
+  // Load saved session data into local state on mount
+  useEffect(() => {
+    if (activeSession) {
+      setCasinoName(activeSession.casino_name || "Casinoname");
+      setHeaderText(activeSession.header_text || "PULSEFRAMELABS.COM");
+      setBonusType(activeSession.bonus_type || "sticky");
+      setCurrency(activeSession.currency === "EUR" ? "eur" : "usd");
+      setDepositAmount(String(activeSession.deposit_amount || 0));
+      setBonusAmount(String(activeSession.bonus_amount || 0));
+      setWagerAmount(String(activeSession.wager_amount || 0));
+      setWageredAmount(String(activeSession.wagered_amount || 0));
+    }
+  }, [activeSession]);
 
   const currencySymbol = currency === "usd" ? "$" : "\u20AC";
   const wager = parseFloat(wagerAmount) || 0;
@@ -44,6 +66,55 @@ export default function WagerPage() {
     return "";
   }, []);
 
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const data = {
+        casino_name: casinoName,
+        header_text: headerText,
+        bonus_type: bonusType,
+        currency: currency === "eur" ? "EUR" : "USD",
+        deposit_amount: deposit,
+        bonus_amount: bonus,
+        wager_amount: wager,
+        wagered_amount: wagered,
+      };
+      if (activeSession) {
+        await wagerSessions.update(activeSession.id, data);
+      } else {
+        await wagerSessions.create({ ...data, is_active: true });
+      }
+      await refetch();
+    } catch (err) {
+      console.error("Failed to save wager:", err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleReset() {
+    if (activeSession) {
+      try {
+        await wagerSessions.update(activeSession.id, {
+          deposit_amount: 0, bonus_amount: 0, wager_amount: 0, wagered_amount: 0,
+          casino_name: "Casinoname", header_text: "PULSEFRAMELABS.COM",
+          bonus_type: "sticky", currency: "USD",
+        });
+        await refetch();
+      } catch (err) {
+        console.error("Failed to reset:", err);
+      }
+    }
+    setCasinoName("Casinoname");
+    setHeaderText("PULSEFRAMELABS.COM");
+    setBonusType("sticky");
+    setCurrency("usd");
+    setDepositAmount("0");
+    setBonusAmount("0");
+    setWagerAmount("0");
+    setWageredAmount("0");
+  }
+
   return (
     <div>
       <PageHeader title="Wager" />
@@ -53,7 +124,7 @@ export default function WagerPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg text-white">Wager Settings</CardTitle>
-            <Button variant="destructive" size="sm" className="gap-1">
+            <Button variant="destructive" size="sm" className="gap-1" onClick={handleReset}>
               <RotateCcw className="h-3.5 w-3.5" />
               Reset
             </Button>
@@ -128,9 +199,9 @@ export default function WagerPage() {
               </div>
             </div>
 
-            <Button className="w-full gap-2">
-              <Save className="h-4 w-4" />
-              Update
+            <Button className="w-full gap-2" onClick={handleSave} disabled={saving}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {saving ? "Saving..." : "Update"}
             </Button>
           </CardContent>
         </Card>

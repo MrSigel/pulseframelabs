@@ -12,61 +12,86 @@ import {
   Trophy,
   BarChart3,
 } from "lucide-react";
+import { dashboardStats } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { DashboardStat } from "@/lib/supabase/types";
 
-const stats = [
-  {
-    label: "Total Wagered",
-    value: "$0.00",
-    change: "+0%",
-    trend: "up" as const,
-    icon: DollarSign,
-    color: "from-blue-500 to-cyan-500",
-    glow: "shadow-[0_0_20px_rgba(59,130,246,0.15)]",
-  },
-  {
-    label: "Total Deposits",
-    value: "$0.00",
-    change: "+0%",
-    trend: "up" as const,
-    icon: TrendingUp,
-    color: "from-emerald-500 to-green-400",
-    glow: "shadow-[0_0_20px_rgba(16,185,129,0.15)]",
-  },
-  {
-    label: "Total Withdrawals",
-    value: "$0.00",
-    change: "0%",
-    trend: "neutral" as const,
-    icon: TrendingDown,
-    color: "from-rose-500 to-pink-500",
-    glow: "shadow-[0_0_20px_rgba(244,63,94,0.15)]",
-  },
-  {
-    label: "Net Profit/Loss",
-    value: "$0.00",
-    change: "0%",
-    trend: "neutral" as const,
-    icon: BarChart3,
-    color: "from-violet-500 to-purple-500",
-    glow: "shadow-[0_0_20px_rgba(139,92,246,0.15)]",
-  },
-];
+function formatCurrency(val: number) {
+  return `$${val.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
-const secondaryStats = [
-  { label: "Active Viewers", value: "0", icon: Eye },
-  { label: "Games Played", value: "0", icon: Gamepad2 },
-  { label: "Best Multiplier", value: "0x", icon: Trophy },
-  { label: "Total Users", value: "0", icon: Users },
-];
+function getChange(val: number) {
+  if (val > 0) return { text: `+${val.toFixed(0)}%`, trend: "up" as const };
+  if (val < 0) return { text: `${val.toFixed(0)}%`, trend: "down" as const };
+  return { text: "0%", trend: "neutral" as const };
+}
 
 export default function DashboardPage() {
+  const { data: stats } = useDbQuery<DashboardStat | null>(
+    () => dashboardStats.get(),
+    [],
+  );
+
+  const s = stats ?? {
+    total_wagered: 0,
+    total_deposits: 0,
+    total_withdrawals: 0,
+    net_profit: 0,
+    active_viewers: 0,
+    games_played: 0,
+    best_multiplier: 0,
+    total_users: 0,
+  };
+
+  const primaryStats = [
+    {
+      label: "Total Wagered",
+      value: formatCurrency(s.total_wagered),
+      ...getChange(0),
+      icon: DollarSign,
+      color: "from-blue-500 to-cyan-500",
+      glow: "shadow-[0_0_20px_rgba(59,130,246,0.15)]",
+    },
+    {
+      label: "Total Deposits",
+      value: formatCurrency(s.total_deposits),
+      ...getChange(0),
+      icon: TrendingUp,
+      color: "from-emerald-500 to-green-400",
+      glow: "shadow-[0_0_20px_rgba(16,185,129,0.15)]",
+    },
+    {
+      label: "Total Withdrawals",
+      value: formatCurrency(s.total_withdrawals),
+      ...getChange(0),
+      icon: TrendingDown,
+      color: "from-rose-500 to-pink-500",
+      glow: "shadow-[0_0_20px_rgba(244,63,94,0.15)]",
+    },
+    {
+      label: "Net Profit/Loss",
+      value: formatCurrency(s.net_profit),
+      ...getChange(0),
+      icon: BarChart3,
+      color: "from-violet-500 to-purple-500",
+      glow: "shadow-[0_0_20px_rgba(139,92,246,0.15)]",
+    },
+  ];
+
+  const secondaryStatsList = [
+    { label: "Active Viewers", value: String(s.active_viewers), icon: Eye },
+    { label: "Games Played", value: String(s.games_played), icon: Gamepad2 },
+    { label: "Best Multiplier", value: `${s.best_multiplier}x`, icon: Trophy },
+    { label: "Total Users", value: String(s.total_users), icon: Users },
+  ];
+
   return (
     <div>
       <PageHeader title="Dashboard" />
 
       {/* Primary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {stats.map((stat) => {
+        {primaryStats.map((stat) => {
           const Icon = stat.icon;
           return (
             <Card key={stat.label} className={stat.glow}>
@@ -80,7 +105,7 @@ export default function DashboardPage() {
                       ? "bg-emerald-500/10 text-emerald-400"
                       : "bg-slate-500/10 text-slate-400"
                   }`}>
-                    {stat.change}
+                    {stat.text}
                   </span>
                 </div>
                 <p className="text-2xl font-bold text-white tracking-tight">{stat.value}</p>
@@ -93,7 +118,7 @@ export default function DashboardPage() {
 
       {/* Secondary Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {secondaryStats.map((stat) => {
+        {secondaryStatsList.map((stat) => {
           const Icon = stat.icon;
           return (
             <Card key={stat.label}>

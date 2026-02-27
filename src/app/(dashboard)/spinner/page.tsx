@@ -6,8 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OverlayLink } from "@/components/overlay-link";
-import { Plus, Shuffle, Save, Play, Trash2, Monitor, X } from "lucide-react";
-import { useState, useMemo, useCallback, useRef } from "react";
+import { spinner as spinnerDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { SpinnerPrize } from "@/lib/supabase/types";
+import { Plus, Shuffle, Save, Play, Trash2, Monitor, X, Loader2 } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 
 interface PrizeRow {
   id: number;
@@ -57,6 +60,17 @@ export default function SpinnerPage() {
   const [winner, setWinner] = useState<string | null>(null);
   const nextId = useRef(3);
 
+  const { data: dbPrizes, refetch: refetchPrizes } = useDbQuery<SpinnerPrize[]>(
+    () => spinnerDb.prizes.list(),
+    [],
+  );
+
+  useEffect(() => {
+    if (dbPrizes && dbPrizes.length > 0) {
+      setPrizes(dbPrizes.map((p, i) => ({ id: i + 1, prize: p.prize, color: p.color })));
+    }
+  }, [dbPrizes]);
+
   const activePrizes = prizes.filter((p) => p.prize.trim() !== "");
 
   const overlayUrl = useMemo(() => {
@@ -66,15 +80,31 @@ export default function SpinnerPage() {
     return `${window.location.origin}/overlay/spinner?prizes=${encodeURIComponent(names)}&colors=${encodeURIComponent(cols)}`;
   }, [activePrizes]);
 
-  const addRow = () => {
-    const c = vibrantPalette[prizes.length % vibrantPalette.length];
-    setPrizes([...prizes, { id: nextId.current++, prize: "", color: c }]);
-  };
+  async function handleAddPrize() {
+    const colors = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
+    const color = colors[prizes.length % colors.length];
+    const newPrize = { id: prizes.length + 1, prize: `Prize ${prizes.length + 1}`, color };
+    setPrizes([...prizes, newPrize]);
+    try {
+      await spinnerDb.prizes.create({ prize: newPrize.prize, color, position: prizes.length });
+      await refetchPrizes();
+    } catch (err) {
+      console.error("Failed to add prize:", err);
+    }
+  }
 
-  const removeRow = (id: number) => {
+  async function handleRemovePrize(index: number) {
     if (prizes.length <= 2) return;
-    setPrizes(prizes.filter((p) => p.id !== id));
-  };
+    setPrizes(prizes.filter((_, i) => i !== index));
+    if (dbPrizes && dbPrizes[index]) {
+      try {
+        await spinnerDb.prizes.remove(dbPrizes[index].id);
+        await refetchPrizes();
+      } catch (err) {
+        console.error("Failed to remove prize:", err);
+      }
+    }
+  }
 
   const randomizeColors = () => {
     const shuffled = [...vibrantPalette].sort(() => Math.random() - 0.5);
@@ -109,13 +139,15 @@ export default function SpinnerPage() {
     const extra = 2000 + Math.random() * 2000;
     const newRotation = rotation + extra;
     setRotation(newRotation);
-    setTimeout(() => {
+    setTimeout(async () => {
       const normalizedAngle = newRotation % 360;
       const segA = 360 / activePrizes.length;
       const pointerAngle = (360 - normalizedAngle + 90) % 360;
       const winnerIdx = Math.floor(pointerAngle / segA) % activePrizes.length;
-      setWinner(activePrizes[winnerIdx].prize);
+      const winnerName = activePrizes[winnerIdx].prize;
+      setWinner(winnerName);
       setSpinning(false);
+      try { await spinnerDb.history.create({ winner: winnerName }); } catch {}
     }, 4500);
   }, [spinning, rotation, activePrizes]);
 
@@ -140,7 +172,7 @@ export default function SpinnerPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg text-white">Prize List</CardTitle>
               <div className="flex gap-2">
-                <Button onClick={addRow} className="gap-1" size="sm">
+                <Button onClick={handleAddPrize} className="gap-1" size="sm">
                   <Plus className="h-3.5 w-3.5" />
                   Add Row
                 </Button>
@@ -189,7 +221,7 @@ export default function SpinnerPage() {
                   <Button
                     variant="destructive"
                     size="icon"
-                    onClick={() => removeRow(prize.id)}
+                    onClick={() => handleRemovePrize(idx)}
                     disabled={prizes.length <= 2}
                   >
                     <Trash2 className="h-4 w-4" />

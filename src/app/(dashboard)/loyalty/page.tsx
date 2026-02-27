@@ -12,15 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Settings2, Play, RefreshCw, Search, ChevronLeft, ChevronRight, ArrowLeft, Plus, Trash2, X } from "lucide-react";
-import { useState } from "react";
+import { Settings2, Play, RefreshCw, Search, ChevronLeft, ChevronRight, ArrowLeft, Plus, Trash2, X, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { loyalty as loyaltyDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { LoyaltyPreset, GiveawayHistoryEntry } from "@/lib/supabase/types";
 
 interface Preset {
   id: string;
   name: string;
   keyword: string;
-  points: string;
-  duration: string;
+  points: number;
+  duration: number;
 }
 
 export default function LoyaltyPage() {
@@ -41,6 +44,28 @@ export default function LoyaltyPage() {
 
   const MAX_PRESETS = 15;
 
+  // Supabase queries
+  const { data: dbPresets, loading: loadingPresets, refetch: refetchPresets } = useDbQuery<LoyaltyPreset[]>(
+    () => loyaltyDb.presets.list(),
+    [],
+  );
+  const { data: dbHistory } = useDbQuery<GiveawayHistoryEntry[]>(
+    () => loyaltyDb.history.list(),
+    [],
+  );
+
+  useEffect(() => {
+    if (dbPresets) {
+      setPresets(dbPresets.map(p => ({
+        id: p.id,
+        name: p.name,
+        keyword: p.keyword,
+        points: p.points,
+        duration: p.duration_seconds,
+      })));
+    }
+  }, [dbPresets]);
+
   function openPresetsModal() {
     setPresetsView("main");
     setShowPresetsModal(true);
@@ -54,31 +79,40 @@ export default function LoyaltyPage() {
     setNewPresetDuration("");
   }
 
-  function handleCreatePreset() {
-    if (!newPresetName.trim() || presets.length >= MAX_PRESETS) return;
-    const preset: Preset = {
-      id: Date.now().toString(),
-      name: newPresetName.trim(),
-      keyword: newPresetKeyword.trim(),
-      points: newPresetPoints || "0",
-      duration: newPresetDuration || "0",
-    };
-    setPresets((prev) => [...prev, preset]);
-    setNewPresetName("");
-    setNewPresetKeyword("");
-    setNewPresetPoints("");
-    setNewPresetDuration("");
-    setPresetsView("manage");
+  async function handleCreatePreset() {
+    if (!newPresetName.trim() || !newPresetKeyword.trim()) return;
+    if (presets.length >= MAX_PRESETS) return;
+    try {
+      await loyaltyDb.presets.create({
+        name: newPresetName.trim(),
+        keyword: newPresetKeyword.trim(),
+        points: parseInt(newPresetPoints) || 0,
+        duration_seconds: parseInt(newPresetDuration) || 60,
+      });
+      setNewPresetName("");
+      setNewPresetKeyword("");
+      setNewPresetPoints("");
+      setNewPresetDuration("");
+      await refetchPresets();
+      setPresetsView("manage");
+    } catch (err) {
+      console.error("Failed to create preset:", err);
+    }
   }
 
-  function handleDeletePreset(id: string) {
-    setPresets((prev) => prev.filter((p) => p.id !== id));
+  async function handleDeletePreset(id: string) {
+    try {
+      await loyaltyDb.presets.remove(id);
+      await refetchPresets();
+    } catch (err) {
+      console.error("Failed to delete preset:", err);
+    }
   }
 
   function handleLoadPreset(preset: Preset) {
     setKeyword(preset.keyword);
-    setPointsAmount(preset.points);
-    setDuration(preset.duration);
+    setPointsAmount(String(preset.points));
+    setDuration(String(preset.duration));
     closePresetsModal();
   }
 
@@ -95,7 +129,12 @@ export default function LoyaltyPage() {
       />
 
       {/* Alert */}
-      {presets.length === 0 ? (
+      {loadingPresets ? (
+        <div className="rounded-lg border border-border bg-secondary/50 px-4 py-2 text-sm text-slate-400 mb-6 flex items-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Loading presets...
+        </div>
+      ) : presets.length === 0 ? (
         <div className="rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-2 text-sm text-red-400 mb-6">
           No presets found.
         </div>
@@ -183,14 +222,34 @@ export default function LoyaltyPage() {
         </CardHeader>
         <CardContent>
           <div className="text-sm text-slate-500 bg-secondary rounded px-3 py-2 inline-block mb-4">Keyword</div>
-          <div className="text-center py-8 text-slate-500 text-sm">No data available in table</div>
+          {!dbHistory || dbHistory.length === 0 ? (
+            <div className="text-center py-8 text-slate-500 text-sm">No data available in table</div>
+          ) : (
+            <div className="divide-y divide-border">
+              {dbHistory.map((entry) => (
+                <div key={entry.id} className="flex items-center justify-between py-3 text-sm">
+                  <span className="text-white font-medium">{entry.keyword}</span>
+                  <div className="flex items-center gap-4 text-slate-400 text-xs">
+                    <span>{entry.points_amount} pts</span>
+                    <span>{entry.duration_seconds}s</span>
+                    <span>{entry.participant_count} participants</span>
+                    <span>{new Date(entry.started_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
             <div className="flex items-center gap-2">
               <Select defaultValue="10">
                 <SelectTrigger className="w-16"><SelectValue /></SelectTrigger>
                 <SelectContent><SelectItem value="10">10</SelectItem></SelectContent>
               </Select>
-              <span className="text-sm text-slate-500">Showing no records</span>
+              <span className="text-sm text-slate-500">
+                {dbHistory && dbHistory.length > 0
+                  ? `Showing ${dbHistory.length} record${dbHistory.length !== 1 ? "s" : ""}`
+                  : "Showing no records"}
+              </span>
             </div>
             <div className="flex gap-1">
               <Button variant="outline" size="icon" className="h-8 w-8" disabled><ChevronLeft className="h-4 w-4" /></Button>
@@ -294,7 +353,7 @@ export default function LoyaltyPage() {
                     variant="success"
                     className="w-full gap-2 py-5 text-sm font-semibold"
                     onClick={handleCreatePreset}
-                    disabled={!newPresetName.trim()}
+                    disabled={!newPresetName.trim() || !newPresetKeyword.trim()}
                   >
                     <Plus className="h-4 w-4" />
                     Create Preset

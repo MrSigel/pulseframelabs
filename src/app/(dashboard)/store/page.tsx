@@ -31,8 +31,12 @@ import {
   ChevronDown,
   Inbox,
   Headphones,
+  Loader2,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { store as storeDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { StoreItem, StoreSettings, StoreRedemption } from "@/lib/supabase/types";
 
 export default function StorePage() {
   const [moreOptionsOpen, setMoreOptionsOpen] = useState(false);
@@ -57,6 +61,29 @@ export default function StorePage() {
   const [themeSettings, setThemeSettings] = useState(false);
   const [overlaySettings, setOverlaySettings] = useState(false);
 
+  // DB queries
+  const [creating, setCreating] = useState(false);
+  const { data: dbItems, loading: itemsLoading, refetch: refetchItems } = useDbQuery<StoreItem[]>(
+    () => storeDb.items.list(),
+    [],
+  );
+  const { data: dbSettings, refetch: refetchSettings } = useDbQuery<StoreSettings | null>(
+    () => storeDb.settings.get(),
+    [],
+  );
+  const { data: dbRedemptions } = useDbQuery<StoreRedemption[]>(
+    () => storeDb.redemptions.list(),
+    [],
+  );
+
+  useEffect(() => {
+    if (dbSettings) {
+      setStoreName(dbSettings.store_name || "My Store");
+      setStoreDescription(dbSettings.store_description || "");
+      setStoreCurrency(dbSettings.store_currency || "Points");
+    }
+  }, [dbSettings]);
+
   const storeUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
     return `${window.location.origin}/streamer-name`;
@@ -72,6 +99,49 @@ export default function StorePage() {
     setRedemptionLimit("-1");
     setExcludedUsers("");
   };
+
+  async function handleCreateItem() {
+    if (!itemName.trim()) return;
+    setCreating(true);
+    try {
+      await storeDb.items.create({
+        name: itemName.trim(),
+        description: itemDescription.trim(),
+        price_points: parseInt(itemPrice) || 0,
+        quantity_available: parseInt(itemQuantity) || -1,
+      });
+      setAddItemOpen(false);
+      setItemName(""); setItemDescription(""); setItemPrice(""); setItemQuantity("");
+      await refetchItems();
+    } catch (err) {
+      console.error("Failed to create item:", err);
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleDeleteItem(id: string) {
+    try {
+      await storeDb.items.remove(id);
+      await refetchItems();
+    } catch (err) {
+      console.error("Failed to delete item:", err);
+    }
+  }
+
+  async function handleSaveSettings() {
+    try {
+      await storeDb.settings.update({
+        store_name: storeName,
+        store_description: storeDescription,
+        store_currency: storeCurrency,
+      });
+      await refetchSettings();
+      setStoreSettingsOpen(false);
+    } catch (err) {
+      console.error("Failed to save settings:", err);
+    }
+  }
 
   return (
     <div>
@@ -155,11 +225,53 @@ export default function StorePage() {
             <span>Manage</span>
           </div>
 
-          {/* Empty state */}
-          <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-            <Inbox className="h-10 w-10 mb-3 text-slate-600" />
-            <p className="text-sm">No data available in table</p>
-          </div>
+          {/* Redemptions list */}
+          {!dbRedemptions || dbRedemptions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-slate-500">
+              <Inbox className="h-10 w-10 mb-3 text-slate-600" />
+              <p className="text-sm">No data available in table</p>
+            </div>
+          ) : (
+            dbRedemptions.map((r) => {
+              const matchedItem = dbItems?.find((i) => i.id === r.item_id);
+              return (
+                <div
+                  key={r.id}
+                  className="grid gap-4 px-4 py-3 items-center text-sm text-slate-300 hover:bg-white/[0.02] transition-colors"
+                  style={{
+                    gridTemplateColumns: "1.5fr 1fr 0.8fr 1fr 1fr 0.8fr",
+                    borderBottom: "1px solid rgba(255,255,255,0.04)",
+                  }}
+                >
+                  <span className="text-white font-medium truncate">{r.viewer_username}</span>
+                  <span className="truncate">{matchedItem?.name ?? "Unknown Item"}</span>
+                  <span>{matchedItem?.price_points ?? "—"} {storeCurrency}</span>
+                  <span className="text-xs">{new Date(r.redeemed_at).toLocaleString()}</span>
+                  <span>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                        r.status === "completed"
+                          ? "bg-green-500/10 text-green-400"
+                          : r.status === "refunded"
+                            ? "bg-red-500/10 text-red-400"
+                            : "bg-yellow-500/10 text-yellow-400"
+                      }`}
+                    >
+                      {r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+                    </span>
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Button variant="outline" size="icon-sm" title="Complete">
+                      <Check className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button variant="outline" size="icon-sm" title="Refund">
+                      <RotateCcw className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })
+          )}
 
           {/* Pagination */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
@@ -172,7 +284,9 @@ export default function StorePage() {
                   <SelectItem value="50">50</SelectItem>
                 </SelectContent>
               </Select>
-              <span className="text-xs text-slate-600">Showing no records</span>
+              <span className="text-xs text-slate-600">
+                {dbRedemptions ? `Showing ${dbRedemptions.length} record${dbRedemptions.length !== 1 ? "s" : ""}` : "Showing no records"}
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <Button variant="outline" size="icon-sm" disabled><ChevronLeft className="h-4 w-4" /></Button>
@@ -208,11 +322,46 @@ export default function StorePage() {
             <span>Manage</span>
           </div>
 
-          {/* Empty state */}
-          <div className="flex flex-col items-center justify-center py-16 text-slate-500">
-            <Inbox className="h-10 w-10 mb-3 text-slate-600" />
-            <p className="text-sm">No data available in table</p>
-          </div>
+          {/* Items list */}
+          {itemsLoading ? (
+            <div className="flex flex-col items-center justify-center py-16 text-slate-500">
+              <Loader2 className="h-8 w-8 mb-3 text-slate-600 animate-spin" />
+              <p className="text-sm">Loading items...</p>
+            </div>
+          ) : !dbItems || dbItems.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-slate-500">
+              <Inbox className="h-10 w-10 mb-3 text-slate-600" />
+              <p className="text-sm">No data available in table</p>
+            </div>
+          ) : (
+            dbItems.map((item) => (
+              <div
+                key={item.id}
+                className="grid gap-4 px-4 py-3 items-center text-sm text-slate-300 hover:bg-white/[0.02] transition-colors"
+                style={{
+                  gridTemplateColumns: "0.5fr 1.5fr 0.8fr 0.8fr 0.8fr 0.8fr",
+                  borderBottom: "1px solid rgba(255,255,255,0.04)",
+                }}
+              >
+                <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  {item.image_url ? (
+                    <img src={item.image_url} alt={item.name} className="h-10 w-10 rounded-lg object-cover" />
+                  ) : (
+                    <ImageIcon className="h-5 w-5 text-slate-600" />
+                  )}
+                </div>
+                <span className="text-white font-medium truncate">{item.name}</span>
+                <span>{item.price_points} {storeCurrency}</span>
+                <span>{item.quantity_available === -1 ? "Unlimited" : item.quantity_available}</span>
+                <span>{item.visible ? <Check className="h-4 w-4 text-green-400" /> : <X className="h-4 w-4 text-red-400" />}</span>
+                <div className="flex items-center gap-1">
+                  <Button variant="destructive" size="icon-sm" onClick={() => handleDeleteItem(item.id)}>
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            ))
+          )}
 
           {/* Pagination */}
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/[0.06]">
@@ -225,7 +374,9 @@ export default function StorePage() {
                   <SelectItem value="50">50</SelectItem>
                 </SelectContent>
               </Select>
-              <span className="text-xs text-slate-600">Showing no records</span>
+              <span className="text-xs text-slate-600">
+                {dbItems ? `Showing ${dbItems.length} record${dbItems.length !== 1 ? "s" : ""}` : "Showing no records"}
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <Button variant="outline" size="icon-sm" disabled><ChevronLeft className="h-4 w-4" /></Button>
@@ -446,13 +597,15 @@ export default function StorePage() {
               {/* Submit */}
               <Button
                 className="w-full gap-2 py-5 text-sm font-semibold"
-                onClick={() => {
-                  setAddItemOpen(false);
-                  resetAddItem();
-                }}
+                onClick={handleCreateItem}
+                disabled={creating || !itemName.trim()}
               >
-                <Plus className="h-4 w-4" />
-                + Add Item
+                {creating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4" />
+                )}
+                {creating ? "Adding..." : "+ Add Item"}
               </Button>
             </div>
           </div>
@@ -615,7 +768,7 @@ export default function StorePage() {
               {/* Save */}
               <Button
                 className="w-full gap-2 py-5 text-sm font-semibold"
-                onClick={() => setStoreSettingsOpen(false)}
+                onClick={handleSaveSettings}
               >
                 <Save className="h-4 w-4" />
                 Save Changes

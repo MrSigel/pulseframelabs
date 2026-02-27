@@ -7,8 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { OverlayLink } from "@/components/overlay-link";
-import { Monitor, RotateCcw, RefreshCw, Gift, Plus, Save, Trash2, X } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Monitor, RotateCcw, RefreshCw, Gift, Plus, Save, Trash2, X, Loader2 } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { duelSessions } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { DuelSession, DuelPlayer as DuelPlayerType } from "@/lib/supabase/types";
 
 interface DuelPlayer {
   id: number;
@@ -25,23 +28,72 @@ export default function DuelPage() {
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [players, setPlayers] = useState<DuelPlayer[]>([]);
   const [nextId, setNextId] = useState(1);
+  const [saving, setSaving] = useState(false);
+
+  const { data: activeSession, refetch: refetchSession } = useDbQuery<DuelSession | null>(
+    () => duelSessions.getActive(),
+    [],
+  );
+  const { data: dbPlayers, refetch: refetchPlayers } = useDbQuery<DuelPlayerType[]>(
+    () => activeSession ? duelSessions.players.list(activeSession.id) : Promise.resolve([]),
+    [activeSession?.id],
+  );
+
+  useEffect(() => {
+    if (activeSession) {
+      setMaxPlayers(String(activeSession.max_players));
+      setRafflePool(activeSession.raffle_pool);
+    }
+  }, [activeSession]);
+
+  useEffect(() => {
+    if (dbPlayers && dbPlayers.length > 0) {
+      setPlayers(dbPlayers.map((p, i) => ({
+        id: i + 1,
+        name: p.name,
+        game: p.game,
+        buyIn: p.buy_in,
+        result: p.result,
+        rank: p.rank,
+      })));
+    }
+  }, [dbPlayers]);
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
     return `${window.location.origin}/overlay/duel_normal?title=DUEL`;
   }, []);
 
-  const addRow = () => {
-    setPlayers((prev) => [
-      ...prev,
-      { id: nextId, name: "", game: "", buyIn: "", result: "", rank: "" },
-    ]);
+  async function handleAddPlayer() {
+    const newPlayer = { id: nextId, name: "", game: "", buyIn: "", result: "", rank: "" };
+    setPlayers((prev) => [...prev, newPlayer]);
     setNextId((n) => n + 1);
-  };
+    if (activeSession) {
+      try {
+        await duelSessions.players.create({
+          session_id: activeSession.id,
+          name: "",
+          position: players.length,
+        });
+        await refetchPlayers();
+      } catch (err) {
+        console.error("Failed to add player:", err);
+      }
+    }
+  }
 
-  const removeRow = (id: number) => {
+  async function handleRemovePlayer(id: number) {
+    const index = players.findIndex((p) => p.id === id);
     setPlayers((prev) => prev.filter((p) => p.id !== id));
-  };
+    if (activeSession && dbPlayers && index >= 0 && index < dbPlayers.length) {
+      try {
+        await duelSessions.players.remove(dbPlayers[index].id);
+        await refetchPlayers();
+      } catch (err) {
+        console.error("Failed to delete player:", err);
+      }
+    }
+  }
 
   const updatePlayer = (id: number, field: keyof DuelPlayer, value: string) => {
     setPlayers((prev) =>
@@ -59,6 +111,38 @@ export default function DuelPage() {
     const shuffled = [...players].sort(() => Math.random() - 0.5);
     setPlayers(shuffled.map((p, i) => ({ ...p, rank: String(i + 1) })));
   };
+
+  async function handleSaveSession() {
+    setSaving(true);
+    try {
+      if (activeSession) {
+        await duelSessions.update(activeSession.id, {
+          max_players: Number(maxPlayers),
+          raffle_pool: rafflePool,
+        });
+      } else {
+        await duelSessions.create({ max_players: Number(maxPlayers), raffle_pool: rafflePool });
+      }
+      // Save all player data
+      if (activeSession && dbPlayers) {
+        for (let i = 0; i < Math.min(players.length, dbPlayers.length); i++) {
+          await duelSessions.players.update(dbPlayers[i].id, {
+            name: players[i].name,
+            game: players[i].game,
+            buy_in: players[i].buyIn,
+            result: players[i].result,
+            rank: players[i].rank,
+          });
+        }
+      }
+      await refetchSession();
+      await refetchPlayers();
+    } catch (err) {
+      console.error("Failed to save:", err);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div>
@@ -90,7 +174,7 @@ export default function DuelPage() {
             </CardHeader>
             <CardContent className="flex flex-col h-[calc(100%-5rem)]">
               <div className="flex gap-2 mb-6">
-                <Button className="gap-1" size="sm">
+                <Button className="gap-1" size="sm" onClick={() => { refetchSession(); refetchPlayers(); }}>
                   <RefreshCw className="h-3.5 w-3.5" />
                   Reload
                 </Button>
@@ -98,13 +182,13 @@ export default function DuelPage() {
                   <Gift className="h-3.5 w-3.5" />
                   Raffle
                 </Button>
-                <Button variant="success" className="gap-1" size="sm" onClick={addRow}>
+                <Button variant="success" className="gap-1" size="sm" onClick={handleAddPlayer}>
                   <Plus className="h-3.5 w-3.5" />
                   Add Row
                 </Button>
-                <Button className="gap-1" size="sm">
-                  <Save className="h-3.5 w-3.5" />
-                  Update
+                <Button className="gap-1" size="sm" onClick={handleSaveSession} disabled={saving}>
+                  {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                  {saving ? "Saving..." : "Update"}
                 </Button>
               </div>
 
@@ -161,7 +245,7 @@ export default function DuelPage() {
                           className="h-8 text-xs"
                         />
                         <button
-                          onClick={() => removeRow(p.id)}
+                          onClick={() => handleRemovePlayer(p.id)}
                           className="h-8 w-8 rounded-md flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
@@ -199,8 +283,9 @@ export default function DuelPage() {
               <Switch checked={rafflePool} onCheckedChange={setRafflePool} />
             </div>
 
-            <Button className="w-full">
-              Save Settings
+            <Button className="w-full" onClick={handleSaveSession} disabled={saving}>
+              {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {saving ? "Saving..." : "Save Settings"}
             </Button>
           </CardContent>
         </Card>

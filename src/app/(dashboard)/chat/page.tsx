@@ -6,6 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { MessageCircle } from "lucide-react";
 import { useMemo, useState } from "react";
+import { chatMessages as chatDb } from "@/lib/supabase/db";
+import { useDbQuery } from "@/hooks/useDbQuery";
+import type { ChatMessage } from "@/lib/supabase/types";
 
 const tabs = [
   { key: "small", label: "Overlay Small", path: "chat_small" },
@@ -16,6 +19,7 @@ type TabKey = (typeof tabs)[number]["key"];
 
 export default function ChatPage() {
   const [activeTab, setActiveTab] = useState<TabKey>("small");
+  const { data: dbMessages } = useDbQuery<ChatMessage[]>(() => chatDb.list(), []);
 
   const overlayUrls = useMemo(() => {
     if (typeof window === "undefined") return { small: "", normal: "" };
