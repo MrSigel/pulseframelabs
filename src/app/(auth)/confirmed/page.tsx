@@ -9,7 +9,7 @@ import { Check, Loader2 } from "lucide-react";
 export default function ConfirmedPage() {
   const router = useRouter();
   const { t } = useLanguage();
-  const auth = t.auth;
+  const auth = t.auth || {};
   const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {

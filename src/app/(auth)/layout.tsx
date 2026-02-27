@@ -100,7 +100,7 @@ function AnimatedDivider({ isDark }: { isDark: boolean }) {
 function AuthLayoutInner({ children }: { children: React.ReactNode }) {
   const { t } = useLanguage();
   const theme = useTheme();
-  const auth = t.auth;
+  const auth = t.auth || {};
   const isDark = theme.isDark;
 
   // Theme-adaptive colors for the left panel

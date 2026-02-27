@@ -13,7 +13,7 @@ export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { t } = useLanguage();
-  const auth = t.auth;
+  const auth = t.auth || {};
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

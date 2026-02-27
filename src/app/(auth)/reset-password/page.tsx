@@ -17,7 +17,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { t } = useLanguage();
-  const auth = t.auth;
+  const auth = t.auth || {};
 
   const hasMinLength = password.length >= 8;
   const hasNumber = /\d/.test(password);
