@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-[0_2px_12px_rgba(59,130,246,0.3)] hover:shadow-[0_4px_20px_rgba(59,130,246,0.4)] hover:brightness-110",
+          "bg-gradient-to-r from-[#c9a84c] to-[#e2cc7e] text-[#09090b] shadow-[0_2px_12px_rgba(201,168,76,0.3)] hover:shadow-[0_4px_20px_rgba(201,168,76,0.4)] hover:brightness-110",
         destructive:
           "bg-gradient-to-r from-red-600 to-rose-500 text-white shadow-[0_2px_12px_rgba(239,68,68,0.25)] hover:shadow-[0_4px_20px_rgba(239,68,68,0.35)] hover:brightness-110",
         success:
@@ -20,12 +20,12 @@ const buttonVariants = cva(
         accent:
           "bg-gradient-to-r from-violet-600 to-purple-500 text-white shadow-[0_2px_12px_rgba(139,92,246,0.25)] hover:shadow-[0_4px_20px_rgba(139,92,246,0.35)] hover:brightness-110",
         outline:
-          "border border-white/[0.1] bg-white/[0.03] text-slate-300 shadow-xs hover:bg-white/[0.06] hover:text-white hover:border-white/[0.15]",
+          "border border-border bg-transparent text-foreground/70 shadow-xs hover:bg-primary/5 hover:text-foreground hover:border-[rgba(201,168,76,0.2)]",
         secondary:
-          "bg-white/[0.06] text-slate-300 hover:bg-white/[0.1] hover:text-white",
+          "bg-primary/5 text-foreground/70 hover:bg-primary/10 hover:text-foreground",
         ghost:
-          "text-slate-400 hover:bg-white/[0.06] hover:text-white",
-        link: "text-blue-400 underline-offset-4 hover:underline hover:text-blue-300",
+          "text-muted-foreground hover:bg-primary/5 hover:text-foreground",
+        link: "text-primary underline-offset-4 hover:underline hover:brightness-110",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

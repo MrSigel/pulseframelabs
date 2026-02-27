@@ -50,7 +50,7 @@ export default function ChatPage() {
                   {tab.label}
                   {activeTab === tab.key && (
                     <div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-blue-500"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#c9a84c]"
                       style={{ animation: "tabSlide 0.2s ease-out" }}
                     />
                   )}
@@ -84,12 +84,12 @@ export default function ChatPage() {
                     }}
                   >
                     <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                      <MessageCircle className="h-3.5 w-3.5 text-blue-400" />
+                      <MessageCircle className="h-3.5 w-3.5 text-[#c9a84c]" />
                       <span className="text-[10px] font-bold text-white uppercase tracking-wider">Chat</span>
                     </div>
                     <div className="px-3 py-3 space-y-2">
                       <div className="flex gap-2 items-start">
-                        <span className="text-[10px] font-bold text-blue-400 shrink-0">Viewer1:</span>
+                        <span className="text-[10px] font-bold text-[#c9a84c] shrink-0">Viewer1:</span>
                         <span className="text-[10px] text-slate-400">Hello chat!</span>
                       </div>
                       <div className="flex gap-2 items-start">
@@ -110,7 +110,7 @@ export default function ChatPage() {
                     }}
                   >
                     <div className="flex items-center gap-2.5 px-4 py-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                      <MessageCircle className="h-4 w-4 text-blue-400" />
+                      <MessageCircle className="h-4 w-4 text-[#c9a84c]" />
                       <span className="text-xs font-bold text-white uppercase tracking-wider">Live Chat</span>
                       <div className="ml-auto flex items-center gap-1.5">
                         <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
@@ -119,11 +119,11 @@ export default function ChatPage() {
                     </div>
                     <div className="px-4 py-3 space-y-2.5 min-h-[160px]">
                       <div className="flex gap-2.5 items-start">
-                        <div className="h-5 w-5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                          <span className="text-[8px] font-bold text-blue-400">V</span>
+                        <div className="h-5 w-5 rounded-full bg-[rgba(201,168,76,0.2)] flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-[8px] font-bold text-[#c9a84c]">V</span>
                         </div>
                         <div>
-                          <span className="text-[11px] font-bold text-blue-400">Viewer1</span>
+                          <span className="text-[11px] font-bold text-[#c9a84c]">Viewer1</span>
                           <p className="text-[11px] text-slate-400 mt-0.5">Hello chat!</p>
                         </div>
                       </div>

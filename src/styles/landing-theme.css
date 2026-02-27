@@ -273,7 +273,7 @@
   text-decoration: none;
 }
 
-[data-theme] button {
+[data-theme] .landing-root button {
   font-family: inherit;
   cursor: pointer;
   border: none;

@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Landing page styles (CSS custom properties, no Tailwind conflicts) */
+/* Landing page styles (CSS custom properties, shared theme system) */
 @import "../styles/landing-theme.css";
 @import "../styles/landing-animations.css";
 
@@ -53,71 +53,137 @@
 
 :root {
   --radius: 0.75rem;
+}
 
-  /* ── Core palette ── */
-  --background: #080b12;
-  --foreground: #e2e8f0;
-  --card: rgba(15, 19, 30, 0.7);
-  --card-foreground: #e2e8f0;
-  --popover: #0f131e;
-  --popover-foreground: #e2e8f0;
+/* ══════════════════════════════════════════════
+   DARK THEME — Gold Luxury Palette
+   ══════════════════════════════════════════════ */
+:root,
+[data-theme="dark"] {
+  --background: #09090b;
+  --foreground: #f5f0e8;
 
-  /* ── Brand accent ── */
-  --primary: #3b82f6;
-  --primary-foreground: #ffffff;
+  --card: rgba(18, 17, 26, 0.65);
+  --card-foreground: #f5f0e8;
+  --popover: #12111a;
+  --popover-foreground: #f5f0e8;
 
-  /* ── Surface layers ── */
-  --secondary: #111827;
-  --secondary-foreground: #e2e8f0;
-  --muted: #0f1420;
-  --muted-foreground: #64748b;
-  --accent: #141c2e;
-  --accent-foreground: #e2e8f0;
+  --primary: #c9a84c;
+  --primary-foreground: #09090b;
 
-  /* ── Semantic ── */
+  --secondary: #15131a;
+  --secondary-foreground: #f5f0e8;
+  --muted: #0f0e12;
+  --muted-foreground: rgba(245, 240, 232, 0.5);
+  --accent: #1a1820;
+  --accent-foreground: #f5f0e8;
+
   --destructive: #ef4444;
-  --border: rgba(56, 79, 125, 0.25);
-  --input: rgba(56, 79, 125, 0.2);
-  --ring: #3b82f6;
+  --border: rgba(201, 168, 76, 0.12);
+  --input: rgba(201, 168, 76, 0.1);
+  --ring: #c9a84c;
 
-  /* ── Sidebar ── */
-  --sidebar: #060910;
-  --sidebar-foreground: #7a8baa;
-  --sidebar-primary: #3b82f6;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(59, 130, 246, 0.08);
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(56, 79, 125, 0.15);
-  --sidebar-ring: #3b82f6;
+  /* Sidebar */
+  --sidebar: #0a0910;
+  --sidebar-foreground: rgba(245, 240, 232, 0.5);
+  --sidebar-primary: #c9a84c;
+  --sidebar-primary-foreground: #09090b;
+  --sidebar-accent: rgba(201, 168, 76, 0.08);
+  --sidebar-accent-foreground: #f5f0e8;
+  --sidebar-border: rgba(201, 168, 76, 0.08);
+  --sidebar-ring: #c9a84c;
 
-  /* ── Extended palette ── */
+  /* Semantic */
   --success: #10b981;
   --warning: #f59e0b;
   --info: #06b6d4;
 
-  /* ── Glow ── */
-  --glow-blue: rgba(59, 130, 246, 0.35);
-  --glow-cyan: rgba(6, 182, 212, 0.35);
+  /* Glow */
+  --glow-gold: rgba(201, 168, 76, 0.35);
   --glow-green: rgba(16, 185, 129, 0.35);
   --glow-red: rgba(239, 68, 68, 0.3);
   --glow-violet: rgba(139, 92, 246, 0.3);
   --glow-orange: rgba(245, 158, 11, 0.3);
+
+  /* Charts */
+  --chart-1: #c9a84c;
+  --chart-2: #10b981;
+  --chart-3: #f59e0b;
+  --chart-4: #ef4444;
+  --chart-5: #8b5cf6;
+}
+
+/* ══════════════════════════════════════════════
+   LIGHT THEME — Warm Gold Palette
+   ══════════════════════════════════════════════ */
+[data-theme="light"] {
+  --background: #faf8f4;
+  --foreground: #1a1714;
+
+  --card: rgba(255, 255, 255, 0.65);
+  --card-foreground: #1a1714;
+  --popover: #ffffff;
+  --popover-foreground: #1a1714;
+
+  --primary: #8b6d1f;
+  --primary-foreground: #faf8f4;
+
+  --secondary: #f3f0ea;
+  --secondary-foreground: #1a1714;
+  --muted: #eae6de;
+  --muted-foreground: rgba(26, 23, 20, 0.5);
+  --accent: #f3f0ea;
+  --accent-foreground: #1a1714;
+
+  --destructive: #dc2626;
+  --border: rgba(139, 109, 31, 0.15);
+  --input: rgba(139, 109, 31, 0.12);
+  --ring: #8b6d1f;
+
+  /* Sidebar */
+  --sidebar: #f3f0ea;
+  --sidebar-foreground: rgba(26, 23, 20, 0.5);
+  --sidebar-primary: #8b6d1f;
+  --sidebar-primary-foreground: #faf8f4;
+  --sidebar-accent: rgba(139, 109, 31, 0.06);
+  --sidebar-accent-foreground: #1a1714;
+  --sidebar-border: rgba(139, 109, 31, 0.1);
+  --sidebar-ring: #8b6d1f;
+
+  /* Semantic */
+  --success: #059669;
+  --warning: #d97706;
+  --info: #0891b2;
+
+  /* Glow */
+  --glow-gold: rgba(139, 109, 31, 0.25);
+  --glow-green: rgba(5, 150, 105, 0.25);
+  --glow-red: rgba(239, 68, 68, 0.2);
+  --glow-violet: rgba(139, 92, 246, 0.2);
+  --glow-orange: rgba(217, 119, 6, 0.2);
+
+  /* Charts */
+  --chart-1: #8b6d1f;
+  --chart-2: #059669;
+  --chart-3: #d97706;
+  --chart-4: #dc2626;
+  --chart-5: #7c3aed;
 }
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.3);
+  background: rgba(201, 168, 76, 0.2);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.5);
+  background: rgba(201, 168, 76, 0.4);
 }
 
 @layer base {
@@ -130,28 +196,31 @@
   }
 }
 
-/* ── Utility classes ── */
+/* ── Glass Effects ── */
 @layer utilities {
   .glass {
-    background: rgba(15, 19, 30, 0.6);
+    background: var(--card);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(56, 79, 125, 0.2);
+    border: 1px solid var(--border);
   }
 
   .glass-strong {
-    background: rgba(15, 19, 30, 0.8);
+    background: var(--popover);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(56, 79, 125, 0.25);
+    border: 1px solid var(--border);
   }
 
-  .glow-blue {
-    box-shadow: 0 0 20px var(--glow-blue), 0 0 60px rgba(59, 130, 246, 0.1);
+  /* Gold glow (primary accent) */
+  .glow-gold {
+    box-shadow: 0 0 20px var(--glow-gold), 0 0 60px rgba(201, 168, 76, 0.1);
   }
 
+  /* Map legacy blue/cyan glows to gold */
+  .glow-blue,
   .glow-cyan {
-    box-shadow: 0 0 20px var(--glow-cyan), 0 0 60px rgba(6, 182, 212, 0.1);
+    box-shadow: 0 0 20px var(--glow-gold), 0 0 60px rgba(201, 168, 76, 0.1);
   }
 
   .glow-green {
@@ -170,8 +239,9 @@
     box-shadow: 0 0 20px var(--glow-orange);
   }
 
+  /* Gold gradient text */
   .gradient-text {
-    background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+    background: linear-gradient(135deg, #8b6d1f 0%, #c9a84c 40%, #e2cc7e 60%, #c9a84c 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -186,7 +256,7 @@
     inset: 0;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(139, 92, 246, 0.3), rgba(6, 182, 212, 0.2));
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.5), rgba(226, 204, 126, 0.3), rgba(212, 197, 169, 0.2));
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
     -webkit-mask-composite: xor;
@@ -202,6 +272,7 @@
   }
 }
 
+/* ── Keyframe Animations ── */
 @keyframes glow-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
@@ -212,7 +283,6 @@
   100% { background-position: 200% 0; }
 }
 
-/* ── Casino overlay animations ── */
 @keyframes spin-chip {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -224,8 +294,8 @@
 }
 
 @keyframes progress-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.6), 0 0 20px rgba(239, 68, 68, 0.2); }
-  50% { box-shadow: 0 0 16px rgba(239, 68, 68, 0.8), 0 0 40px rgba(239, 68, 68, 0.4); }
+  0%, 100% { box-shadow: 0 0 8px rgba(201, 168, 76, 0.6), 0 0 20px rgba(201, 168, 76, 0.2); }
+  50% { box-shadow: 0 0 16px rgba(201, 168, 76, 0.8), 0 0 40px rgba(201, 168, 76, 0.4); }
 }
 
 @keyframes progress-shimmer {

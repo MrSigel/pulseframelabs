@@ -230,7 +230,7 @@ export default function TournamentsPage() {
                   {tab.label}
                   {activeTab === tab.key && (
                     <div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-blue-500"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#c9a84c]"
                       style={{ animation: "tabSlide 0.2s ease-out" }}
                     />
                   )}

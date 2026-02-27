@@ -262,7 +262,7 @@ export default function DuelPage() {
         {/* Options */}
         <Card className="h-full flex flex-col">
           <CardHeader>
-            <CardTitle className="text-lg text-blue-400">Options</CardTitle>
+            <CardTitle className="text-lg text-[#c9a84c]">Options</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 flex-1">
             <div>
@@ -322,7 +322,7 @@ export default function DuelPage() {
             <div className="px-6 pt-4 border-b border-white/[0.06]">
               <button className="pb-3 text-sm font-medium text-white relative">
                 Overlay Normal
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-blue-500" style={{ animation: "tabSlide 0.2s ease-out" }} />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#c9a84c]" style={{ animation: "tabSlide 0.2s ease-out" }} />
               </button>
             </div>
 

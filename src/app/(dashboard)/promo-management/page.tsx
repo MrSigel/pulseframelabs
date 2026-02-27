@@ -100,7 +100,7 @@ export default function PromoManagementPage() {
         <CardContent className="py-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-4" />
+              <Loader2 className="h-8 w-8 text-[#c9a84c] animate-spin mb-4" />
               <p className="text-slate-500">Loading promotions...</p>
             </div>
           ) : dbPromos && dbPromos.length > 0 ? (
@@ -119,7 +119,7 @@ export default function PromoManagementPage() {
                     {promo.description && <p className="text-slate-500 text-xs truncate">{promo.description}</p>}
                   </div>
                   {promo.code && (
-                    <span className="text-xs font-mono px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 shrink-0">{promo.code}</span>
+                    <span className="text-xs font-mono px-2 py-1 rounded bg-[rgba(201,168,76,0.1)] text-[#c9a84c] border border-[rgba(201,168,76,0.2)] shrink-0">{promo.code}</span>
                   )}
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded shrink-0 ${promo.is_active ? "bg-green-500/10 text-green-400" : "bg-slate-500/10 text-slate-500"}`}>
                     {promo.is_active ? "Active" : "Inactive"}
@@ -127,10 +127,10 @@ export default function PromoManagementPage() {
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => handleToggleActive(promo.id, promo.is_active)}
-                      className="h-7 w-7 rounded flex items-center justify-center hover:bg-blue-500/10 transition-colors"
+                      className="h-7 w-7 rounded flex items-center justify-center hover:bg-[rgba(201,168,76,0.1)] transition-colors"
                       title={promo.is_active ? "Deactivate" : "Activate"}
                     >
-                      <Pencil className="h-3.5 w-3.5 text-blue-400" />
+                      <Pencil className="h-3.5 w-3.5 text-[#c9a84c]" />
                     </button>
                     <button
                       onClick={() => handleDelete(promo.id)}

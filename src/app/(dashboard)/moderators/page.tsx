@@ -70,7 +70,7 @@ export default function ModeratorsPage() {
         <CardContent className="space-y-8">
           {/* Add moderator */}
           <div>
-            <p className="text-sm text-blue-400 font-semibold mb-2">
+            <p className="text-sm text-[#c9a84c] font-semibold mb-2">
               Add or find a moderator
             </p>
             <div className="flex gap-2">
@@ -99,7 +99,7 @@ export default function ModeratorsPage() {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <h3 className="font-bold text-white">Active Team</h3>
-                <p className="text-sm text-blue-400">
+                <p className="text-sm text-[#c9a84c]">
                   These moderators can use their permissions.
                 </p>
               </div>
@@ -153,7 +153,7 @@ export default function ModeratorsPage() {
           {/* Inactive Team */}
           <div>
             <h3 className="font-bold text-white mb-1">Inactive Team</h3>
-            <p className="text-sm text-blue-400 mb-3">
+            <p className="text-sm text-[#c9a84c] mb-3">
               These moderators currently have no permissions.
             </p>
             {loading ? (

@@ -190,7 +190,7 @@ export default function ThemeSettingsPage() {
                       onClick={() => applyPreset(preset)}
                       className={`flex items-center justify-between rounded-lg p-3 transition-all text-left ${
                         selectedPreset === preset.name
-                          ? "bg-blue-500/10 border border-blue-500/30 ring-1 ring-blue-500/20"
+                          ? "bg-[rgba(201,168,76,0.1)] border border-[rgba(201,168,76,0.3)] ring-1 ring-[rgba(201,168,76,0.2)]"
                           : "bg-secondary border border-transparent hover:bg-white/[0.06]"
                       }`}
                     >
@@ -206,7 +206,7 @@ export default function ThemeSettingsPage() {
                         </div>
                       </div>
                       {selectedPreset === preset.name && (
-                        <div className="h-5 w-5 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
+                        <div className="h-5 w-5 rounded-full bg-[#c9a84c] flex items-center justify-center shrink-0">
                           <Check className="h-3 w-3 text-white" />
                         </div>
                       )}
@@ -420,7 +420,7 @@ function PreviewRenderer({
               <span className="text-white font-semibold">$0</span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span style={{ color: "#64748b" }}>WEBSITE: <span className="font-semibold text-blue-400">CASINONAME</span></span>
+              <span style={{ color: "#64748b" }}>WEBSITE: <span className="font-semibold text-[#c9a84c]">CASINONAME</span></span>
               <span style={{ color: "#64748b" }}>LEFT: <span className="text-amber-400 font-semibold">$0</span></span>
             </div>
             <div className="flex items-center justify-between text-xs">
@@ -727,7 +727,7 @@ function PreviewRenderer({
           <span className="text-[10px] font-bold text-white uppercase tracking-wider">Chat</span>
         </div>
         <div className="px-3 py-3 space-y-2">
-          <div className="flex gap-2 items-start"><span className="text-[10px] font-bold text-blue-400 shrink-0">Viewer1:</span><span className="text-[10px] text-slate-400">Hello chat!</span></div>
+          <div className="flex gap-2 items-start"><span className="text-[10px] font-bold text-[#c9a84c] shrink-0">Viewer1:</span><span className="text-[10px] text-slate-400">Hello chat!</span></div>
           <div className="flex gap-2 items-start"><span className="text-[10px] font-bold text-green-400 shrink-0">Mod:</span><span className="text-[10px] text-slate-400">Welcome!</span></div>
         </div>
       </div>
@@ -843,7 +843,7 @@ function PreviewRenderer({
         <div className="px-4 pb-3">
           {[{ l: "0/0", label: "# BONUS", r: "0/0" }, { l: "0$", label: "COST", r: "0$" }, { l: "0.00", label: "SCORE", r: "0.00", hl: true }].map((row, i) => (
             <div key={i} className="flex items-center justify-between py-2 px-3" style={{ borderTop: i === 0 ? "1px solid rgba(255,255,255,0.06)" : "1px solid rgba(255,255,255,0.03)", background: row.hl ? "rgba(255,255,255,0.02)" : "transparent" }}>
-              <span className={`text-xs font-bold ${row.hl ? "text-blue-400" : "text-white"}`}>{row.l}</span>
+              <span className={`text-xs font-bold ${row.hl ? "text-[#c9a84c]" : "text-white"}`}>{row.l}</span>
               <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">{row.label}</span>
               <span className={`text-xs font-bold ${row.hl ? "text-green-400" : "text-white"}`}>{row.r}</span>
             </div>

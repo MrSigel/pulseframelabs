@@ -49,8 +49,8 @@ export default function DashboardPage() {
       value: formatCurrency(s.total_wagered),
       ...getChange(0),
       icon: DollarSign,
-      color: "from-blue-500 to-cyan-500",
-      glow: "shadow-[0_0_20px_rgba(59,130,246,0.15)]",
+      color: "from-[#c9a84c] to-[#e2cc7e]",
+      glow: "shadow-[0_0_20px_rgba(201,168,76,0.15)]",
     },
     {
       label: "Total Deposits",
@@ -141,7 +141,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm text-white flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-blue-400" />
+              <BarChart3 className="h-4 w-4 text-[#c9a84c]" />
               Session History
             </CardTitle>
           </CardHeader>

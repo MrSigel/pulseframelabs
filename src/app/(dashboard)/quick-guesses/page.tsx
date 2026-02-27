@@ -249,7 +249,7 @@ export default function QuickGuessesPage() {
                 <div>
                   <Label className="text-sm font-semibold text-white mb-2 block">Success Message</Label>
                   <textarea
-                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all resize-y min-h-[80px]"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(201,168,76,0.4)] focus:border-[rgba(201,168,76,0.4)] transition-all resize-y min-h-[80px]"
                     placeholder="Success Message"
                     value={successMsg}
                     onChange={(e) => setSuccessMsg(e.target.value)}
@@ -263,7 +263,7 @@ export default function QuickGuessesPage() {
                 <div>
                   <Label className="text-sm font-semibold text-white mb-2 block">Guess already in use Message</Label>
                   <textarea
-                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all resize-y min-h-[80px]"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(201,168,76,0.4)] focus:border-[rgba(201,168,76,0.4)] transition-all resize-y min-h-[80px]"
                     placeholder="Guess already in use Message"
                     value={alreadyInUseMsg}
                     onChange={(e) => setAlreadyInUseMsg(e.target.value)}
@@ -281,7 +281,7 @@ export default function QuickGuessesPage() {
                 <div>
                   <Label className="text-sm font-semibold text-white mb-2 block">Guess Changed Message</Label>
                   <textarea
-                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all resize-y min-h-[80px]"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(201,168,76,0.4)] focus:border-[rgba(201,168,76,0.4)] transition-all resize-y min-h-[80px]"
                     placeholder="Guess Changed Message"
                     value={guessChangedMsg}
                     onChange={(e) => setGuessChangedMsg(e.target.value)}
@@ -295,7 +295,7 @@ export default function QuickGuessesPage() {
                 <div>
                   <Label className="text-sm font-semibold text-white mb-2 block">Wrong Numbers Message</Label>
                   <textarea
-                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all resize-y min-h-[80px]"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(201,168,76,0.4)] focus:border-[rgba(201,168,76,0.4)] transition-all resize-y min-h-[80px]"
                     placeholder="Wrong Numbers Message"
                     value={wrongNumbersMsg}
                     onChange={(e) => setWrongNumbersMsg(e.target.value)}
@@ -313,7 +313,7 @@ export default function QuickGuessesPage() {
                 <div>
                   <Label className="text-sm font-semibold text-white mb-2 block">Not Active Message</Label>
                   <textarea
-                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all resize-y min-h-[80px]"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(201,168,76,0.4)] focus:border-[rgba(201,168,76,0.4)] transition-all resize-y min-h-[80px]"
                     placeholder="Not Active Message"
                     value={notActiveMsg}
                     onChange={(e) => setNotActiveMsg(e.target.value)}
@@ -327,7 +327,7 @@ export default function QuickGuessesPage() {
                 <div>
                   <Label className="text-sm font-semibold text-white mb-2 block">Winner Message</Label>
                   <textarea
-                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/40 transition-all resize-y min-h-[80px]"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(201,168,76,0.4)] focus:border-[rgba(201,168,76,0.4)] transition-all resize-y min-h-[80px]"
                     placeholder="Winner Message"
                     value={winnerMsg}
                     onChange={(e) => setWinnerMsg(e.target.value)}
