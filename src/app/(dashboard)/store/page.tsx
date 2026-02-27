@@ -448,9 +448,9 @@ export default function StorePage() {
                 <Headphones className="h-5 w-5 text-slate-500 mt-0.5 shrink-0" />
                 <p className="text-sm text-slate-500">
                   Need help?{" "}
-                  <span className="text-[#c9a84c] hover:underline cursor-pointer">Visit our Help Center</span>{" "}
+                  <span className="text-primary hover:underline cursor-pointer">Visit our Help Center</span>{" "}
                   or{" "}
-                  <span className="text-[#c9a84c] hover:underline cursor-pointer">Contact Support</span>{" "}
+                  <span className="text-primary hover:underline cursor-pointer">Contact Support</span>{" "}
                   for assistance.
                 </p>
               </div>
@@ -520,7 +520,7 @@ export default function StorePage() {
               <div>
                 <Label className="text-sm font-semibold text-white mb-2 block">Description</Label>
                 <textarea
-                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(201,168,76,0.4)] focus:border-[rgba(201,168,76,0.4)] transition-all resize-y min-h-[80px]"
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all resize-y min-h-[80px]"
                   placeholder="Enter item description"
                   value={itemDescription}
                   onChange={(e) => setItemDescription(e.target.value)}
@@ -672,7 +672,7 @@ export default function StorePage() {
               <div>
                 <Label className="text-sm font-semibold text-white mb-2 block">Store Description</Label>
                 <textarea
-                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[rgba(201,168,76,0.4)] focus:border-[rgba(201,168,76,0.4)] transition-all resize-y min-h-[80px]"
+                  className="w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all resize-y min-h-[80px]"
                   placeholder="Description"
                   value={storeDescription}
                   onChange={(e) => setStoreDescription(e.target.value)}

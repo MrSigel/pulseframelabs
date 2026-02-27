@@ -110,7 +110,7 @@ export default function HotwordsPage() {
                 {dbEntries.map((entry) => (
                   <span
                     key={entry.id}
-                    className="px-3 py-1 rounded-full text-xs font-bold tracking-wide bg-[rgba(201,168,76,0.15)] border border-[rgba(201,168,76,0.25)] text-[#c9a84c]"
+                    className="px-3 py-1 rounded-full text-xs font-bold tracking-wide bg-primary/15 border border-primary/25 text-primary"
                   >
                     {entry.word} ({entry.count})
                   </span>

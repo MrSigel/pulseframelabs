@@ -53,7 +53,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-xl px-6">
       {/* Gold gradient underline */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[rgba(201,168,76,0.2)] to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
 
       {/* Left spacer */}
       <div />
@@ -87,8 +87,8 @@ export function Header() {
             onClick={() => setShowDropdown(!showDropdown)}
           >
             <div className="relative">
-              <div className="absolute -inset-0.5 rounded-full bg-gradient-to-br from-[#c9a84c] to-[#e2cc7e] opacity-50" />
-              <div className="relative h-8 w-8 rounded-full bg-gradient-to-br from-[#c9a84c] to-[#8b6d1f] flex items-center justify-center text-[#09090b] text-sm font-bold">
+              <div className="absolute -inset-0.5 rounded-full bg-gradient-to-br from-primary to-primary/60 opacity-50" />
+              <div className="relative h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-sm font-bold">
                 {initial}
               </div>
             </div>

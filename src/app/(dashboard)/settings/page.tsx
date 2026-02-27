@@ -115,7 +115,7 @@ export default function SettingsPage() {
               </div>
               {loading ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-5 w-5 text-[#c9a84c] animate-spin" />
+                  <Loader2 className="h-5 w-5 text-primary animate-spin" />
                 </div>
               ) : pagedViewers.length > 0 ? (
                 <div className="space-y-1">
@@ -212,7 +212,7 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => setMoreOptionsView("main")}
-                      className="text-[#c9a84c] hover:text-[#c9a84c] transition-colors"
+                      className="text-primary hover:text-primary transition-colors"
                     >
                       <ArrowLeft className="h-5 w-5" />
                     </button>

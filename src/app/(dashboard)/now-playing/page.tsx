@@ -663,7 +663,7 @@ export default function NowPlayingPage() {
                 >
                   {tab.label}
                   {overlayTab === tab.key && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#c9a84c]" />
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-primary" />
                   )}
                 </button>
               ))}
@@ -840,13 +840,13 @@ export default function NowPlayingPage() {
                   key={tab.key}
                   onClick={() => setCasinoTab(tab.key)}
                   className={`pb-3 text-sm font-medium transition-colors relative ${
-                    casinoTab === tab.key ? "text-[#c9a84c]" : "text-slate-500 hover:text-slate-300"
+                    casinoTab === tab.key ? "text-primary" : "text-slate-500 hover:text-slate-300"
                   }`}
                 >
                   {tab.label}
                   {casinoTab === tab.key && (
                     <div
-                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#c9a84c]"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-primary"
                       style={{ animation: "tabSlide 0.2s ease-out" }}
                     />
                   )}
@@ -960,7 +960,7 @@ export default function NowPlayingPage() {
                                     : "rgba(100, 116, 139, 0.1)",
                                 }}
                               >
-                                <Pencil className={`h-3.5 w-3.5 transition-colors ${isEditing ? "text-[#c9a84c]" : "text-slate-400"}`} />
+                                <Pencil className={`h-3.5 w-3.5 transition-colors ${isEditing ? "text-primary" : "text-slate-400"}`} />
                               </button>
                             </div>
                           </div>
@@ -998,7 +998,7 @@ export default function NowPlayingPage() {
                                     className="h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-200 hover:scale-105"
                                     style={{ background: "rgba(59, 130, 246, 0.2)" }}
                                   >
-                                    <Save className="h-3.5 w-3.5 text-[#c9a84c]" />
+                                    <Save className="h-3.5 w-3.5 text-primary" />
                                   </button>
                                   <button
                                     onClick={() => setEditingCasino(null)}

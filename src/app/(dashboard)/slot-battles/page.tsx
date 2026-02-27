@@ -222,7 +222,7 @@ export default function SlotBattlesPage() {
             <div className="px-6 pt-4 border-b border-white/[0.06]">
               <button className="pb-3 text-sm font-medium text-white relative">
                 Overlay Normal
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#c9a84c]" style={{ animation: "tabSlide 0.2s ease-out" }} />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-primary" style={{ animation: "tabSlide 0.2s ease-out" }} />
               </button>
             </div>
 
@@ -439,7 +439,7 @@ function SlotBattlePreview() {
               background: row.highlight ? "rgba(255,255,255,0.02)" : "transparent",
             }}
           >
-            <span className={`text-[10px] font-bold ${row.highlight ? "text-[#c9a84c]" : "text-white"}`}>{row.left}</span>
+            <span className={`text-[10px] font-bold ${row.highlight ? "text-primary" : "text-white"}`}>{row.left}</span>
             <span className="text-[8px] font-semibold text-slate-500 uppercase tracking-wider">{row.label}</span>
             <span className={`text-[10px] font-bold ${row.highlight ? "text-green-400" : "text-white"}`}>{row.right}</span>
           </div>

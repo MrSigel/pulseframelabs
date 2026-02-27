@@ -465,7 +465,7 @@ export default function SpinnerPage() {
             <div className="px-6 pt-4 border-b border-white/[0.06]">
               <button className="pb-3 text-sm font-medium text-white relative">
                 Overlay Normal
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-[#c9a84c]" style={{ animation: "tabSlide 0.2s ease-out" }} />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-primary" style={{ animation: "tabSlide 0.2s ease-out" }} />
               </button>
             </div>
 

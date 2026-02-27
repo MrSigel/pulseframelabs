@@ -87,16 +87,16 @@ function NavSection({ title, items, pathname }: { title?: string; items: NavItem
               href={item.href}
               className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-200 ${
                 isActive
-                  ? "bg-gradient-to-r from-[rgba(201,168,76,0.15)] to-[rgba(226,204,126,0.05)] text-foreground"
+                  ? "bg-gradient-to-r from-primary/15 to-primary/5 text-foreground"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-foreground/80"
               }`}
             >
               {/* Active gold indicator bar */}
               {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-gradient-to-b from-[#c9a84c] to-[#e2cc7e] shadow-[0_0_8px_rgba(201,168,76,0.5)]" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-gradient-to-b from-primary to-primary/60 shadow-[0_0_8px_var(--glow-gold)]" />
               )}
               <Icon className={`h-4 w-4 shrink-0 transition-colors duration-200 ${
-                isActive ? "text-[#c9a84c]" : "text-muted-foreground group-hover:text-foreground/60"
+                isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground/60"
               }`} />
               <span>{item.name}</span>
             </Link>
@@ -114,13 +114,13 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-56 flex-col border-r border-sidebar-border bg-sidebar">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" className="drop-shadow-[0_0_8px_rgba(201,168,76,0.4)]">
-          <path d="M6 8l6 8-6 8" stroke="#c9a84c" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M14 8l6 8-6 8" stroke="#c9a84c" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none" style={{ filter: 'drop-shadow(0 0 8px var(--glow-gold))' }}>
+          <path d="M6 8l6 8-6 8" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M14 8l6 8-6 8" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
         </svg>
         <div className="leading-tight">
           <div className="text-[13px] font-bold text-foreground tracking-wider">PULSEFRAME</div>
-          <div className="text-[13px] font-bold text-[#c9a84c] tracking-wider">LABS</div>
+          <div className="text-[13px] font-bold text-primary tracking-wider">LABS</div>
         </div>
       </div>
 

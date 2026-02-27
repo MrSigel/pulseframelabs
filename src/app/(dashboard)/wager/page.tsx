@@ -401,7 +401,7 @@ export default function WagerPage() {
                         </div>
                         <div className="flex items-center justify-between text-xs">
                           <span style={{ color: "#64748b" }}>
-                            WEBSITE: <span className="font-semibold text-[#c9a84c]">{casinoName.toUpperCase()}</span>
+                            WEBSITE: <span className="font-semibold text-primary">{casinoName.toUpperCase()}</span>
                           </span>
                           <span style={{ color: "#64748b" }}>
                             LEFT: <span className="text-amber-400 font-semibold">{currencySymbol}{left.toLocaleString()}</span>

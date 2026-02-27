@@ -384,7 +384,7 @@ export default function LoyaltyPage() {
                       {presets.map((preset) => (
                         <div
                           key={preset.id}
-                          className="flex items-center justify-between rounded-lg border border-border bg-secondary/50 px-4 py-3 group hover:border-[rgba(201,168,76,0.3)] transition-colors"
+                          className="flex items-center justify-between rounded-lg border border-border bg-secondary/50 px-4 py-3 group hover:border-primary/30 transition-colors"
                         >
                           <div
                             className="flex-1 cursor-pointer"

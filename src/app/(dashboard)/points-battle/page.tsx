@@ -456,7 +456,7 @@ export default function PointsBattlePage() {
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => { setPresetsView("main"); resetCreateForm(); }}
-                      className="text-[#c9a84c] hover:text-[#c9a84c] transition-colors"
+                      className="text-primary hover:text-primary transition-colors"
                     >
                       <ArrowLeft className="h-5 w-5" />
                     </button>
@@ -592,7 +592,7 @@ export default function PointsBattlePage() {
                       {presets.map((preset) => (
                         <div
                           key={preset.id}
-                          className="flex items-center justify-between rounded-lg border border-border bg-secondary/50 px-4 py-3 group hover:border-[rgba(201,168,76,0.3)] transition-colors"
+                          className="flex items-center justify-between rounded-lg border border-border bg-secondary/50 px-4 py-3 group hover:border-primary/30 transition-colors"
                         >
                           <div
                             className="flex-1 cursor-pointer"

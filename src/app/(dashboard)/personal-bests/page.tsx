@@ -48,7 +48,7 @@ export default function PersonalBestsPage() {
         <CardContent className="py-8">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <Loader2 className="h-8 w-8 text-[#c9a84c] animate-spin mb-4" />
+              <Loader2 className="h-8 w-8 text-primary animate-spin mb-4" />
               <p className="text-slate-500">Loading personal bests...</p>
             </div>
           ) : filteredBests.length > 0 ? (

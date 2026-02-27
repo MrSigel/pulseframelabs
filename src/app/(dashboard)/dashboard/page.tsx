@@ -141,7 +141,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-sm text-white flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-[#c9a84c]" />
+              <BarChart3 className="h-4 w-4 text-primary" />
               Session History
             </CardTitle>
           </CardHeader>

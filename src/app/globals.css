@@ -170,6 +170,82 @@
   --chart-5: #7c3aed;
 }
 
+/* ══════════════════════════════════════════════
+   LIGHT MODE — Hardcoded Color Overrides
+   Dashboard pages use hardcoded dark-mode Tailwind
+   classes. These rules adapt them for light mode.
+   ══════════════════════════════════════════════ */
+
+/* Text: white → foreground in light mode */
+[data-theme="light"] .text-white {
+  color: var(--foreground);
+}
+
+/* Preserve white text on/inside colored backgrounds */
+[data-theme="light"] :is(
+  [class*="bg-gradient-to"],
+  [class*="bg-emerald-"],
+  [class*="bg-green-"],
+  [class*="bg-rose-"],
+  [class*="bg-pink-"],
+  [class*="bg-violet-"],
+  [class*="bg-purple-"],
+  [class*="bg-amber-"],
+  [class*="bg-orange-"],
+  [class*="bg-red-"],
+  [class*="bg-cyan-"],
+  [class*="bg-teal-"],
+  [class*="bg-sky-"],
+  [class*="bg-indigo-"]
+) .text-white {
+  color: #fff;
+}
+
+/* Same element has both gradient bg + text-white */
+[data-theme="light"] .text-white:is(
+  [class*="bg-gradient-to"],
+  [class*="bg-emerald-"],
+  [class*="bg-green-"],
+  [class*="bg-rose-"],
+  [class*="bg-pink-"],
+  [class*="bg-violet-"],
+  [class*="bg-purple-"],
+  [class*="bg-amber-"],
+  [class*="bg-orange-"],
+  [class*="bg-red-"],
+  [class*="bg-cyan-"],
+  [class*="bg-teal-"],
+  [class*="bg-sky-"],
+  [class*="bg-indigo-"]
+) {
+  color: #fff;
+}
+
+/* Muted text: slate → theme-aware muted */
+[data-theme="light"] .text-slate-300 { color: var(--foreground); }
+[data-theme="light"] .text-slate-400 { color: var(--muted-foreground); }
+[data-theme="light"] .text-slate-500 { color: var(--muted-foreground); }
+[data-theme="light"] .text-slate-600 { color: var(--muted-foreground); }
+
+/* Hover text states */
+[data-theme="light"] .hover\:text-white:hover { color: var(--foreground); }
+[data-theme="light"] .hover\:text-slate-200:hover { color: var(--foreground); }
+[data-theme="light"] .hover\:text-slate-300:hover { color: var(--foreground); }
+[data-theme="light"] .hover\:text-slate-400:hover { color: var(--foreground); }
+
+/* Subtle white backgrounds → subtle dark overlays */
+[data-theme="light"] [class*="bg-white/"] {
+  background-color: rgba(26, 23, 20, 0.04);
+}
+[data-theme="light"] [class*="hover:bg-white/"]:hover {
+  background-color: rgba(26, 23, 20, 0.06);
+}
+
+/* White opacity borders → theme border */
+[data-theme="light"] [class*="border-white/"] {
+  border-color: var(--border);
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 5px;
