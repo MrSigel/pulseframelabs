@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useThemeContext } from "@/components/providers";
 import type { User } from "@supabase/supabase-js";
+import type { UserProfile } from "@/lib/supabase/types";
 
 const themeIcons = {
   dark: Moon,
@@ -16,8 +17,30 @@ const themeIcons = {
 
 const themeLabels = { dark: "Dark", light: "Light", system: "Auto" } as const;
 
+function Avatar({ src, initial, size = "sm" }: { src?: string | null; initial: string; size?: "sm" | "md" }) {
+  const px = size === "sm" ? "h-8 w-8" : "h-10 w-10";
+  const textSize = size === "sm" ? "text-sm" : "text-base";
+
+  if (src) {
+    return (
+      <img
+        src={src}
+        alt="Avatar"
+        className={`relative ${px} rounded-full border-2 border-primary/30 object-cover`}
+      />
+    );
+  }
+
+  return (
+    <div className={`relative ${px} rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground ${textSize} font-bold`}>
+      {initial}
+    </div>
+  );
+}
+
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -25,16 +48,52 @@ export function Header() {
 
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+      if (data.user) {
+        supabase
+          .from("user_profiles")
+          .select("*")
+          .eq("user_id", data.user.id)
+          .maybeSingle()
+          .then(({ data: p }) => setProfile(p as UserProfile | null));
+      }
+    });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        supabase
+          .from("user_profiles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .maybeSingle()
+          .then(({ data: p }) => setProfile(p as UserProfile | null));
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Listen for profile updates (e.g. after avatar upload on settings page)
+  useEffect(() => {
+    if (!user) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel("profile-changes")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "user_profiles", filter: `user_id=eq.${user.id}` },
+        (payload) => setProfile(payload.new as UserProfile),
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -57,10 +116,12 @@ export function Header() {
   }
 
   const displayName =
+    profile?.display_name ||
     user?.user_metadata?.display_name ||
     user?.email?.split("@")[0] ||
     "User";
   const initial = displayName.charAt(0).toUpperCase();
+  const avatarUrl = profile?.avatar_url || null;
 
   const ThemeIcon = themeIcons[preference];
 
@@ -102,9 +163,7 @@ export function Header() {
           >
             <div className="relative">
               <div className="absolute -inset-0.5 rounded-full bg-gradient-to-br from-primary to-primary/60 opacity-50" />
-              <div className="relative h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-sm font-bold">
-                {initial}
-              </div>
+              <Avatar src={avatarUrl} initial={initial} size="sm" />
             </div>
             <div className="text-right">
               <div className="text-sm font-semibold text-foreground">{displayName}</div>
@@ -132,9 +191,7 @@ export function Header() {
                   <div className="flex items-center gap-3">
                     <div className="relative shrink-0">
                       <div className="absolute -inset-0.5 rounded-full bg-gradient-to-br from-primary to-primary/60 opacity-40" />
-                      <div className="relative h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-base font-bold">
-                        {initial}
-                      </div>
+                      <Avatar src={avatarUrl} initial={initial} size="md" />
                     </div>
                     <div className="min-w-0">
                       <div className="text-sm font-semibold text-foreground truncate">{displayName}</div>

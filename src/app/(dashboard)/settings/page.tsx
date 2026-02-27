@@ -12,11 +12,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Settings2, Search, Link, ChevronLeft, ChevronRight, X, ArrowLeft, Plus, Minus, Info, Coins, Loader2 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Settings2, Search, Link, ChevronLeft, ChevronRight, X, ArrowLeft, Plus, Minus, Info, Coins, Loader2, Camera, Trash2, Save } from "lucide-react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import { streamViewers as viewersDb, userProfiles } from "@/lib/supabase/db";
+import { createClient } from "@/lib/supabase/client";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import type { StreamViewer, UserProfile } from "@/lib/supabase/types";
+
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
 
 export default function SettingsPage() {
   const [showMoreOptions, setShowMoreOptions] = useState(false);
@@ -27,8 +31,24 @@ export default function SettingsPage() {
   const [perPage, setPerPage] = useState(5);
   const [viewerPage, setViewerPage] = useState(0);
 
+  // Avatar states
+  const [uploading, setUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [displayNameInput, setDisplayNameInput] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileInitialized, setProfileInitialized] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const { data: dbViewers, loading, refetch } = useDbQuery<StreamViewer[]>(() => viewersDb.list(), []);
-  const { data: profile } = useDbQuery<UserProfile | null>(() => userProfiles.get(), []);
+  const { data: profile, refetch: refetchProfile } = useDbQuery<UserProfile | null>(() => userProfiles.get(), []);
+
+  // Initialize form from profile
+  if (profile && !profileInitialized) {
+    setDisplayNameInput(profile.display_name || "");
+    setAvatarPreview(profile.avatar_url || null);
+    setProfileInitialized(true);
+  }
 
   const filteredViewers = useMemo(() => {
     if (!dbViewers) return [];
@@ -38,6 +58,79 @@ export default function SettingsPage() {
 
   const totalViewerPages = Math.max(1, Math.ceil(filteredViewers.length / perPage));
   const pagedViewers = filteredViewers.slice(viewerPage * perPage, (viewerPage + 1) * perPage);
+
+  const handleAvatarSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAvatarError(null);
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setAvatarError("Only JPG, PNG, GIF, and WebP files are allowed.");
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      setAvatarError("File is too large. Maximum size is 2 MB.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const filePath = `${user.id}/avatar.${ext}`;
+
+      // Upload to Supabase Storage (bucket: avatars)
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true, contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+
+      // Save to user profile
+      await userProfiles.update({ avatar_url: publicUrl });
+      setAvatarPreview(publicUrl);
+      await refetchProfile();
+    } catch (err: unknown) {
+      console.error("Upload failed:", err);
+      setAvatarError(err instanceof Error ? err.message : "Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [refetchProfile]);
+
+  async function handleRemoveAvatar() {
+    try {
+      await userProfiles.update({ avatar_url: null });
+      setAvatarPreview(null);
+      await refetchProfile();
+    } catch (err) {
+      console.error("Failed to remove avatar:", err);
+    }
+  }
+
+  async function handleSaveProfile() {
+    setSavingProfile(true);
+    try {
+      await userProfiles.update({ display_name: displayNameInput || null });
+      await refetchProfile();
+    } catch (err) {
+      console.error("Failed to save profile:", err);
+    } finally {
+      setSavingProfile(false);
+    }
+  }
 
   async function handleAddPoints() {
     if (!pointsAmount) return;
@@ -78,13 +171,128 @@ export default function SettingsPage() {
     setPointsReason("");
   }
 
+  const currentAvatarUrl = avatarPreview || profile?.avatar_url;
+  const currentInitial = (displayNameInput || profile?.display_name || "U").charAt(0).toUpperCase();
+
   return (
     <div>
       <PageHeader title="Stream Settings" />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Stream Viewers */}
-        <div className="lg:col-span-2">
+        {/* Left column: Profile + Viewers */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Profile Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg text-white flex items-center gap-2">
+                <Camera className="h-5 w-5 text-primary" />
+                Profile Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Avatar Section */}
+              <div className="flex items-start gap-6">
+                <div className="relative group shrink-0">
+                  {/* Avatar display */}
+                  <div className="relative">
+                    <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary to-primary/40 opacity-50" />
+                    {currentAvatarUrl ? (
+                      <img
+                        src={currentAvatarUrl}
+                        alt="Avatar"
+                        className="relative h-20 w-20 rounded-full border-2 border-primary/30 object-cover"
+                      />
+                    ) : (
+                      <div className="relative h-20 w-20 rounded-full border-2 border-primary/30 bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-2xl font-bold">
+                        {currentInitial}
+                      </div>
+                    )}
+                    {/* Upload overlay */}
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                    >
+                      {uploading ? (
+                        <Loader2 className="h-6 w-6 text-white animate-spin" />
+                      ) : (
+                        <Camera className="h-6 w-6 text-white" />
+                      )}
+                    </button>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.gif,.webp"
+                    className="hidden"
+                    onChange={handleAvatarSelect}
+                  />
+                </div>
+
+                <div className="flex-1 space-y-3">
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground">Profile Picture</h4>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Upload a profile picture. Supported formats: JPG, PNG, GIF, WebP.
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Max. size: <span className="text-foreground/70 font-medium">2 MB</span> — Recommended: <span className="text-foreground/70 font-medium">256 x 256 px</span> (square)
+                    </p>
+                  </div>
+
+                  {avatarError && (
+                    <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                      {avatarError}
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                    >
+                      {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
+                      {uploading ? "Uploading..." : "Upload Image"}
+                    </Button>
+                    {currentAvatarUrl && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="gap-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/5"
+                        onClick={handleRemoveAvatar}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Display Name */}
+              <div className="space-y-2 pt-2 border-t border-border/50">
+                <Label className="text-white">Display Name</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={displayNameInput}
+                    onChange={(e) => setDisplayNameInput(e.target.value)}
+                    placeholder="Your display name"
+                    className="flex-1"
+                  />
+                  <Button className="gap-1.5" onClick={handleSaveProfile} disabled={savingProfile}>
+                    {savingProfile ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                    Save
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">Shown in the header and profile dropdown</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Stream Viewers */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg text-white flex items-center gap-2">
