@@ -1,21 +1,65 @@
 "use client";
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { motion } from 'framer-motion';
 import RevealText from '@/components/landing/ui/RevealText';
 import { useLanguage } from '@/context/LanguageContext';
 
 gsap.registerPlugin(ScrollTrigger);
 
 /* ================================================================
+   Animated hooks for overlay demo data
+   ================================================================ */
+
+function useAnimatedCounter(target, duration = 3000, interval = 4000) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    let frame;
+    const animate = () => {
+      const start = performance.now();
+      const from = 0;
+      const step = (now) => {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setValue(Math.round(from + (target - from) * eased));
+        if (progress < 1) frame = requestAnimationFrame(step);
+      };
+      frame = requestAnimationFrame(step);
+    };
+    animate();
+    const id = setInterval(() => {
+      setValue(0);
+      setTimeout(animate, 200);
+    }, interval);
+    return () => { cancelAnimationFrame(frame); clearInterval(id); };
+  }, [target, duration, interval]);
+  return value;
+}
+
+function useCycleIndex(length, intervalMs = 2500) {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setIdx((i) => (i + 1) % length), intervalMs);
+    return () => clearInterval(id);
+  }, [length, intervalMs]);
+  return idx;
+}
+
+/* ================================================================
    EXACT 1:1 copies of the real overlay visual components,
-   hard-coded with demo data. Each overlay keeps its original
-   Tailwind classes + inline styles from the overlay pages.
+   with demo data + subtle animations. Each overlay keeps its
+   original Tailwind classes + inline styles.
    ================================================================ */
 
 // ── 1. Balance Normal ───────────────────────────────────
 function BalanceOverlay() {
+  const deposits = useAnimatedCounter(12500, 2500, 5000);
+  const withdrawals = useAnimatedCounter(4200, 2500, 5000);
+  const balance = deposits - withdrawals;
+
   return (
     <div className="inline-block w-full">
       <div
@@ -28,35 +72,35 @@ function BalanceOverlay() {
         }}
       >
         {/* Deposits */}
-        <div className="flex items-center gap-2.5">
+        <motion.div className="flex items-center gap-2.5" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
           <div
             className="flex items-center justify-center h-7 w-7 rounded-full text-sm font-bold"
             style={{ background: "rgba(16, 185, 129, 0.15)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.25)" }}
           >
             +
           </div>
-          <span className="text-white font-bold text-base">$12,500</span>
-        </div>
+          <span className="text-white font-bold text-base">${deposits.toLocaleString()}</span>
+        </motion.div>
         {/* Withdrawals */}
-        <div className="flex items-center gap-2.5">
+        <motion.div className="flex items-center gap-2.5" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
           <div
             className="flex items-center justify-center h-7 w-7 rounded-full text-sm font-bold"
             style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.25)" }}
           >
             &minus;
           </div>
-          <span className="text-white font-bold text-base">$4,200</span>
-        </div>
+          <span className="text-white font-bold text-base">${withdrawals.toLocaleString()}</span>
+        </motion.div>
         {/* Balance / LeftOver */}
-        <div className="flex items-center gap-2.5">
+        <motion.div className="flex items-center gap-2.5" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
           <div
             className="flex items-center justify-center h-7 w-7 rounded-full text-sm font-bold"
             style={{ background: "rgba(139, 92, 246, 0.15)", color: "#8b5cf6", border: "1px solid rgba(139, 92, 246, 0.25)" }}
           >
             &#8645;
           </div>
-          <span className="text-white font-bold text-base">$8,300</span>
-        </div>
+          <span className="text-white font-bold text-base">${balance.toLocaleString()}</span>
+        </motion.div>
       </div>
     </div>
   );
@@ -64,7 +108,18 @@ function BalanceOverlay() {
 
 // ── 2. Wager Bar Normal ─────────────────────────────────
 function WagerBarOverlay() {
-  const pct = 63.6;
+  const [pct, setPct] = useState(12);
+  useEffect(() => {
+    const timeout = setTimeout(() => setPct(63.6), 800);
+    const interval = setInterval(() => {
+      setPct(12);
+      setTimeout(() => setPct(63.6 + Math.random() * 15), 800);
+    }, 6000);
+    return () => { clearTimeout(timeout); clearInterval(interval); };
+  }, []);
+
+  const wagered = Math.round(50000 * pct / 100);
+
   return (
     <div className="inline-block w-full">
       <div
@@ -106,7 +161,7 @@ function WagerBarOverlay() {
                 className="font-bold text-sm px-3 py-1 rounded"
                 style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)" }}
               >
-                $31,800 / $50,000
+                ${wagered.toLocaleString()} / $50,000
               </span>
               <span
                 className="font-semibold text-sm px-2.5 py-1 rounded"
@@ -146,11 +201,11 @@ function WagerBarOverlay() {
             </div>
             <div className="flex items-center justify-between text-xs">
               <span style={{ color: "#64748b" }}>WEBSITE: <span className="font-semibold text-blue-400">STAKE.COM</span></span>
-              <span style={{ color: "#64748b" }}>LEFT: <span className="text-amber-400 font-semibold">$18,200</span></span>
+              <span style={{ color: "#64748b" }}>LEFT: <span className="text-amber-400 font-semibold">${(50000 - wagered).toLocaleString()}</span></span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span style={{ color: "#64748b" }}>START: <span className="text-emerald-400 font-semibold">$5,000</span></span>
-              <span style={{ color: "#64748b" }}>WAGERED: <span className="text-red-400 font-semibold">$31,800</span></span>
+              <span style={{ color: "#64748b" }}>WAGERED: <span className="text-red-400 font-semibold">${wagered.toLocaleString()}</span></span>
             </div>
           </div>
 
@@ -168,6 +223,12 @@ function WagerBarOverlay() {
 
 // ── 3. Bonushunt Large ──────────────────────────────────
 function BonushuntOverlay() {
+  const [count, setCount] = useState(3);
+  useEffect(() => {
+    const id = setInterval(() => setCount((c) => c >= 12 ? 3 : c + 1), 3000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="inline-block w-full">
       <div
@@ -196,9 +257,15 @@ function BonushuntOverlay() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(239, 68, 68, 0.1)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.15)" }}>
-              3/12
-            </span>
+            <motion.span
+              key={count}
+              initial={{ scale: 1.3, color: "#ef4444" }}
+              animate={{ scale: 1, color: "#ef4444" }}
+              className="text-xs font-bold px-2.5 py-1 rounded-full"
+              style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.15)" }}
+            >
+              {count}/12
+            </motion.span>
           </div>
         </div>
 
@@ -244,12 +311,22 @@ function BonushuntOverlay() {
 
 // ── 4. Slot Battle Normal ───────────────────────────────
 function SlotBattleOverlay() {
+  const [scoreL, setScoreL] = useState(2.1);
+  const [scoreR, setScoreR] = useState(1.5);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setScoreL((s) => Math.min(s + 0.2 + Math.random() * 0.3, 5.0));
+      setScoreR((s) => Math.min(s + 0.1 + Math.random() * 0.4, 5.0));
+    }, 2500);
+    return () => clearInterval(id);
+  }, []);
+
   const statsRows = [
     { left: "3/3", label: "# BONUS", right: "3/3" },
     { left: "150$", label: "COST", right: "150$" },
     { left: "847$", label: "BEST WIN", right: "623$" },
     { left: "5.6X", label: "BEST X", right: "4.2X" },
-    { left: "3.42", label: "SCORE", right: "2.18", highlight: true },
+    { left: scoreL.toFixed(2), label: "SCORE", right: scoreR.toFixed(2), highlight: true },
   ];
 
   return (
@@ -280,7 +357,13 @@ function SlotBattleOverlay() {
                 <span className="text-[9px] text-slate-500 block">Pragmatic Play</span>
               </div>
             </div>
-            <span className="text-slate-600 font-black text-sm shrink-0">VS</span>
+            <motion.span
+              animate={{ scale: [1, 1.15, 1] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="text-slate-600 font-black text-sm shrink-0"
+            >
+              VS
+            </motion.span>
             <div className="flex-1 rounded-lg px-3 py-2.5 flex items-center gap-2 justify-end" style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.04), rgba(16,185,129,0.12))", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
               <div className="text-right">
                 <span className="text-white font-bold text-xs block">Gates of Olympus</span>
@@ -317,6 +400,12 @@ function SlotBattleOverlay() {
 
 // ── 5. Tournament Normal ────────────────────────────────
 function TournamentOverlay() {
+  const [multi, setMulti] = useState(187);
+  useEffect(() => {
+    const id = setInterval(() => setMulti((m) => m + Math.floor(Math.random() * 30 + 5)), 3500);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="inline-block w-full">
       <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)", border: "1px solid rgba(59, 130, 246, 0.15)", boxShadow: "0 4px 32px rgba(0,0,0,0.6)" }}>
@@ -346,9 +435,15 @@ function TournamentOverlay() {
                 <span className="text-white font-bold text-sm block">SlotKing99</span>
                 <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">HIGHEST X-FACTOR</span>
               </div>
-              <div className="px-2.5 py-1 rounded-md text-xs font-black" style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)" }}>
-                187X
-              </div>
+              <motion.div
+                key={multi}
+                initial={{ scale: 1.2 }}
+                animate={{ scale: 1 }}
+                className="px-2.5 py-1 rounded-md text-xs font-black"
+                style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+              >
+                {multi}X
+              </motion.div>
             </div>
           </div>
         </div>
@@ -371,7 +466,13 @@ function NowPlayingOverlay() {
           {/* Game Image placeholder */}
           <div className="w-[100px] shrink-0 relative overflow-hidden">
             <div className="h-full w-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #1a73e833, #1a73e811)" }}>
-              <span className="text-[10px] font-bold text-white/50 text-center px-2">Sweet Bonanza</span>
+              <motion.span
+                animate={{ opacity: [0.4, 0.7, 0.4] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                className="text-[10px] font-bold text-white/50 text-center px-2"
+              >
+                Sweet Bonanza
+              </motion.span>
             </div>
             <div className="absolute inset-y-0 right-0 w-6" style={{ background: "linear-gradient(to right, transparent, #0c1018)" }} />
           </div>
@@ -381,7 +482,7 @@ function NowPlayingOverlay() {
             {/* Current Game */}
             <div className="flex-1 px-3 py-3 flex flex-col justify-center">
               <div className="flex items-center gap-1.5 mb-1">
-                <span className="text-[10px]" style={{ color: "#ef4444" }}>&#9654;</span>
+                <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} className="text-[10px]" style={{ color: "#ef4444" }}>&#9654;</motion.span>
                 <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: "#94a3b8" }}>CURRENT GAME</span>
               </div>
               <p className="text-white font-bold text-xs leading-tight">Sweet Bonanza</p>
@@ -420,13 +521,19 @@ function NowPlayingOverlay() {
 
 // ── 7. Chat Normal ──────────────────────────────────────
 function ChatOverlay() {
-  const messages = [
+  const allMessages = [
     { role: "viewer", user: "SlotKing99", msg: "Let's go!! Big win incoming" },
     { role: "moderator", user: "ModDave", msg: "Welcome everyone!" },
     { role: "subscriber", user: "BigWinMax", msg: "Thanks for the sub!" },
     { role: "viewer", user: "LuckyRoller", msg: "POGCHAMP" },
     { role: "viewer", user: "GoldSpinner", msg: "!guess 250" },
+    { role: "subscriber", user: "ProGamer42", msg: "Insane hit!" },
+    { role: "viewer", user: "CryptoKing", msg: "GG easy" },
+    { role: "moderator", user: "ModSarah", msg: "Remember the rules!" },
   ];
+
+  const offset = useCycleIndex(allMessages.length - 4, 2500);
+  const messages = allMessages.slice(offset, offset + 5);
 
   const roleColor = {
     viewer: { text: "text-blue-400", bg: "bg-blue-500/20", letter: "V" },
@@ -447,11 +554,17 @@ function ChatOverlay() {
             <span className="text-[9px] text-slate-500 font-semibold">LIVE</span>
           </div>
         </div>
-        <div className="px-4 py-3 space-y-3">
+        <div className="px-4 py-3 space-y-3 min-h-[180px]">
           {messages.map((msg, i) => {
             const rc = roleColor[msg.role];
             return (
-              <div key={i} className="flex gap-2.5 items-start">
+              <motion.div
+                key={`${msg.user}-${offset}-${i}`}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.05 }}
+                className="flex gap-2.5 items-start"
+              >
                 <div className={`h-5 w-5 rounded-full ${rc.bg} flex items-center justify-center shrink-0 mt-0.5`}>
                   <span className={`text-[8px] font-bold ${rc.text}`}>{rc.letter}</span>
                 </div>
@@ -459,7 +572,7 @@ function ChatOverlay() {
                   <span className={`text-[11px] font-bold ${rc.text}`}>{msg.user}</span>
                   <p className="text-[11px] text-slate-400 mt-0.5">{msg.msg}</p>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -470,9 +583,19 @@ function ChatOverlay() {
 
 // ── 8. Duel Normal ──────────────────────────────────────
 function DuelOverlay() {
+  const [r1, setR1] = useState(342);
+  const [r2, setR2] = useState(187);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setR1((r) => r + Math.floor(Math.random() * 80 + 20));
+      setR2((r) => r + Math.floor(Math.random() * 80 + 20));
+    }, 2200);
+    return () => clearInterval(id);
+  }, []);
+
   const players = [
-    { name: "Player 1", game: "Sweet Bonanza", buyIn: "100$", result: "342$", rank: 1, color: "#ef4444" },
-    { name: "Player 2", game: "Gates of Olympus", buyIn: "100$", result: "187$", rank: 2, color: "#10b981" },
+    { name: "Player 1", game: "Sweet Bonanza", buyIn: "100$", result: `${r1}$`, rank: 1, color: "#ef4444" },
+    { name: "Player 2", game: "Gates of Olympus", buyIn: "100$", result: `${r2}$`, rank: 2, color: "#10b981" },
   ];
 
   return (
@@ -510,7 +633,7 @@ function DuelOverlay() {
               </div>
               <span className="text-slate-400 text-[10px]">{p.game}</span>
               <span className="text-white text-[10px] font-semibold">{p.buyIn}</span>
-              <span className="text-slate-500 text-[10px]">{p.result}</span>
+              <motion.span key={p.result} initial={{ color: "#22c55e" }} animate={{ color: "#64748b" }} transition={{ duration: 1 }} className="text-[10px]">{p.result}</motion.span>
               <span className="text-amber-400 text-[10px] font-bold text-center">{p.rank}</span>
             </div>
           ))}
@@ -536,6 +659,14 @@ function HotWordsOverlay() {
     { bg: "rgba(139, 92, 246, 0.15)", border: "rgba(139, 92, 246, 0.25)", text: "#8b5cf6" },
   ];
 
+  const [counts, setCounts] = useState([42, 87, 65, 31, 54]);
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCounts((prev) => prev.map((c) => c + Math.floor(Math.random() * 8 + 1)));
+    }, 2000);
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="inline-block w-full">
       <div
@@ -559,10 +690,22 @@ function HotWordsOverlay() {
           {words.map((word, i) => {
             const c = colors[i % colors.length];
             return (
-              <span key={i} className="px-3 py-1 rounded-full text-xs font-bold tracking-wide inline-flex items-center gap-1.5" style={{ background: c.bg, border: `1px solid ${c.border}`, color: c.text }}>
+              <motion.span
+                key={i}
+                whileHover={{ scale: 1.08 }}
+                className="px-3 py-1 rounded-full text-xs font-bold tracking-wide inline-flex items-center gap-1.5"
+                style={{ background: c.bg, border: `1px solid ${c.border}`, color: c.text }}
+              >
                 {word}
-                <span className="text-[9px] font-semibold opacity-70">({Math.floor(Math.random() * 100 + 20)})</span>
-              </span>
+                <motion.span
+                  key={counts[i]}
+                  initial={{ scale: 1.3 }}
+                  animate={{ scale: 1 }}
+                  className="text-[9px] font-semibold opacity-70"
+                >
+                  ({counts[i]})
+                </motion.span>
+              </motion.span>
             );
           })}
         </div>
@@ -571,35 +714,33 @@ function HotWordsOverlay() {
   );
 }
 
-// ── Overlay label ───────────────────────────────────────
-function OverlayLabel({ children }) {
+// ── Overlay Card wrapper with entrance + hover animation ──
+function OverlayCard({ children, label, index }) {
   return (
-    <div className="text-center mt-3">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.15em]" style={{ color: 'var(--text-tertiary)' }}>
-        {children}
-      </span>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -6, transition: { duration: 0.25 } }}
+      style={{ cursor: "default" }}
+    >
+      {children}
+      <div className="text-center mt-3">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.15em]" style={{ color: 'var(--text-tertiary)' }}>
+          {label}
+        </span>
+      </div>
+    </motion.div>
   );
 }
 
 // ── Main Section ────────────────────────────────────────
 export default function WidgetShowcase() {
   const { t } = useLanguage();
-  const sectionRef = useRef(null);
-  const cardsRef = useRef(null);
-
-  useEffect(() => {
-    const cards = cardsRef.current;
-    if (!cards) return;
-    const cardEls = cards.querySelectorAll(':scope > div');
-    gsap.fromTo(cardEls, { y: 50, opacity: 0 }, {
-      y: 0, opacity: 1, duration: 0.9, stagger: 0.07, ease: 'power3.out',
-      scrollTrigger: { trigger: sectionRef.current, start: 'top 70%', toggleActions: 'play none none reverse' },
-    });
-  }, []);
 
   return (
-    <section id="widgets" ref={sectionRef} className="section" style={{ padding: 'clamp(100px, 14vw, 180px) 0', position: 'relative' }}>
+    <section id="widgets" className="section" style={{ padding: 'clamp(100px, 14vw, 180px) 0', position: 'relative' }}>
       {/* Header */}
       <div className="container" style={{ textAlign: 'center', marginBottom: 'clamp(36px, 5vw, 56px)' }}>
         <RevealText as="div" style={{ marginBottom: '16px' }}>
@@ -640,10 +781,9 @@ export default function WidgetShowcase() {
         </div>
       </div>
 
-      {/* 3x3 Overlay Grid — exact copies of real overlays */}
+      {/* 3x3 Overlay Grid — animated exact copies of real overlays */}
       <div className="container-wide">
         <div
-          ref={cardsRef}
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
@@ -651,19 +791,19 @@ export default function WidgetShowcase() {
           }}
         >
           {/* Row 1 */}
-          <div><BalanceOverlay /><OverlayLabel>Balance</OverlayLabel></div>
-          <div><WagerBarOverlay /><OverlayLabel>Wager Bar</OverlayLabel></div>
-          <div><BonushuntOverlay /><OverlayLabel>Bonus Hunt</OverlayLabel></div>
+          <OverlayCard label="Balance" index={0}><BalanceOverlay /></OverlayCard>
+          <OverlayCard label="Wager Bar" index={1}><WagerBarOverlay /></OverlayCard>
+          <OverlayCard label="Bonus Hunt" index={2}><BonushuntOverlay /></OverlayCard>
 
           {/* Row 2 */}
-          <div><SlotBattleOverlay /><OverlayLabel>Slot Battle</OverlayLabel></div>
-          <div><TournamentOverlay /><OverlayLabel>Tournament</OverlayLabel></div>
-          <div><NowPlayingOverlay /><OverlayLabel>Now Playing</OverlayLabel></div>
+          <OverlayCard label="Slot Battle" index={3}><SlotBattleOverlay /></OverlayCard>
+          <OverlayCard label="Tournament" index={4}><TournamentOverlay /></OverlayCard>
+          <OverlayCard label="Now Playing" index={5}><NowPlayingOverlay /></OverlayCard>
 
           {/* Row 3 */}
-          <div><ChatOverlay /><OverlayLabel>Live Chat</OverlayLabel></div>
-          <div><DuelOverlay /><OverlayLabel>Duel</OverlayLabel></div>
-          <div><HotWordsOverlay /><OverlayLabel>Hot Words</OverlayLabel></div>
+          <OverlayCard label="Live Chat" index={6}><ChatOverlay /></OverlayCard>
+          <OverlayCard label="Duel" index={7}><DuelOverlay /></OverlayCard>
+          <OverlayCard label="Hot Words" index={8}><HotWordsOverlay /></OverlayCard>
         </div>
       </div>
     </section>
