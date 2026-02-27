@@ -4,9 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  // Use nextUrl.origin which correctly resolves x-forwarded-host/proto
-  // behind reverse proxies (Render.com runs on internal localhost:10000)
-  const origin = request.nextUrl.origin;
+  // Use NEXT_PUBLIC_SITE_URL env var for reliable origin on Render.com
+  // (reverse proxy makes request.url resolve to internal localhost:10000)
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || request.nextUrl.origin;
   const code = searchParams.get("code");
   const next = searchParams.get("next");
 
@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
   // Handle Supabase error redirects (e.g. expired token)
   const error = searchParams.get("error");
   const errorCode = searchParams.get("error_code");
-  const errorDescription = searchParams.get("error_description");
   if (error) {
     const msg = errorCode || error;
     return NextResponse.redirect(
