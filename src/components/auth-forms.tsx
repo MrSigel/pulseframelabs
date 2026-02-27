@@ -416,6 +416,7 @@ function RegisterFormContent({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -458,24 +459,76 @@ function RegisterFormContent({
       return;
     }
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { first_name: firstName },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { first_name: firstName },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+
+      // If email confirmation is required, user session will be null
+      if (data.user && !data.session) {
+        setSuccess(true);
+        setLoading(false);
+        return;
+      }
+
+      // If auto-confirmed (email confirmation disabled), redirect
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
       setLoading(false);
-      return;
     }
+  }
 
-    router.push("/dashboard");
-    router.refresh();
+  if (success) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        style={{ textAlign: "center", padding: "20px 0" }}
+      >
+        <div
+          style={{
+            width: "56px",
+            height: "56px",
+            borderRadius: "50%",
+            background: "linear-gradient(135deg, var(--gold), var(--gold-light, #e2cc7e))",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 20px",
+          }}
+        >
+          <Check size={28} style={{ color: "var(--bg-primary, #09090b)" }} />
+        </div>
+        <h3
+          style={{
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontSize: "1.3rem",
+            fontWeight: 700,
+            color: "var(--text-primary)",
+            marginBottom: "10px",
+          }}
+        >
+          {auth.checkEmailTitle || "Check your email"}
+        </h3>
+        <p style={{ fontSize: "0.85rem", color: "var(--text-tertiary)", lineHeight: 1.6 }}>
+          {auth.checkEmailMessage || `We sent a confirmation link to ${email}. Please check your inbox and click the link to activate your account.`}
+        </p>
+      </motion.div>
+    );
   }
 
   return (
