@@ -442,7 +442,22 @@ function AuthLayoutInner({ children }: { children: React.ReactNode }) {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            style={{ width: "100%", maxWidth: "380px" }}
+            style={{
+              width: "100%",
+              maxWidth: "400px",
+              borderRadius: "16px",
+              border: `1px solid ${isDark ? "rgba(201,168,76,0.15)" : "rgba(139,109,31,0.12)"}`,
+              background: isDark
+                ? "linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%)"
+                : "linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.3) 100%)",
+              boxShadow: isDark
+                ? "0 8px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)"
+                : "0 8px 40px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.7)",
+              backdropFilter: "blur(12px)",
+              WebkitBackdropFilter: "blur(12px)",
+              padding: "32px 28px",
+              transition: "border-color 0.5s, background 0.5s, box-shadow 0.5s",
+            }}
           >
             {children}
           </motion.div>

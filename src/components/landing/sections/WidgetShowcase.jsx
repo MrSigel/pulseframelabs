@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { motion } from 'framer-motion';
 import RevealText from '@/components/landing/ui/RevealText';
 import { useLanguage } from '@/context/LanguageContext';
+import { useTheme } from '@/hooks/useTheme';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -49,9 +50,50 @@ function useCycleIndex(length, intervalMs = 2500) {
 }
 
 /* ================================================================
+   Theme-aware color helper — returns all overlay colors
+   ================================================================ */
+
+function useOverlayTheme() {
+  const theme = useTheme();
+  const isDark = theme.isDark;
+
+  return {
+    isDark,
+    cardBg: isDark
+      ? "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)"
+      : "linear-gradient(135deg, #ffffff 0%, #f8f6f1 50%, #ffffff 100%)",
+    cardBgFlat: isDark
+      ? "linear-gradient(180deg, #0c1018 0%, #111827 100%)"
+      : "linear-gradient(180deg, #ffffff 0%, #f5f3ee 100%)",
+    cardBorder: isDark ? "1px solid rgba(59,130,246,0.2)" : "1px solid rgba(139,109,31,0.18)",
+    cardBorderSubtle: isDark ? "1px solid rgba(59,130,246,0.15)" : "1px solid rgba(139,109,31,0.12)",
+    cardShadow: isDark ? "0 4px 32px rgba(0,0,0,0.6)" : "0 4px 32px rgba(0,0,0,0.08)",
+    cardShadowSm: isDark ? "0 2px 16px rgba(0,0,0,0.5)" : "0 2px 16px rgba(0,0,0,0.06)",
+    textMain: isDark ? "#f5f0e8" : "#1a1714",
+    textSub: isDark ? "#94a3b8" : "#6b7280",
+    textMuted: isDark ? "#64748b" : "#9ca3af",
+    textFaint: isDark ? "rgba(100,116,139,0.4)" : "rgba(100,116,139,0.5)",
+    rowDivider: isDark ? "1px solid rgba(255,255,255,0.06)" : "1px solid rgba(0,0,0,0.06)",
+    rowDividerSubtle: isDark ? "1px solid rgba(255,255,255,0.04)" : "1px solid rgba(0,0,0,0.04)",
+    rowDividerFaint: isDark ? "1px solid rgba(255,255,255,0.03)" : "1px solid rgba(0,0,0,0.03)",
+    rowBg: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.02)",
+    rowBgSubtle: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
+    barTrack: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.06)",
+    statCellBg: isDark
+      ? "linear-gradient(180deg,rgba(15,21,33,0.8),rgba(12,16,24,0.9))"
+      : "linear-gradient(180deg,rgba(255,255,255,0.9),rgba(248,246,241,0.95))",
+    gridGap: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+    imgFadeTo: isDark ? "#0c1018" : "#f8f6f1",
+    shimmerGrad: isDark
+      ? "linear-gradient(90deg, #fca5a5, #ffffff, #fca5a5)"
+      : "linear-gradient(90deg, #dc2626, #991b1b, #dc2626)",
+    infoBg: isDark ? "rgba(59, 130, 246, 0.2)" : "rgba(59, 130, 246, 0.15)",
+  };
+}
+
+/* ================================================================
    EXACT 1:1 copies of the real overlay visual components,
-   with demo data + subtle animations. Each overlay keeps its
-   original Tailwind classes + inline styles.
+   with demo data + subtle animations. Theme-aware for light/dark.
    ================================================================ */
 
 // ── 1. Balance Normal ───────────────────────────────────
@@ -59,48 +101,24 @@ function BalanceOverlay() {
   const deposits = useAnimatedCounter(12500, 2500, 5000);
   const withdrawals = useAnimatedCounter(4200, 2500, 5000);
   const balance = deposits - withdrawals;
+  const c = useOverlayTheme();
 
   return (
     <div className="inline-block w-full">
       <div
         className="rounded-lg overflow-hidden space-y-2"
-        style={{
-          background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.2)",
-          boxShadow: "0 2px 16px rgba(0,0,0,0.5)",
-          padding: "12px 18px",
-        }}
+        style={{ background: c.cardBg, border: c.cardBorder, boxShadow: c.cardShadowSm, padding: "12px 18px" }}
       >
-        {/* Deposits */}
-        <motion.div className="flex items-center gap-2.5" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
-          <div
-            className="flex items-center justify-center h-7 w-7 rounded-full text-sm font-bold"
-            style={{ background: "rgba(16, 185, 129, 0.15)", color: "#10b981", border: "1px solid rgba(16, 185, 129, 0.25)" }}
-          >
-            +
-          </div>
-          <span className="text-white font-bold text-base">${deposits.toLocaleString()}</span>
-        </motion.div>
-        {/* Withdrawals */}
-        <motion.div className="flex items-center gap-2.5" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-          <div
-            className="flex items-center justify-center h-7 w-7 rounded-full text-sm font-bold"
-            style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.25)" }}
-          >
-            &minus;
-          </div>
-          <span className="text-white font-bold text-base">${withdrawals.toLocaleString()}</span>
-        </motion.div>
-        {/* Balance / LeftOver */}
-        <motion.div className="flex items-center gap-2.5" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
-          <div
-            className="flex items-center justify-center h-7 w-7 rounded-full text-sm font-bold"
-            style={{ background: "rgba(139, 92, 246, 0.15)", color: "#8b5cf6", border: "1px solid rgba(139, 92, 246, 0.25)" }}
-          >
-            &#8645;
-          </div>
-          <span className="text-white font-bold text-base">${balance.toLocaleString()}</span>
-        </motion.div>
+        {[
+          { icon: "+", val: `$${deposits.toLocaleString()}`, bg: "rgba(16, 185, 129, 0.15)", color: "#10b981", border: "rgba(16, 185, 129, 0.25)" },
+          { icon: "\u2212", val: `$${withdrawals.toLocaleString()}`, bg: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "rgba(239, 68, 68, 0.25)" },
+          { icon: "\u21C5", val: `$${balance.toLocaleString()}`, bg: "rgba(139, 92, 246, 0.15)", color: "#8b5cf6", border: "rgba(139, 92, 246, 0.25)" },
+        ].map((r, i) => (
+          <motion.div key={i} className="flex items-center gap-2.5" initial={{ x: -20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.1 * (i + 1) }}>
+            <div className="flex items-center justify-center h-7 w-7 rounded-full text-sm font-bold" style={{ background: r.bg, color: r.color, border: `1px solid ${r.border}` }}>{r.icon}</div>
+            <span className="font-bold text-base" style={{ color: c.textMain }}>{r.val}</span>
+          </motion.div>
+        ))}
       </div>
     </div>
   );
@@ -119,99 +137,53 @@ function WagerBarOverlay() {
   }, []);
 
   const wagered = Math.round(50000 * pct / 100);
+  const c = useOverlayTheme();
 
   return (
     <div className="inline-block w-full">
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{
-          background: "linear-gradient(180deg, #0c1018 0%, #111827 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.15)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
-        }}
-      >
+      <div className="rounded-xl overflow-hidden" style={{ background: c.cardBgFlat, border: c.cardBorderSubtle, boxShadow: c.cardShadow }}>
         {/* Header */}
-        <div
-          className="px-5 py-2.5 flex items-center justify-center"
-          style={{
-            background: "linear-gradient(90deg, rgba(239,68,68,0.08), rgba(239,68,68,0.18), rgba(239,68,68,0.08))",
-            borderBottom: "1px solid rgba(239, 68, 68, 0.12)",
-          }}
-        >
-          <span
-            className="font-bold text-sm tracking-[0.15em]"
-            style={{
-              background: "linear-gradient(90deg, #fca5a5, #ffffff, #fca5a5)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundSize: "200% 100%",
-              animation: "shimmer 3s linear infinite",
-            }}
-          >
+        <div className="px-5 py-2.5 flex items-center justify-center" style={{ background: "linear-gradient(90deg, rgba(239,68,68,0.08), rgba(239,68,68,0.18), rgba(239,68,68,0.08))", borderBottom: "1px solid rgba(239, 68, 68, 0.12)" }}>
+          <span className="font-bold text-sm tracking-[0.15em]" style={{ background: c.shimmerGrad, backgroundClip: "text", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundSize: "200% 100%", animation: "shimmer 3s linear infinite" }}>
             PULSEFRAMELABS.COM
           </span>
         </div>
 
         <div className="px-5 py-4 space-y-3">
-          {/* Wager progress */}
           <div>
             <div className="flex items-center justify-center gap-3 mb-2.5">
-              <span
-                className="font-bold text-sm px-3 py-1 rounded"
-                style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)" }}
-              >
+              <span className="font-bold text-sm px-3 py-1 rounded" style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)" }}>
                 ${wagered.toLocaleString()} / $50,000
               </span>
-              <span
-                className="font-semibold text-sm px-2.5 py-1 rounded"
-                style={{ background: "rgba(16, 185, 129, 0.12)", color: "#10b981" }}
-              >
+              <span className="font-semibold text-sm px-2.5 py-1 rounded" style={{ background: "rgba(16, 185, 129, 0.12)", color: "#10b981" }}>
                 {pct.toFixed(1)}%
               </span>
             </div>
-
-            {/* Progress bar */}
-            <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
-              <div
-                className="h-full rounded-full relative"
-                style={{
-                  width: `${pct}%`,
-                  background: "linear-gradient(90deg, #ef4444, #f97316, #eab308)",
-                  transition: "width 1.5s ease-in-out",
-                }}
-              >
-                <div
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)",
-                    backgroundSize: "200% 100%",
-                    animation: "shimmer 2s linear infinite",
-                  }}
-                />
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: c.barTrack }}>
+              <div className="h-full rounded-full relative" style={{ width: `${pct}%`, background: "linear-gradient(90deg, #ef4444, #f97316, #eab308)", transition: "width 1.5s ease-in-out" }}>
+                <div className="absolute inset-0 rounded-full" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)", backgroundSize: "200% 100%", animation: "shimmer 2s linear infinite" }} />
               </div>
             </div>
           </div>
 
           {/* Info grid */}
-          <div className="rounded-lg p-3 space-y-1.5" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
+          <div className="rounded-lg p-3 space-y-1.5" style={{ background: c.rowBg, border: c.rowDividerSubtle }}>
             <div className="flex items-center justify-between text-xs">
-              <span className="font-medium" style={{ color: "#64748b" }}>TOTAL</span>
-              <span className="text-white font-semibold">$50,000</span>
+              <span className="font-medium" style={{ color: c.textMuted }}>TOTAL</span>
+              <span className="font-semibold" style={{ color: c.textMain }}>$50,000</span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span style={{ color: "#64748b" }}>WEBSITE: <span className="font-semibold text-blue-400">STAKE.COM</span></span>
-              <span style={{ color: "#64748b" }}>LEFT: <span className="text-amber-400 font-semibold">${(50000 - wagered).toLocaleString()}</span></span>
+              <span style={{ color: c.textMuted }}>WEBSITE: <span className="font-semibold text-blue-400">STAKE.COM</span></span>
+              <span style={{ color: c.textMuted }}>LEFT: <span className="text-amber-400 font-semibold">${(50000 - wagered).toLocaleString()}</span></span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span style={{ color: "#64748b" }}>START: <span className="text-emerald-400 font-semibold">$5,000</span></span>
-              <span style={{ color: "#64748b" }}>WAGERED: <span className="text-red-400 font-semibold">${wagered.toLocaleString()}</span></span>
+              <span style={{ color: c.textMuted }}>START: <span className="text-emerald-400 font-semibold">$5,000</span></span>
+              <span style={{ color: c.textMuted }}>WAGERED: <span className="text-red-400 font-semibold">${wagered.toLocaleString()}</span></span>
             </div>
           </div>
 
-          {/* Footer */}
           <div className="flex items-center justify-center pt-1">
-            <span className="text-[9px] tracking-[0.12em] font-medium uppercase" style={{ color: "rgba(100, 116, 139, 0.4)" }}>
+            <span className="text-[9px] tracking-[0.12em] font-medium uppercase" style={{ color: c.textFaint }}>
               Powered by Pulseframelabs
             </span>
           </div>
@@ -225,27 +197,20 @@ function WagerBarOverlay() {
 function BonushuntOverlay() {
   const [count, setCount] = useState(3);
   useEffect(() => {
-    const id = setInterval(() => setCount((c) => c >= 12 ? 3 : c + 1), 3000);
+    const id = setInterval(() => setCount((cc) => cc >= 12 ? 3 : cc + 1), 3000);
     return () => clearInterval(id);
   }, []);
+  const c = useOverlayTheme();
 
   return (
     <div className="inline-block w-full">
-      <div
-        className="rounded-xl overflow-hidden"
-        style={{
-          background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.15)",
-          boxShadow: "0 4px 32px rgba(0,0,0,0.6)",
-        }}
-      >
+      <div className="rounded-xl overflow-hidden" style={{ background: c.cardBg, border: c.cardBorderSubtle, boxShadow: c.cardShadow }}>
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: c.rowDivider }}>
           <div className="flex items-center gap-2.5">
             <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(239, 68, 68, 0.12)", border: "1px solid rgba(239, 68, 68, 0.2)" }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="2" y1="12" x2="22" y2="12" />
+                <circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" />
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
               </svg>
             </div>
@@ -253,55 +218,49 @@ function BonushuntOverlay() {
               <span className="font-bold text-sm block" style={{ background: "linear-gradient(90deg, #ef4444, #f97316, #ef4444)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>
                 Bonus Hunt #5
               </span>
-              <span className="text-[10px] font-semibold text-slate-500">HUNT #A7B</span>
+              <span className="text-[10px] font-semibold" style={{ color: c.textMuted }}>HUNT #A7B</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <motion.span
-              key={count}
-              initial={{ scale: 1.3, color: "#ef4444" }}
-              animate={{ scale: 1, color: "#ef4444" }}
-              className="text-xs font-bold px-2.5 py-1 rounded-full"
-              style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.15)" }}
-            >
+            <motion.span key={count} initial={{ scale: 1.3, color: "#ef4444" }} animate={{ scale: 1, color: "#ef4444" }} className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(239, 68, 68, 0.1)", border: "1px solid rgba(239, 68, 68, 0.15)" }}>
               {count}/12
             </motion.span>
           </div>
         </div>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-4 gap-px" style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+        <div className="grid grid-cols-4 gap-px" style={{ background: c.gridGap, borderBottom: c.rowDividerSubtle }}>
           {[
             { icon: "grid", value: "$2.5K" },
             { icon: "play", value: "$5,000" },
             { icon: "chart", value: "187.0X+" },
             { icon: "x", value: "42.5X" },
           ].map((stat, i) => (
-            <div key={i} className="flex flex-col items-center py-2.5 gap-1" style={{ background: "linear-gradient(180deg, rgba(15,21,33,0.8) 0%, rgba(12,16,24,0.9) 100%)" }}>
+            <div key={i} className="flex flex-col items-center py-2.5 gap-1" style={{ background: c.statCellBg }}>
               <div style={{ color: "#ef4444" }}>
                 {stat.icon === "grid" && <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>}
                 {stat.icon === "play" && <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>}
                 {stat.icon === "chart" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>}
                 {stat.icon === "x" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>}
               </div>
-              <span className="text-white font-bold text-xs">{stat.value}</span>
+              <span className="font-bold text-xs" style={{ color: c.textMain }}>{stat.value}</span>
             </div>
           ))}
         </div>
 
         {/* Leaderboard */}
         <div className="px-4 py-3 space-y-1.5">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: c.rowBgSubtle, border: c.rowDividerSubtle }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="none">
               <path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7L2 9.4h7.6z" />
             </svg>
-            <span className="text-slate-400 text-xs font-semibold">Sweet Bonanza — 187.0X</span>
+            <span className="text-xs font-semibold" style={{ color: c.textSub }}>Sweet Bonanza — 187.0X</span>
           </div>
-          <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.04)" }}>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: c.rowBgSubtle, border: c.rowDividerSubtle }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="none">
               <path d="M12 2C8 6 4 9.5 4 13a8 8 0 0016 0c0-3.5-4-7-8-11z" />
             </svg>
-            <span className="text-slate-400 text-xs font-semibold">Starlight Princess — 8.4X</span>
+            <span className="text-xs font-semibold" style={{ color: c.textSub }}>Starlight Princess — 8.4X</span>
           </div>
         </div>
       </div>
@@ -320,6 +279,7 @@ function SlotBattleOverlay() {
     }, 2500);
     return () => clearInterval(id);
   }, []);
+  const c = useOverlayTheme();
 
   const statsRows = [
     { left: "3/3", label: "# BONUS", right: "3/3" },
@@ -331,15 +291,15 @@ function SlotBattleOverlay() {
 
   return (
     <div className="inline-block w-full">
-      <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)", border: "1px solid rgba(59, 130, 246, 0.15)", boxShadow: "0 4px 32px rgba(0,0,0,0.6)" }}>
+      <div className="rounded-xl overflow-hidden" style={{ background: c.cardBg, border: c.cardBorderSubtle, boxShadow: c.cardShadow }}>
         {/* Header */}
         <div className="px-5 pt-4 pb-2 text-center">
           <span className="font-black text-base tracking-wider" style={{ background: "linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>
             SLOT BATTLE
           </span>
           <div className="flex items-center justify-between mt-1.5">
-            <span className="text-[10px] font-bold text-slate-400">BONUS <span className="text-white">3/3</span></span>
-            <span className="text-[10px] font-bold text-slate-400">START <span className="text-white">500$</span></span>
+            <span className="text-[10px] font-bold" style={{ color: c.textSub }}>BONUS <span style={{ color: c.textMain }}>3/3</span></span>
+            <span className="text-[10px] font-bold" style={{ color: c.textSub }}>START <span style={{ color: c.textMain }}>500$</span></span>
           </div>
         </div>
 
@@ -353,21 +313,17 @@ function SlotBattleOverlay() {
                 </svg>
               </div>
               <div>
-                <span className="text-white font-bold text-xs block">Sweet Bonanza</span>
-                <span className="text-[9px] text-slate-500 block">Pragmatic Play</span>
+                <span className="font-bold text-xs block" style={{ color: c.textMain }}>Sweet Bonanza</span>
+                <span className="text-[9px] block" style={{ color: c.textMuted }}>Pragmatic Play</span>
               </div>
             </div>
-            <motion.span
-              animate={{ scale: [1, 1.15, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="text-slate-600 font-black text-sm shrink-0"
-            >
+            <motion.span animate={{ scale: [1, 1.15, 1] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }} className="font-black text-sm shrink-0" style={{ color: c.textMuted }}>
               VS
             </motion.span>
             <div className="flex-1 rounded-lg px-3 py-2.5 flex items-center gap-2 justify-end" style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.04), rgba(16,185,129,0.12))", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
               <div className="text-right">
-                <span className="text-white font-bold text-xs block">Gates of Olympus</span>
-                <span className="text-[9px] text-slate-500 block">Pragmatic Play</span>
+                <span className="font-bold text-xs block" style={{ color: c.textMain }}>Gates of Olympus</span>
+                <span className="text-[9px] block" style={{ color: c.textMuted }}>Pragmatic Play</span>
               </div>
               <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.25)" }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -381,17 +337,17 @@ function SlotBattleOverlay() {
         {/* Stats Table */}
         <div className="px-4 pb-3">
           {statsRows.map((row, i) => (
-            <div key={i} className="flex items-center justify-between py-2 px-3" style={{ borderTop: i === 0 ? "1px solid rgba(255,255,255,0.06)" : "1px solid rgba(255,255,255,0.03)", background: row.highlight ? "rgba(255,255,255,0.02)" : "transparent" }}>
-              <span className={`text-xs font-bold ${row.highlight ? "text-blue-400" : "text-white"}`}>{row.left}</span>
-              <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">{row.label}</span>
-              <span className={`text-xs font-bold ${row.highlight ? "text-green-400" : "text-white"}`}>{row.right}</span>
+            <div key={i} className="flex items-center justify-between py-2 px-3" style={{ borderTop: i === 0 ? c.rowDivider : c.rowDividerFaint, background: row.highlight ? c.rowBg : "transparent" }}>
+              <span className={`text-xs font-bold ${row.highlight ? "text-blue-400" : ""}`} style={row.highlight ? {} : { color: c.textMain }}>{row.left}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: c.textMuted }}>{row.label}</span>
+              <span className={`text-xs font-bold ${row.highlight ? "text-green-400" : ""}`} style={row.highlight ? {} : { color: c.textMain }}>{row.right}</span>
             </div>
           ))}
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <span className="text-[8px] uppercase tracking-widest text-slate-600">SCORE = OVERALL PAYBACK / (BUY AMOUNT x COST)</span>
+        <div className="px-4 py-2 text-center" style={{ borderTop: c.rowDividerSubtle }}>
+          <span className="text-[8px] uppercase tracking-widest" style={{ color: c.textMuted }}>SCORE = OVERALL PAYBACK / (BUY AMOUNT x COST)</span>
         </div>
       </div>
     </div>
@@ -405,10 +361,11 @@ function TournamentOverlay() {
     const id = setInterval(() => setMulti((m) => m + Math.floor(Math.random() * 30 + 5)), 3500);
     return () => clearInterval(id);
   }, []);
+  const c = useOverlayTheme();
 
   return (
     <div className="inline-block w-full">
-      <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)", border: "1px solid rgba(59, 130, 246, 0.15)", boxShadow: "0 4px 32px rgba(0,0,0,0.6)" }}>
+      <div className="rounded-xl overflow-hidden" style={{ background: c.cardBg, border: c.cardBorderSubtle, boxShadow: c.cardShadow }}>
         {/* Header */}
         <div className="px-5 pt-5 pb-3 text-center">
           <div className="flex items-center justify-center gap-2.5 mb-1">
@@ -419,7 +376,7 @@ function TournamentOverlay() {
               VIEWER TOURNAMENT
             </span>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">TOURNAMENT FINISHED</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: c.textMuted }}>TOURNAMENT FINISHED</span>
         </div>
 
         {/* Winner Card */}
@@ -432,16 +389,10 @@ function TournamentOverlay() {
                 </svg>
               </div>
               <div className="flex-1">
-                <span className="text-white font-bold text-sm block">SlotKing99</span>
-                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">HIGHEST X-FACTOR</span>
+                <span className="font-bold text-sm block" style={{ color: c.textMain }}>SlotKing99</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: c.textSub }}>HIGHEST X-FACTOR</span>
               </div>
-              <motion.div
-                key={multi}
-                initial={{ scale: 1.2 }}
-                animate={{ scale: 1 }}
-                className="px-2.5 py-1 rounded-md text-xs font-black"
-                style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)" }}
-              >
+              <motion.div key={multi} initial={{ scale: 1.2 }} animate={{ scale: 1 }} className="px-2.5 py-1 rounded-md text-xs font-black" style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)" }}>
                 {multi}X
               </motion.div>
             </div>
@@ -449,7 +400,7 @@ function TournamentOverlay() {
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        <div className="px-5 py-3 text-center" style={{ borderTop: c.rowDividerSubtle }}>
           <span className="text-sm font-black tracking-wider" style={{ color: "#10b981" }}>SlotKing99</span>
         </div>
       </div>
@@ -459,45 +410,43 @@ function TournamentOverlay() {
 
 // ── 6. Now Playing Normal ───────────────────────────────
 function NowPlayingOverlay() {
+  const c = useOverlayTheme();
+
   return (
     <div className="inline-block w-full">
-      <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)", border: "1px solid rgba(59, 130, 246, 0.2)", boxShadow: "0 4px 24px rgba(0,0,0,0.5)" }}>
+      <div className="rounded-xl overflow-hidden" style={{ background: c.cardBg, border: c.cardBorder, boxShadow: c.cardShadow }}>
         <div className="flex items-stretch">
           {/* Game Image placeholder */}
           <div className="w-[100px] shrink-0 relative overflow-hidden">
-            <div className="h-full w-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #1a73e833, #1a73e811)" }}>
-              <motion.span
-                animate={{ opacity: [0.4, 0.7, 0.4] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                className="text-[10px] font-bold text-white/50 text-center px-2"
-              >
+            <div className="h-full w-full flex items-center justify-center" style={{ background: c.isDark ? "linear-gradient(135deg, #1a73e833, #1a73e811)" : "linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.04))" }}>
+              <motion.span animate={{ opacity: [0.4, 0.7, 0.4] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} className="text-[10px] font-bold text-center px-2" style={{ color: c.textMuted }}>
                 Sweet Bonanza
               </motion.span>
             </div>
-            <div className="absolute inset-y-0 right-0 w-6" style={{ background: "linear-gradient(to right, transparent, #0c1018)" }} />
+            <div className="absolute inset-y-0 right-0 w-6" style={{ background: `linear-gradient(to right, transparent, ${c.imgFadeTo})` }} />
           </div>
 
           {/* Info Section */}
-          <div className="flex-1 flex items-stretch divide-x divide-white/[0.06]">
+          <div className="flex-1 flex items-stretch" style={{ borderLeft: c.rowDivider }}>
             {/* Current Game */}
-            <div className="flex-1 px-3 py-3 flex flex-col justify-center">
+            <div className="flex-1 px-3 py-3 flex flex-col justify-center" style={{ borderRight: c.rowDivider }}>
               <div className="flex items-center gap-1.5 mb-1">
                 <motion.span animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} className="text-[10px]" style={{ color: "#ef4444" }}>&#9654;</motion.span>
-                <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: "#94a3b8" }}>CURRENT GAME</span>
+                <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: c.textSub }}>CURRENT GAME</span>
               </div>
-              <p className="text-white font-bold text-xs leading-tight">Sweet Bonanza</p>
-              <p className="text-[10px] font-semibold mt-0.5" style={{ color: "#64748b" }}>PRAGMATIC PLAY</p>
+              <p className="font-bold text-xs leading-tight" style={{ color: c.textMain }}>Sweet Bonanza</p>
+              <p className="text-[10px] font-semibold mt-0.5" style={{ color: c.textMuted }}>PRAGMATIC PLAY</p>
             </div>
 
             {/* Info */}
-            <div className="flex-1 px-3 py-3 flex flex-col justify-center">
+            <div className="flex-1 px-3 py-3 flex flex-col justify-center" style={{ borderRight: c.rowDivider }}>
               <div className="flex items-center gap-1.5 mb-1">
-                <div className="h-3 w-3 rounded-full flex items-center justify-center text-[7px] font-bold" style={{ background: "rgba(59, 130, 246, 0.2)", color: "#3b82f6" }}>i</div>
+                <div className="h-3 w-3 rounded-full flex items-center justify-center text-[7px] font-bold" style={{ background: c.infoBg, color: "#3b82f6" }}>i</div>
                 <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: "#3b82f6" }}>INFO</span>
               </div>
               <div className="space-y-0.5 text-[10px]">
-                <div className="flex justify-between"><span style={{ color: "#64748b" }}>POTENTIAL</span><span className="text-white font-bold">21100X</span></div>
-                <div className="flex justify-between"><span style={{ color: "#64748b" }}>RTP</span><span className="text-white font-bold">96.5%</span></div>
+                <div className="flex justify-between"><span style={{ color: c.textMuted }}>POTENTIAL</span><span className="font-bold" style={{ color: c.textMain }}>21100X</span></div>
+                <div className="flex justify-between"><span style={{ color: c.textMuted }}>RTP</span><span className="font-bold" style={{ color: c.textMain }}>96.5%</span></div>
               </div>
             </div>
 
@@ -508,8 +457,8 @@ function NowPlayingOverlay() {
                 <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: "#ef4444" }}>RECORD</span>
               </div>
               <div className="space-y-0.5 text-[10px]">
-                <div className="flex justify-between"><span style={{ color: "#64748b" }}>WIN</span><span className="text-white font-bold">4,200$</span></div>
-                <div className="flex justify-between"><span style={{ color: "#64748b" }}>X</span><span className="text-white font-bold">187X</span></div>
+                <div className="flex justify-between"><span style={{ color: c.textMuted }}>WIN</span><span className="font-bold" style={{ color: c.textMain }}>4,200$</span></div>
+                <div className="flex justify-between"><span style={{ color: c.textMuted }}>X</span><span className="font-bold" style={{ color: c.textMain }}>187X</span></div>
               </div>
             </div>
           </div>
@@ -534,43 +483,38 @@ function ChatOverlay() {
 
   const offset = useCycleIndex(allMessages.length - 4, 2500);
   const messages = allMessages.slice(offset, offset + 5);
+  const c = useOverlayTheme();
 
   const roleColor = {
-    viewer: { text: "text-blue-400", bg: "bg-blue-500/20", letter: "V" },
-    moderator: { text: "text-green-400", bg: "bg-green-500/20", letter: "M" },
-    subscriber: { text: "text-purple-400", bg: "bg-purple-500/20", letter: "S" },
+    viewer: { text: "#60a5fa", bg: "rgba(59,130,246,0.2)", letter: "V" },
+    moderator: { text: "#34d399", bg: "rgba(16,185,129,0.2)", letter: "M" },
+    subscriber: { text: "#a78bfa", bg: "rgba(139,92,246,0.2)", letter: "S" },
   };
 
   return (
     <div className="inline-block w-full">
-      <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)", border: "1px solid rgba(59, 130, 246, 0.15)", boxShadow: "0 4px 32px rgba(0,0,0,0.6)" }}>
-        <div className="flex items-center gap-2.5 px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+      <div className="rounded-xl overflow-hidden" style={{ background: c.cardBg, border: c.cardBorderSubtle, boxShadow: c.cardShadow }}>
+        <div className="flex items-center gap-2.5 px-4 py-3" style={{ borderBottom: c.rowDivider }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
           </svg>
-          <span className="text-xs font-bold text-white uppercase tracking-wider">Live Chat</span>
+          <span className="text-xs font-bold uppercase tracking-wider" style={{ color: c.textMain }}>Live Chat</span>
           <div className="ml-auto flex items-center gap-1.5">
             <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-[9px] text-slate-500 font-semibold">LIVE</span>
+            <span className="text-[9px] font-semibold" style={{ color: c.textMuted }}>LIVE</span>
           </div>
         </div>
         <div className="px-4 py-3 space-y-3 min-h-[180px]">
           {messages.map((msg, i) => {
             const rc = roleColor[msg.role];
             return (
-              <motion.div
-                key={`${msg.user}-${offset}-${i}`}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.05 }}
-                className="flex gap-2.5 items-start"
-              >
-                <div className={`h-5 w-5 rounded-full ${rc.bg} flex items-center justify-center shrink-0 mt-0.5`}>
-                  <span className={`text-[8px] font-bold ${rc.text}`}>{rc.letter}</span>
+              <motion.div key={`${msg.user}-${offset}-${i}`} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: i * 0.05 }} className="flex gap-2.5 items-start">
+                <div className="h-5 w-5 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: rc.bg }}>
+                  <span className="text-[8px] font-bold" style={{ color: rc.text }}>{rc.letter}</span>
                 </div>
                 <div>
-                  <span className={`text-[11px] font-bold ${rc.text}`}>{msg.user}</span>
-                  <p className="text-[11px] text-slate-400 mt-0.5">{msg.msg}</p>
+                  <span className="text-[11px] font-bold" style={{ color: rc.text }}>{msg.user}</span>
+                  <p className="text-[11px] mt-0.5" style={{ color: c.textSub }}>{msg.msg}</p>
                 </div>
               </motion.div>
             );
@@ -592,6 +536,7 @@ function DuelOverlay() {
     }, 2200);
     return () => clearInterval(id);
   }, []);
+  const c = useOverlayTheme();
 
   const players = [
     { name: "Player 1", game: "Sweet Bonanza", buyIn: "100$", result: `${r1}$`, rank: 1, color: "#ef4444" },
@@ -600,7 +545,7 @@ function DuelOverlay() {
 
   return (
     <div className="inline-block w-full">
-      <div className="rounded-xl overflow-hidden" style={{ background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)", border: "1px solid rgba(59, 130, 246, 0.15)", boxShadow: "0 4px 32px rgba(0,0,0,0.6)" }}>
+      <div className="rounded-xl overflow-hidden" style={{ background: c.cardBg, border: c.cardBorderSubtle, boxShadow: c.cardShadow }}>
         {/* Header */}
         <div className="px-5 pt-4 pb-3 text-center">
           <div className="flex items-center justify-center gap-2 mb-1">
@@ -611,37 +556,37 @@ function DuelOverlay() {
               DUEL
             </span>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">2 Players</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: c.textMuted }}>2 Players</span>
         </div>
 
         {/* Table Header */}
-        <div className="grid px-4 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-500" style={{ gridTemplateColumns: "1fr 1.2fr 0.8fr 0.8fr 0.5fr", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="grid px-4 py-2 text-[9px] font-bold uppercase tracking-wider" style={{ gridTemplateColumns: "1fr 1.2fr 0.8fr 0.8fr 0.5fr", borderTop: c.rowDivider, color: c.textMuted }}>
           <span>Player</span><span>Game</span><span>Buy-In</span><span>Result</span><span className="text-center">#</span>
         </div>
 
         {/* Players */}
         <div className="px-4 pb-3">
           {players.map((p, i) => (
-            <div key={i} className="grid py-2 items-center" style={{ gridTemplateColumns: "1fr 1.2fr 0.8fr 0.8fr 0.5fr", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+            <div key={i} className="grid py-2 items-center" style={{ gridTemplateColumns: "1fr 1.2fr 0.8fr 0.8fr 0.5fr", borderTop: c.rowDividerSubtle }}>
               <div className="flex items-center gap-2">
                 <div className="h-6 w-6 rounded-full flex items-center justify-center" style={{ background: `${p.color}1f`, border: `1px solid ${p.color}33` }}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill={p.color} stroke="none">
                     <circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" />
                   </svg>
                 </div>
-                <span className="text-white font-semibold text-[10px]">{p.name}</span>
+                <span className="font-semibold text-[10px]" style={{ color: c.textMain }}>{p.name}</span>
               </div>
-              <span className="text-slate-400 text-[10px]">{p.game}</span>
-              <span className="text-white text-[10px] font-semibold">{p.buyIn}</span>
-              <motion.span key={p.result} initial={{ color: "#22c55e" }} animate={{ color: "#64748b" }} transition={{ duration: 1 }} className="text-[10px]">{p.result}</motion.span>
+              <span className="text-[10px]" style={{ color: c.textSub }}>{p.game}</span>
+              <span className="text-[10px] font-semibold" style={{ color: c.textMain }}>{p.buyIn}</span>
+              <motion.span key={p.result} initial={{ color: "#22c55e" }} animate={{ color: c.textMuted }} transition={{ duration: 1 }} className="text-[10px]">{p.result}</motion.span>
               <span className="text-amber-400 text-[10px] font-bold text-center">{p.rank}</span>
             </div>
           ))}
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <span className="text-[8px] uppercase tracking-widest text-slate-600">!duel GameName to join</span>
+        <div className="px-4 py-2 text-center" style={{ borderTop: c.rowDividerSubtle }}>
+          <span className="text-[8px] uppercase tracking-widest" style={{ color: c.textMuted }}>!duel GameName to join</span>
         </div>
       </div>
     </div>
@@ -662,24 +607,17 @@ function HotWordsOverlay() {
   const [counts, setCounts] = useState([42, 87, 65, 31, 54]);
   useEffect(() => {
     const id = setInterval(() => {
-      setCounts((prev) => prev.map((c) => c + Math.floor(Math.random() * 8 + 1)));
+      setCounts((prev) => prev.map((cc) => cc + Math.floor(Math.random() * 8 + 1)));
     }, 2000);
     return () => clearInterval(id);
   }, []);
+  const c = useOverlayTheme();
 
   return (
     <div className="inline-block w-full">
-      <div
-        className="rounded-lg overflow-hidden"
-        style={{
-          background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.2)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
-          padding: "16px 22px",
-        }}
-      >
+      <div className="rounded-lg overflow-hidden" style={{ background: c.cardBg, border: c.cardBorder, boxShadow: c.cardShadow, padding: "16px 22px" }}>
         {/* Header */}
-        <div className="mb-3 pb-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="mb-3 pb-2" style={{ borderBottom: c.rowDivider }}>
           <span className="font-bold text-sm tracking-widest" style={{ background: "linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>
             HOT WORDS
           </span>
@@ -688,21 +626,11 @@ function HotWordsOverlay() {
         {/* Words */}
         <div className="flex flex-wrap gap-2">
           {words.map((word, i) => {
-            const c = colors[i % colors.length];
+            const clr = colors[i % colors.length];
             return (
-              <motion.span
-                key={i}
-                whileHover={{ scale: 1.08 }}
-                className="px-3 py-1 rounded-full text-xs font-bold tracking-wide inline-flex items-center gap-1.5"
-                style={{ background: c.bg, border: `1px solid ${c.border}`, color: c.text }}
-              >
+              <motion.span key={i} whileHover={{ scale: 1.08 }} className="px-3 py-1 rounded-full text-xs font-bold tracking-wide inline-flex items-center gap-1.5" style={{ background: clr.bg, border: `1px solid ${clr.border}`, color: clr.text }}>
                 {word}
-                <motion.span
-                  key={counts[i]}
-                  initial={{ scale: 1.3 }}
-                  animate={{ scale: 1 }}
-                  className="text-[9px] font-semibold opacity-70"
-                >
+                <motion.span key={counts[i]} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="text-[9px] font-semibold opacity-70">
                   ({counts[i]})
                 </motion.span>
               </motion.span>
@@ -717,6 +645,7 @@ function HotWordsOverlay() {
 // ── Overlay Card wrapper with banner + hover animation ──
 function OverlayCard({ children, label, icon, index }) {
   const [hovered, setHovered] = useState(false);
+  const c = useOverlayTheme();
 
   return (
     <motion.div
@@ -730,15 +659,16 @@ function OverlayCard({ children, label, icon, index }) {
       style={{ cursor: "default", position: "relative" }}
     >
       {/* Banner above */}
-      <div
-        className="flex items-center gap-2 mb-3 px-1"
-        style={{ transition: "opacity 0.3s" }}
-      >
+      <div className="flex items-center gap-2 mb-3 px-1" style={{ transition: "opacity 0.3s" }}>
         <div
           className="flex items-center justify-center h-7 w-7 rounded-lg"
           style={{
-            background: hovered ? "rgba(59, 130, 246, 0.15)" : "rgba(255,255,255,0.04)",
-            border: hovered ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid rgba(255,255,255,0.08)",
+            background: hovered
+              ? (c.isDark ? "rgba(59, 130, 246, 0.15)" : "rgba(139, 109, 31, 0.1)")
+              : (c.isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"),
+            border: hovered
+              ? (c.isDark ? "1px solid rgba(59, 130, 246, 0.3)" : "1px solid rgba(139, 109, 31, 0.25)")
+              : (c.isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(0,0,0,0.08)"),
             transition: "all 0.3s ease",
           }}
         >
@@ -758,8 +688,8 @@ function OverlayCard({ children, label, icon, index }) {
             flex: 1,
             height: "1px",
             background: hovered
-              ? "linear-gradient(90deg, rgba(59,130,246,0.3), transparent)"
-              : "linear-gradient(90deg, rgba(255,255,255,0.06), transparent)",
+              ? (c.isDark ? "linear-gradient(90deg, rgba(59,130,246,0.3), transparent)" : "linear-gradient(90deg, rgba(139,109,31,0.2), transparent)")
+              : (c.isDark ? "linear-gradient(90deg, rgba(255,255,255,0.06), transparent)" : "linear-gradient(90deg, rgba(0,0,0,0.06), transparent)"),
             transition: "background 0.3s ease",
           }}
         />
@@ -770,10 +700,10 @@ function OverlayCard({ children, label, icon, index }) {
         style={{
           position: "relative",
           borderRadius: "12px",
-          transition: "box-shadow 0.3s ease, transform 0.3s ease",
+          transition: "box-shadow 0.3s ease",
           boxShadow: hovered
-            ? "0 8px 40px rgba(59, 130, 246, 0.12), 0 0 0 1px rgba(59, 130, 246, 0.15)"
-            : "0 4px 20px rgba(0,0,0,0.2)",
+            ? (c.isDark ? "0 8px 40px rgba(59, 130, 246, 0.12), 0 0 0 1px rgba(59, 130, 246, 0.15)" : "0 8px 40px rgba(139, 109, 31, 0.1), 0 0 0 1px rgba(139, 109, 31, 0.12)")
+            : (c.isDark ? "0 4px 20px rgba(0,0,0,0.2)" : "0 4px 20px rgba(0,0,0,0.06)"),
         }}
       >
         {children}
