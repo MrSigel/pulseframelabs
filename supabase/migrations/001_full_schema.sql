@@ -647,6 +647,52 @@ create trigger on_auth_user_created
 
 
 -- ============================================================
+-- STREAMER PAGE SETTINGS
+-- ============================================================
+create table public.streamer_page_settings (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  slug text not null,
+  display_name text not null default '',
+  bio text default '',
+  avatar_url text,
+  banner_url text,
+  twitch_url text,
+  kick_url text,
+  youtube_url text,
+  twitter_url text,
+  discord_url text,
+  instagram_url text,
+  tiktok_url text,
+  website_url text,
+  is_public boolean default true,
+  accent_color text default '#c9a84c',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now(),
+  unique(user_id),
+  unique(slug)
+);
+
+alter table public.streamer_page_settings enable row level security;
+
+create policy "Users can view own streamer page"
+  on public.streamer_page_settings for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert own streamer page"
+  on public.streamer_page_settings for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update own streamer page"
+  on public.streamer_page_settings for update
+  using (auth.uid() = user_id);
+
+create policy "Public can view published streamer pages"
+  on public.streamer_page_settings for select
+  using (is_public = true);
+
+
+-- ============================================================
 -- AUTO-UPDATE updated_at timestamps
 -- ============================================================
 create or replace function public.update_updated_at()
@@ -671,7 +717,8 @@ begin
       'quick_guess_settings', 'slot_request_settings',
       'hotword_settings', 'moderators', 'games',
       'slideshow_items', 'store_settings', 'store_items',
-      'stream_viewers', 'stream_points_config', 'promotions', 'theme_settings'
+      'stream_viewers', 'stream_points_config', 'promotions', 'theme_settings',
+      'streamer_page_settings'
     ])
   loop
     execute format(
