@@ -13,7 +13,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Search, Plus, Minus, Gift } from "lucide-react";
+import { Search, Plus, Minus, Gift, CheckCircle2 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -52,10 +52,10 @@ export default function AdminWalletsPage() {
   const [selectedPkg, setSelectedPkg] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   async function loadData() {
     setLoading(true);
-    setError(null);
     try {
       const [usersRes, pkgRes] = await Promise.all([
         fetch("/api/admin/users"),
@@ -98,6 +98,8 @@ export default function AdminWalletsPage() {
     if (!numAmount || numAmount <= 0) return;
 
     setActionLoading(true);
+    setError(null);
+    setSuccess(null);
     try {
       const res = await fetch(`/api/admin/users/${walletModal.user.user_id}/wallet`, {
         method: "POST",
@@ -109,7 +111,10 @@ export default function AdminWalletsPage() {
         }),
       });
       if (!res.ok) {
-        setError(`Failed to ${walletModal.action} wallet (${res.status})`);
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Failed to ${walletModal.action} wallet (${res.status})`);
+      } else {
+        setSuccess(`Successfully ${walletModal.action === "credit" ? "credited" : "debited"} ${numAmount} credits for ${walletModal.user.email}`);
       }
       setWalletModal(null);
       setAmount("");
@@ -125,6 +130,8 @@ export default function AdminWalletsPage() {
   async function handleAssignPackage() {
     if (!pkgModal || !selectedPkg) return;
     setActionLoading(true);
+    setError(null);
+    setSuccess(null);
     try {
       const res = await fetch(`/api/admin/users/${pkgModal.user_id}/subscription`, {
         method: "POST",
@@ -132,7 +139,10 @@ export default function AdminWalletsPage() {
         body: JSON.stringify({ package_id: selectedPkg }),
       });
       if (!res.ok) {
-        setError(`Failed to assign package (${res.status})`);
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Failed to assign package (${res.status})`);
+      } else {
+        setSuccess(`Package assigned to ${pkgModal.email}`);
       }
       setPkgModal(null);
       setSelectedPkg("");
@@ -147,6 +157,14 @@ export default function AdminWalletsPage() {
   return (
     <div>
       <PageHeader title={a.walletAdmin ?? "Wallet Administration"} />
+
+      {/* Success Banner */}
+      {success && (
+        <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400 flex items-center justify-between">
+          <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" />{success}</span>
+          <button onClick={() => setSuccess(null)} className="text-emerald-400/60 hover:text-emerald-400 ml-4">&times;</button>
+        </div>
+      )}
 
       {/* Error Banner */}
       {error && (

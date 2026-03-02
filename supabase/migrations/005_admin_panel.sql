@@ -32,6 +32,7 @@ CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_target
 
 -- 3. Admin credit wallet RPC
 -- Credits a target user's wallet and logs an audit entry
+-- Auto-creates wallet if it doesn't exist yet
 CREATE OR REPLACE FUNCTION public.admin_credit_wallet(
   p_admin_id uuid,
   p_target_user_id uuid,
@@ -50,14 +51,17 @@ BEGIN
     RAISE EXCEPTION 'Amount must be positive';
   END IF;
 
-  -- Lock and update wallet
+  -- Try to lock existing wallet
   SELECT id INTO v_wallet_id
     FROM wallets
     WHERE user_id = p_target_user_id
     FOR UPDATE;
 
+  -- Auto-create wallet if it doesn't exist
   IF v_wallet_id IS NULL THEN
-    RAISE EXCEPTION 'Wallet not found for user %', p_target_user_id;
+    INSERT INTO wallets (user_id, balance, total_deposited, total_spent)
+      VALUES (p_target_user_id, 0, 0, 0)
+      RETURNING id INTO v_wallet_id;
   END IF;
 
   UPDATE wallets

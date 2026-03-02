@@ -21,6 +21,7 @@ import {
   Search,
   Plus,
   Minus,
+  CheckCircle2,
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -61,10 +62,10 @@ export default function AdminUsersPage() {
   const [walletDescription, setWalletDescription] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   async function loadUsers() {
     setLoading(true);
-    setError(null);
     try {
       const res = await fetch("/api/admin/users");
       if (!res.ok) {
@@ -96,6 +97,8 @@ export default function AdminUsersPage() {
 
   async function handleLock(user: UserRow) {
     setActionLoading(true);
+    setError(null);
+    setSuccess(null);
     try {
       const res = await fetch(`/api/admin/users/${user.user_id}`, {
         method: "PATCH",
@@ -106,7 +109,10 @@ export default function AdminUsersPage() {
         }),
       });
       if (!res.ok) {
-        setError(`Failed to ${user.is_locked ? "unlock" : "lock"} user (${res.status})`);
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Failed to ${user.is_locked ? "unlock" : "lock"} user (${res.status})`);
+      } else {
+        setSuccess(`User ${user.is_locked ? "unlocked" : "locked"} successfully`);
       }
       setLockModal(null);
       setLockReason("");
@@ -121,6 +127,8 @@ export default function AdminUsersPage() {
   async function handleEdit() {
     if (!editModal) return;
     setActionLoading(true);
+    setError(null);
+    setSuccess(null);
     try {
       const ipArr = editIps
         .split(",")
@@ -135,7 +143,10 @@ export default function AdminUsersPage() {
         }),
       });
       if (!res.ok) {
-        setError(`Failed to update user (${res.status})`);
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Failed to update user (${res.status})`);
+      } else {
+        setSuccess("User updated successfully");
       }
       setEditModal(null);
       await loadUsers();
@@ -149,12 +160,17 @@ export default function AdminUsersPage() {
   async function handleDelete() {
     if (!deleteModal) return;
     setActionLoading(true);
+    setError(null);
+    setSuccess(null);
     try {
       const res = await fetch(`/api/admin/users/${deleteModal.user_id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
-        setError(`Failed to delete user (${res.status})`);
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Failed to delete user (${res.status})`);
+      } else {
+        setSuccess("User deleted successfully");
       }
       setDeleteModal(null);
       await loadUsers();
@@ -171,6 +187,8 @@ export default function AdminUsersPage() {
     if (!numAmount || numAmount <= 0) return;
 
     setActionLoading(true);
+    setError(null);
+    setSuccess(null);
     try {
       const res = await fetch(`/api/admin/users/${walletModal.user.user_id}/wallet`, {
         method: "POST",
@@ -182,7 +200,10 @@ export default function AdminUsersPage() {
         }),
       });
       if (!res.ok) {
-        setError(`Failed to ${walletModal.action} wallet (${res.status})`);
+        const data = await res.json().catch(() => ({}));
+        setError(data.error || `Failed to ${walletModal.action} wallet (${res.status})`);
+      } else {
+        setSuccess(`Successfully ${walletModal.action === "credit" ? "credited" : "debited"} ${numAmount} credits for ${walletModal.user.email}`);
       }
       setWalletModal(null);
       setWalletAmount("");
@@ -198,6 +219,14 @@ export default function AdminUsersPage() {
   return (
     <div>
       <PageHeader title={a.userManagement ?? "User Management"} />
+
+      {/* Success Banner */}
+      {success && (
+        <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400 flex items-center justify-between">
+          <span className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4" />{success}</span>
+          <button onClick={() => setSuccess(null)} className="text-emerald-400/60 hover:text-emerald-400 ml-4">&times;</button>
+        </div>
+      )}
 
       {/* Error Banner */}
       {error && (

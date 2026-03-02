@@ -7,13 +7,22 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-    const { data: wallet, error } = await supabase
+    let { data: wallet } = await supabase
       .from("wallets")
       .select("*")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    // Auto-create wallet if it doesn't exist
+    if (!wallet) {
+      const { data: newWallet, error: insertError } = await supabase
+        .from("wallets")
+        .insert({ user_id: user.id, balance: 0, total_deposited: 0, total_spent: 0 })
+        .select()
+        .single();
+      if (insertError) throw insertError;
+      wallet = newWallet;
+    }
 
     // Also get active subscription
     const { data: subscription } = await supabase
