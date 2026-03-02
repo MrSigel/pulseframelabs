@@ -77,9 +77,10 @@ export const translations = {
       label: 'Setup in Minutes',
       title: 'How It Works',
       steps: [
-        { title: 'Login / Register', time: '1–2 min', desc: 'Create your account and enter the dashboard with one entry point.' },
-        { title: 'Configure Overlay', time: '2–3 min', desc: 'Build your widget setup and tune layout details to fit your stream.' },
-        { title: 'Go Live', time: 'instant', desc: 'Publish tokens, feed OBS BrowserSource and manage interactions in realtime.' },
+        { title: 'Register & Confirm Email', time: '1–2 min', desc: 'Create your account, confirm your email address and log in to your personal dashboard.' },
+        { title: 'Connect Twitch & Set Up Widgets', time: '3–5 min', desc: 'Link your Twitch channel, configure your overlay widgets and customize them to match your stream.' },
+        { title: 'Add Overlays to OBS', time: '2–3 min', desc: 'Copy each overlay link from the dashboard and paste it as a Browser Source in OBS Studio.' },
+        { title: 'Top Up Wallet & Go Live', time: '1–2 min', desc: 'Add credits via crypto, activate your package and start streaming with full overlay power.' },
       ],
     },
     testimonials: {
@@ -258,9 +259,23 @@ export const translations = {
     },
     tools: {
       randomSlot: { title: 'Random Slot Generator', description: 'Get a random provider and game', selectProvider: 'Filter by Provider', allProviders: 'All Providers', start: 'Start', result: 'Your Slot', provider: 'Provider', game: 'Game', spinning: 'Randomizing...', tryAgain: 'Try Again' },
-      bonusCalc: { title: 'Bonus Hunt Calculator', description: 'Calculate your bonus hunt stats', totalBuyIn: 'Total Buy-In', numberOfBonuses: 'Number of Bonuses', averageBuyIn: 'Avg. Buy-In', totalResult: 'Total Result', profit: 'Profit', loss: 'Loss', averageMultiplier: 'Avg. Multiplier', breakEven: 'Break-Even X', bestBonus: 'Best Bonus', worstBonus: 'Worst Bonus', addBonus: 'Add Bonus', reset: 'Reset', bonusNum: 'Bonus #', buyIn: 'Buy-In', win: 'Win', multiplier: 'Multiplier', noData: 'Add bonuses to see stats' },
       volatility: { title: 'Slot Comparer', description: 'Compare slots side by side', selectSlot: 'Select Slot', rtp: 'RTP', volatilityLabel: 'Volatility', maxWin: 'Max Win', hitFrequency: 'Hit Frequency', provider: 'Provider', low: 'Low', medium: 'Medium', high: 'High', extreme: 'Extreme', vs: 'VS', selectBoth: 'Select two slots to compare' },
-      countdown: { title: 'Stream Countdown', description: 'Timer for stream events', presets: 'Quick Presets', custom: 'Custom', minutes: 'min', seconds: 'sec', start: 'Start', pause: 'Pause', resume: 'Resume', reset: 'Reset', timeUp: "Time's Up!" },
+      setupGuide: { title: 'Setup Guide' },
+    },
+    setupGuide: {
+      title: 'Complete Setup Guide',
+      subtitle: 'Follow these steps to get your stream fully set up — from registration to going live.',
+      tipTitle: 'Pro Tip',
+      tipText: 'Start with just one or two widgets and add more as you get comfortable. You can always change everything later.',
+      steps: [
+        { title: '1. Create Your Account', lines: ['Go to the Pulseframelabs website and click "Get Started" or "Register".', 'Enter your name, email address and a password.', 'You will receive a confirmation email — click the link in it to activate your account.', 'After confirmation you will be redirected to your personal dashboard.'] },
+        { title: '2. Connect Your Twitch Channel', lines: ['In the dashboard, go to "Settings" or "Twitch Connection".', 'Click "Connect Twitch" — you will be redirected to Twitch to authorize.', 'Grant the permissions and you will be sent back. Your channel is now linked.', 'This allows the Twitch bot, chat commands and viewer interactions to work.'] },
+        { title: '3. Configure Your Widgets', lines: ['Go to the widget section in your dashboard (e.g. Bonus Hunt, Balance, Wager Bar, etc.).', 'Each widget has its own settings page — colors, text size, layout and more.', 'Customize each widget to match your stream design.', 'You can enable or disable individual widgets at any time.'] },
+        { title: '4. Copy Overlay Links for OBS', lines: ['Every widget has a unique Overlay Link (URL) — find it in the widget settings.', 'Open OBS Studio and add a new "Browser Source".', 'Paste the Overlay URL into the URL field. Set width/height as needed (e.g. 800×600).', 'Position and resize the source in your OBS scene. Repeat for each widget you want to show.'] },
+        { title: '5. Top Up Your Wallet', lines: ['Go to the "Wallet" section in the dashboard.', 'Click "Top Up" and enter the amount in credits (1 Credit = 1 EUR).', 'Choose a cryptocurrency (e.g. Bitcoin, Ethereum, Litecoin, USDT).', 'Send the exact amount to the displayed wallet address. Credits are added automatically once confirmed.'] },
+        { title: '6. Activate a Package', lines: ['Go to "Packages" in the wallet section.', 'Choose a plan: 1 Day (5€), Monthly (99€), 3 Months (249€) or 6 Months (449€).', 'Click "Buy" — credits will be deducted from your wallet instantly.', 'All overlay widgets and features are now unlocked for the duration of your package.'] },
+        { title: '7. Go Live!', lines: ['Start your OBS stream — all overlays update in real time automatically.', 'Use the dashboard to control widgets, start bonus hunts, run tournaments, etc.', 'Your Twitch bot handles chat commands and viewer interactions for you.', 'Everything syncs live — no page refreshes or manual updates needed.'] },
+      ],
     },
     auth: {
       backToHome: 'Back to Homepage',
@@ -384,9 +399,10 @@ export const translations = {
       label: 'Einrichtung in Minuten',
       title: 'So funktioniert\'s',
       steps: [
-        { title: 'Anmelden / Registrieren', time: '1–2 Min', desc: 'Erstelle dein Konto und betrete das Dashboard mit einem Zugang.' },
-        { title: 'Overlay konfigurieren', time: '2–3 Min', desc: 'Baue dein Widget-Setup und passe das Layout an deinen Stream an.' },
-        { title: 'Live gehen', time: 'sofort', desc: 'Tokens veröffentlichen, OBS BrowserSource einbinden und Interaktionen in Echtzeit verwalten.' },
+        { title: 'Registrieren & E-Mail bestätigen', time: '1–2 Min', desc: 'Erstelle dein Konto, bestätige deine E-Mail und melde dich in deinem persönlichen Dashboard an.' },
+        { title: 'Twitch verbinden & Widgets einrichten', time: '3–5 Min', desc: 'Verknüpfe deinen Twitch-Kanal, konfiguriere deine Overlay-Widgets und passe sie an deinen Stream an.' },
+        { title: 'Overlays in OBS einfügen', time: '2–3 Min', desc: 'Kopiere die Overlay-Links aus dem Dashboard und füge sie als Browser Source in OBS Studio ein.' },
+        { title: 'Wallet aufladen & Live gehen', time: '1–2 Min', desc: 'Lade Credits per Krypto auf, aktiviere dein Paket und starte deinen Stream mit voller Overlay-Power.' },
       ],
     },
     testimonials: {
@@ -565,9 +581,23 @@ export const translations = {
     },
     tools: {
       randomSlot: { title: 'Zufallsgenerator', description: 'Zufälligen Anbieter und Spiel erhalten', selectProvider: 'Nach Anbieter filtern', allProviders: 'Alle Anbieter', start: 'Start', result: 'Dein Slot', provider: 'Anbieter', game: 'Spiel', spinning: 'Zufallsauswahl...', tryAgain: 'Nochmal' },
-      bonusCalc: { title: 'Bonus Hunt Rechner', description: 'Berechne deine Bonus Hunt Statistiken', totalBuyIn: 'Gesamt Buy-In', numberOfBonuses: 'Anzahl Boni', averageBuyIn: 'Ø Buy-In', totalResult: 'Gesamtergebnis', profit: 'Gewinn', loss: 'Verlust', averageMultiplier: 'Ø Multiplikator', breakEven: 'Break-Even X', bestBonus: 'Bester Bonus', worstBonus: 'Schlechtester Bonus', addBonus: 'Bonus hinzufügen', reset: 'Zurücksetzen', bonusNum: 'Bonus #', buyIn: 'Buy-In', win: 'Gewinn', multiplier: 'Multiplikator', noData: 'Füge Boni hinzu um Statistiken zu sehen' },
       volatility: { title: 'Slot Vergleich', description: 'Slots nebeneinander vergleichen', selectSlot: 'Slot wählen', rtp: 'RTP', volatilityLabel: 'Volatilität', maxWin: 'Max Gewinn', hitFrequency: 'Trefferquote', provider: 'Anbieter', low: 'Niedrig', medium: 'Mittel', high: 'Hoch', extreme: 'Extrem', vs: 'VS', selectBoth: 'Wähle zwei Slots zum Vergleichen' },
-      countdown: { title: 'Stream Countdown', description: 'Timer für Stream-Events', presets: 'Schnellauswahl', custom: 'Benutzerdefiniert', minutes: 'Min', seconds: 'Sek', start: 'Start', pause: 'Pause', resume: 'Weiter', reset: 'Zurücksetzen', timeUp: 'Zeit abgelaufen!' },
+      setupGuide: { title: 'Einrichtungs-Guide' },
+    },
+    setupGuide: {
+      title: 'Kompletter Einrichtungs-Guide',
+      subtitle: 'Folge diesen Schritten, um deinen Stream komplett einzurichten — von der Registrierung bis zum Live-Gang.',
+      tipTitle: 'Profi-Tipp',
+      tipText: 'Starte mit nur ein oder zwei Widgets und füge mehr hinzu, wenn du dich sicher fühlst. Du kannst später jederzeit alles ändern.',
+      steps: [
+        { title: '1. Konto erstellen', lines: ['Gehe auf die Pulseframelabs-Website und klicke auf "Loslegen" oder "Registrieren".', 'Gib deinen Namen, deine E-Mail-Adresse und ein Passwort ein.', 'Du bekommst eine Bestätigungs-E-Mail — klicke auf den Link darin, um dein Konto zu aktivieren.', 'Nach der Bestätigung wirst du automatisch zu deinem persönlichen Dashboard weitergeleitet.'] },
+        { title: '2. Twitch-Kanal verbinden', lines: ['Gehe im Dashboard zu "Einstellungen" oder "Twitch-Verbindung".', 'Klicke auf "Twitch verbinden" — du wirst zu Twitch weitergeleitet, um die Berechtigung zu erteilen.', 'Erteile die Berechtigungen und du wirst zurückgeleitet. Dein Kanal ist jetzt verknüpft.', 'Dadurch funktionieren der Twitch-Bot, Chat-Befehle und Zuschauer-Interaktionen.'] },
+        { title: '3. Widgets konfigurieren', lines: ['Gehe zum Widget-Bereich in deinem Dashboard (z.B. Bonus Hunt, Balance, Wager Bar usw.).', 'Jedes Widget hat eine eigene Einstellungsseite — Farben, Textgröße, Layout und mehr.', 'Passe jedes Widget an dein Stream-Design an.', 'Du kannst einzelne Widgets jederzeit aktivieren oder deaktivieren.'] },
+        { title: '4. Overlay-Links in OBS einfügen', lines: ['Jedes Widget hat einen einzigartigen Overlay-Link (URL) — du findest ihn in den Widget-Einstellungen.', 'Öffne OBS Studio und füge eine neue "Browser Source" hinzu.', 'Füge die Overlay-URL in das URL-Feld ein. Stelle Breite/Höhe ein (z.B. 800×600).', 'Positioniere und skaliere die Quelle in deiner OBS-Szene. Wiederhole das für jedes Widget, das du zeigen willst.'] },
+        { title: '5. Wallet aufladen', lines: ['Gehe zum "Wallet"-Bereich im Dashboard.', 'Klicke auf "Aufladen" und gib den Betrag in Credits ein (1 Credit = 1 EUR).', 'Wähle eine Kryptowährung (z.B. Bitcoin, Ethereum, Litecoin, USDT).', 'Sende den genauen Betrag an die angezeigte Wallet-Adresse. Die Credits werden automatisch gutgeschrieben, sobald die Zahlung bestätigt ist.'] },
+        { title: '6. Paket aktivieren', lines: ['Gehe zu "Pakete" im Wallet-Bereich.', 'Wähle einen Plan: 1 Tag (5€), Monatlich (99€), 3 Monate (249€) oder 6 Monate (449€).', 'Klicke auf "Kaufen" — Credits werden sofort von deinem Wallet abgezogen.', 'Alle Overlay-Widgets und Funktionen sind jetzt für die Dauer deines Pakets freigeschaltet.'] },
+        { title: '7. Live gehen!', lines: ['Starte deinen OBS-Stream — alle Overlays aktualisieren sich automatisch in Echtzeit.', 'Nutze das Dashboard, um Widgets zu steuern, Bonus Hunts zu starten, Turniere zu veranstalten usw.', 'Dein Twitch-Bot übernimmt Chat-Befehle und Zuschauer-Interaktionen für dich.', 'Alles synchronisiert sich live — keine Seitenaktualisierungen oder manuellen Updates nötig.'] },
+      ],
     },
     auth: {
       backToHome: 'Zurück zur Startseite',
@@ -691,9 +721,10 @@ export const translations = {
       label: 'Setup in pochi minuti',
       title: 'Come funziona',
       steps: [
-        { title: 'Accedi / Registrati', time: '1–2 min', desc: 'Crea il tuo account e accedi alla dashboard con un unico punto di ingresso.' },
-        { title: 'Configura Overlay', time: '2–3 min', desc: 'Costruisci il tuo setup widget e adatta il layout al tuo stream.' },
-        { title: 'Vai Live', time: 'istantaneo', desc: 'Pubblica i token, inserisci il BrowserSource in OBS e gestisci le interazioni in tempo reale.' },
+        { title: 'Registrati & Conferma Email', time: '1–2 min', desc: 'Crea il tuo account, conferma la tua email e accedi alla tua dashboard personale.' },
+        { title: 'Collega Twitch & Configura Widget', time: '3–5 min', desc: 'Collega il tuo canale Twitch, configura i widget overlay e personalizzali per il tuo stream.' },
+        { title: 'Aggiungi Overlay a OBS', time: '2–3 min', desc: 'Copia ogni link overlay dalla dashboard e incollalo come Browser Source in OBS Studio.' },
+        { title: 'Ricarica & Vai Live', time: '1–2 min', desc: 'Aggiungi crediti tramite crypto, attiva il tuo pacchetto e inizia a streammare con tutti gli overlay.' },
       ],
     },
     testimonials: {
@@ -872,9 +903,23 @@ export const translations = {
     },
     tools: {
       randomSlot: { title: 'Generatore Casuale', description: 'Ottieni un provider e gioco casuale', selectProvider: 'Filtra per Provider', allProviders: 'Tutti i Provider', start: 'Avvia', result: 'Il tuo Slot', provider: 'Provider', game: 'Gioco', spinning: 'Selezione casuale...', tryAgain: 'Riprova' },
-      bonusCalc: { title: 'Calcolatore Bonus Hunt', description: 'Calcola le statistiche del tuo bonus hunt', totalBuyIn: 'Buy-In Totale', numberOfBonuses: 'Numero di Bonus', averageBuyIn: 'Buy-In Medio', totalResult: 'Risultato Totale', profit: 'Profitto', loss: 'Perdita', averageMultiplier: 'Moltiplicatore Medio', breakEven: 'Break-Even X', bestBonus: 'Miglior Bonus', worstBonus: 'Peggior Bonus', addBonus: 'Aggiungi Bonus', reset: 'Resetta', bonusNum: 'Bonus #', buyIn: 'Buy-In', win: 'Vincita', multiplier: 'Moltiplicatore', noData: 'Aggiungi bonus per vedere le statistiche' },
       volatility: { title: 'Confronto Slot', description: 'Confronta slot affiancate', selectSlot: 'Seleziona Slot', rtp: 'RTP', volatilityLabel: 'Volatilità', maxWin: 'Vincita Max', hitFrequency: 'Frequenza Vincite', provider: 'Provider', low: 'Bassa', medium: 'Media', high: 'Alta', extreme: 'Estrema', vs: 'VS', selectBoth: 'Seleziona due slot da confrontare' },
-      countdown: { title: 'Countdown Stream', description: 'Timer per eventi stream', presets: 'Preset Rapidi', custom: 'Personalizzato', minutes: 'min', seconds: 'sec', start: 'Avvia', pause: 'Pausa', resume: 'Riprendi', reset: 'Resetta', timeUp: 'Tempo scaduto!' },
+      setupGuide: { title: 'Guida alla Configurazione' },
+    },
+    setupGuide: {
+      title: 'Guida Completa alla Configurazione',
+      subtitle: 'Segui questi passaggi per configurare completamente il tuo stream — dalla registrazione alla diretta.',
+      tipTitle: 'Suggerimento',
+      tipText: 'Inizia con uno o due widget e aggiungine altri quando ti senti a tuo agio. Puoi sempre cambiare tutto in seguito.',
+      steps: [
+        { title: '1. Crea il tuo Account', lines: ['Vai sul sito Pulseframelabs e clicca su "Inizia" o "Registrati".', 'Inserisci il tuo nome, indirizzo email e una password.', 'Riceverai un\'email di conferma — clicca sul link per attivare il tuo account.', 'Dopo la conferma verrai reindirizzato alla tua dashboard personale.'] },
+        { title: '2. Collega il tuo Canale Twitch', lines: ['Nella dashboard, vai su "Impostazioni" o "Connessione Twitch".', 'Clicca su "Collega Twitch" — verrai reindirizzato a Twitch per autorizzare.', 'Concedi i permessi e verrai rimandato indietro. Il tuo canale è ora collegato.', 'Questo permette al bot Twitch, ai comandi chat e alle interazioni degli spettatori di funzionare.'] },
+        { title: '3. Configura i Widget', lines: ['Vai alla sezione widget nella dashboard (es. Bonus Hunt, Bilancio, Barra Wager ecc.).', 'Ogni widget ha la propria pagina impostazioni — colori, dimensione testo, layout e altro.', 'Personalizza ogni widget per adattarlo al design del tuo stream.', 'Puoi attivare o disattivare i singoli widget in qualsiasi momento.'] },
+        { title: '4. Copia i Link Overlay in OBS', lines: ['Ogni widget ha un Link Overlay unico (URL) — lo trovi nelle impostazioni del widget.', 'Apri OBS Studio e aggiungi una nuova "Browser Source".', 'Incolla l\'URL Overlay nel campo URL. Imposta larghezza/altezza come necessario (es. 800×600).', 'Posiziona e ridimensiona la sorgente nella scena OBS. Ripeti per ogni widget che vuoi mostrare.'] },
+        { title: '5. Ricarica il Wallet', lines: ['Vai alla sezione "Wallet" nella dashboard.', 'Clicca su "Ricarica" e inserisci l\'importo in crediti (1 Credito = 1 EUR).', 'Scegli una criptovaluta (es. Bitcoin, Ethereum, Litecoin, USDT).', 'Invia l\'importo esatto all\'indirizzo wallet mostrato. I crediti vengono aggiunti automaticamente una volta confermato.'] },
+        { title: '6. Attiva un Pacchetto', lines: ['Vai su "Pacchetti" nella sezione wallet.', 'Scegli un piano: 1 Giorno (5€), Mensile (99€), 3 Mesi (249€) o 6 Mesi (449€).', 'Clicca su "Acquista" — i crediti verranno detratti istantaneamente dal tuo wallet.', 'Tutti i widget overlay e le funzionalità sono ora sbloccati per la durata del tuo pacchetto.'] },
+        { title: '7. Vai in Diretta!', lines: ['Avvia il tuo stream OBS — tutti gli overlay si aggiornano automaticamente in tempo reale.', 'Usa la dashboard per controllare widget, avviare bonus hunt, organizzare tornei ecc.', 'Il tuo bot Twitch gestisce comandi chat e interazioni degli spettatori per te.', 'Tutto si sincronizza in diretta — nessun aggiornamento di pagina o azione manuale necessaria.'] },
+      ],
     },
     auth: {
       backToHome: 'Torna alla homepage',
@@ -998,9 +1043,10 @@ export const translations = {
       label: 'Configuration en quelques minutes',
       title: 'Comment ça marche',
       steps: [
-        { title: 'Connexion / Inscription', time: '1–2 min', desc: 'Créez votre compte et accédez au tableau de bord en un seul point d\'entrée.' },
-        { title: 'Configurer l\'Overlay', time: '2–3 min', desc: 'Construisez votre configuration de widgets et ajustez la mise en page à votre stream.' },
-        { title: 'Passer en Direct', time: 'instantané', desc: 'Publiez les tokens, intégrez le BrowserSource OBS et gérez les interactions en temps réel.' },
+        { title: 'Inscription & Confirmation Email', time: '1–2 min', desc: 'Créez votre compte, confirmez votre email et connectez-vous à votre tableau de bord personnel.' },
+        { title: 'Connecter Twitch & Configurer les Widgets', time: '3–5 min', desc: 'Liez votre chaîne Twitch, configurez vos widgets overlay et personnalisez-les pour votre stream.' },
+        { title: 'Ajouter les Overlays à OBS', time: '2–3 min', desc: 'Copiez chaque lien overlay depuis le tableau de bord et collez-le comme Browser Source dans OBS Studio.' },
+        { title: 'Recharger & Passer en Direct', time: '1–2 min', desc: 'Ajoutez des crédits via crypto, activez votre forfait et commencez à streamer avec tous les overlays.' },
       ],
     },
     testimonials: {
@@ -1179,9 +1225,23 @@ export const translations = {
     },
     tools: {
       randomSlot: { title: 'Générateur Aléatoire', description: 'Obtenez un fournisseur et jeu aléatoire', selectProvider: 'Filtrer par Fournisseur', allProviders: 'Tous les Fournisseurs', start: 'Lancer', result: 'Votre Slot', provider: 'Fournisseur', game: 'Jeu', spinning: 'Sélection aléatoire...', tryAgain: 'Réessayer' },
-      bonusCalc: { title: 'Calculateur Bonus Hunt', description: 'Calculez vos statistiques de bonus hunt', totalBuyIn: 'Buy-In Total', numberOfBonuses: 'Nombre de Bonus', averageBuyIn: 'Buy-In Moyen', totalResult: 'Résultat Total', profit: 'Profit', loss: 'Perte', averageMultiplier: 'Multiplicateur Moyen', breakEven: 'Break-Even X', bestBonus: 'Meilleur Bonus', worstBonus: 'Pire Bonus', addBonus: 'Ajouter Bonus', reset: 'Réinitialiser', bonusNum: 'Bonus #', buyIn: 'Buy-In', win: 'Gain', multiplier: 'Multiplicateur', noData: 'Ajoutez des bonus pour voir les statistiques' },
       volatility: { title: 'Comparateur de Slots', description: 'Comparez les slots côte à côte', selectSlot: 'Sélectionner un Slot', rtp: 'RTP', volatilityLabel: 'Volatilité', maxWin: 'Gain Max', hitFrequency: 'Fréquence de Gain', provider: 'Fournisseur', low: 'Faible', medium: 'Moyenne', high: 'Haute', extreme: 'Extrême', vs: 'VS', selectBoth: 'Sélectionnez deux slots à comparer' },
-      countdown: { title: 'Compte à Rebours', description: 'Minuteur pour événements stream', presets: 'Presets Rapides', custom: 'Personnalisé', minutes: 'min', seconds: 'sec', start: 'Lancer', pause: 'Pause', resume: 'Reprendre', reset: 'Réinitialiser', timeUp: 'Temps écoulé !' },
+      setupGuide: { title: 'Guide de Configuration' },
+    },
+    setupGuide: {
+      title: 'Guide de Configuration Complet',
+      subtitle: 'Suivez ces étapes pour configurer entièrement votre stream — de l\'inscription à la mise en direct.',
+      tipTitle: 'Conseil Pro',
+      tipText: 'Commencez avec un ou deux widgets et ajoutez-en davantage quand vous êtes à l\'aise. Vous pouvez toujours tout changer plus tard.',
+      steps: [
+        { title: '1. Créer votre Compte', lines: ['Allez sur le site Pulseframelabs et cliquez sur "Commencer" ou "S\'inscrire".', 'Entrez votre nom, adresse email et un mot de passe.', 'Vous recevrez un email de confirmation — cliquez sur le lien pour activer votre compte.', 'Après la confirmation, vous serez redirigé vers votre tableau de bord personnel.'] },
+        { title: '2. Connecter votre Chaîne Twitch', lines: ['Dans le tableau de bord, allez dans "Paramètres" ou "Connexion Twitch".', 'Cliquez sur "Connecter Twitch" — vous serez redirigé vers Twitch pour autoriser.', 'Accordez les permissions et vous serez redirigé. Votre chaîne est maintenant liée.', 'Cela permet au bot Twitch, aux commandes chat et aux interactions des spectateurs de fonctionner.'] },
+        { title: '3. Configurer les Widgets', lines: ['Allez dans la section widgets de votre tableau de bord (ex: Bonus Hunt, Solde, Barre de Wager, etc.).', 'Chaque widget a sa propre page de paramètres — couleurs, taille du texte, mise en page et plus.', 'Personnalisez chaque widget pour qu\'il corresponde au design de votre stream.', 'Vous pouvez activer ou désactiver chaque widget à tout moment.'] },
+        { title: '4. Copier les Liens Overlay dans OBS', lines: ['Chaque widget a un Lien Overlay unique (URL) — trouvez-le dans les paramètres du widget.', 'Ouvrez OBS Studio et ajoutez une nouvelle "Source Navigateur".', 'Collez l\'URL de l\'Overlay dans le champ URL. Réglez largeur/hauteur (ex: 800×600).', 'Positionnez et redimensionnez la source dans votre scène OBS. Répétez pour chaque widget à afficher.'] },
+        { title: '5. Recharger le Portefeuille', lines: ['Allez dans la section "Portefeuille" du tableau de bord.', 'Cliquez sur "Recharger" et entrez le montant en crédits (1 Crédit = 1 EUR).', 'Choisissez une cryptomonnaie (ex: Bitcoin, Ethereum, Litecoin, USDT).', 'Envoyez le montant exact à l\'adresse affichée. Les crédits sont ajoutés automatiquement après confirmation.'] },
+        { title: '6. Activer un Forfait', lines: ['Allez dans "Forfaits" dans la section portefeuille.', 'Choisissez un plan : 1 Jour (5€), Mensuel (99€), 3 Mois (249€) ou 6 Mois (449€).', 'Cliquez sur "Acheter" — les crédits seront déduits instantanément de votre portefeuille.', 'Tous les widgets overlay et fonctionnalités sont maintenant débloqués pour la durée de votre forfait.'] },
+        { title: '7. Passez en Direct !', lines: ['Lancez votre stream OBS — tous les overlays se mettent à jour automatiquement en temps réel.', 'Utilisez le tableau de bord pour contrôler les widgets, lancer des bonus hunts, organiser des tournois, etc.', 'Votre bot Twitch gère les commandes chat et les interactions des spectateurs pour vous.', 'Tout se synchronise en direct — aucun rechargement de page ou mise à jour manuelle nécessaire.'] },
+      ],
     },
     auth: {
       backToHome: "Retour à l'accueil",
@@ -1305,9 +1365,10 @@ export const translations = {
       label: 'Dakikalar içinde kurulum',
       title: 'Nasıl çalışır',
       steps: [
-        { title: 'Giriş / Kayıt', time: '1–2 dk', desc: 'Hesabınızı oluşturun ve tek giriş noktasıyla panele erişin.' },
-        { title: 'Overlay\'i Yapılandır', time: '2–3 dk', desc: 'Widget kurulumunuzu oluşturun ve düzen detaylarını yayınınıza uyarlayın.' },
-        { title: 'Canlıya Geç', time: 'anında', desc: 'Tokenları yayınlayın, OBS BrowserSource\'u besleyin ve etkileşimleri gerçek zamanlı yönetin.' },
+        { title: 'Kayıt Ol & E-postayı Onayla', time: '1–2 dk', desc: 'Hesabını oluştur, e-postanı onayla ve kişisel paneline giriş yap.' },
+        { title: 'Twitch Bağla & Widgetları Ayarla', time: '3–5 dk', desc: 'Twitch kanalını bağla, overlay widgetlarını yapılandır ve yayınına göre özelleştir.' },
+        { title: 'Overlayleri OBS\'ye Ekle', time: '2–3 dk', desc: 'Panelden her overlay linkini kopyala ve OBS Studio\'da Browser Source olarak yapıştır.' },
+        { title: 'Cüzdan Yükle & Canlıya Geç', time: '1–2 dk', desc: 'Kripto ile kredi ekle, paketini aktifleştir ve tam overlay gücüyle yayına başla.' },
       ],
     },
     testimonials: {
@@ -1486,9 +1547,23 @@ export const translations = {
     },
     tools: {
       randomSlot: { title: 'Rastgele Slot Seçici', description: 'Rastgele sağlayıcı ve oyun alın', selectProvider: 'Sağlayıcıya Göre Filtrele', allProviders: 'Tüm Sağlayıcılar', start: 'Başlat', result: 'Slotunuz', provider: 'Sağlayıcı', game: 'Oyun', spinning: 'Rastgele seçim...', tryAgain: 'Tekrar Dene' },
-      bonusCalc: { title: 'Bonus Hunt Hesaplayıcı', description: 'Bonus hunt istatistiklerinizi hesaplayın', totalBuyIn: 'Toplam Buy-In', numberOfBonuses: 'Bonus Sayısı', averageBuyIn: 'Ort. Buy-In', totalResult: 'Toplam Sonuç', profit: 'Kâr', loss: 'Zarar', averageMultiplier: 'Ort. Çarpan', breakEven: 'Başabaş X', bestBonus: 'En İyi Bonus', worstBonus: 'En Kötü Bonus', addBonus: 'Bonus Ekle', reset: 'Sıfırla', bonusNum: 'Bonus #', buyIn: 'Buy-In', win: 'Kazanç', multiplier: 'Çarpan', noData: 'İstatistikleri görmek için bonus ekleyin' },
       volatility: { title: 'Slot Karşılaştırma', description: 'Slotları yan yana karşılaştırın', selectSlot: 'Slot Seç', rtp: 'RTP', volatilityLabel: 'Volatilite', maxWin: 'Maks Kazanç', hitFrequency: 'İsabet Sıklığı', provider: 'Sağlayıcı', low: 'Düşük', medium: 'Orta', high: 'Yüksek', extreme: 'Aşırı', vs: 'VS', selectBoth: 'Karşılaştırmak için iki slot seçin' },
-      countdown: { title: 'Yayın Geri Sayımı', description: 'Yayın etkinlikleri için zamanlayıcı', presets: 'Hızlı Seçenekler', custom: 'Özel', minutes: 'dk', seconds: 'sn', start: 'Başlat', pause: 'Duraklat', resume: 'Devam', reset: 'Sıfırla', timeUp: 'Süre doldu!' },
+      setupGuide: { title: 'Kurulum Rehberi' },
+    },
+    setupGuide: {
+      title: 'Tam Kurulum Rehberi',
+      subtitle: 'Yayınını tamamen kurmak için bu adımları takip et — kayıttan canlıya geçişe kadar.',
+      tipTitle: 'Pro İpucu',
+      tipText: 'Bir veya iki widget ile başla ve rahat hissettiğinde daha fazlasını ekle. Her şeyi istediğin zaman değiştirebilirsin.',
+      steps: [
+        { title: '1. Hesap Oluştur', lines: ['Pulseframelabs web sitesine git ve "Başla" veya "Kayıt Ol"a tıkla.', 'Adını, e-posta adresini ve bir şifre gir.', 'Bir onay e-postası alacaksın — hesabını aktifleştirmek için içindeki linke tıkla.', 'Onaydan sonra kişisel paneline yönlendirileceksin.'] },
+        { title: '2. Twitch Kanalını Bağla', lines: ['Panelde "Ayarlar" veya "Twitch Bağlantısı"na git.', '"Twitch Bağla"ya tıkla — yetki vermek için Twitch\'e yönlendirileceksin.', 'İzinleri ver ve geri yönlendirileceksin. Kanalın artık bağlı.', 'Bu sayede Twitch botu, sohbet komutları ve izleyici etkileşimleri çalışır.'] },
+        { title: '3. Widgetları Yapılandır', lines: ['Paneldeki widget bölümüne git (ör. Bonus Hunt, Bakiye, Wager Çubuğu vb.).', 'Her widgetın kendi ayar sayfası var — renkler, metin boyutu, düzen ve daha fazlası.', 'Her widgetı yayın tasarımına uyacak şekilde özelleştir.', 'Tek tek widgetları istediğin zaman etkinleştirebilir veya devre dışı bırakabilirsin.'] },
+        { title: '4. Overlay Linklerini OBS\'ye Kopyala', lines: ['Her widgetın benzersiz bir Overlay Linki (URL) var — widget ayarlarında bulabilirsin.', 'OBS Studio\'yu aç ve yeni bir "Browser Source" ekle.', 'Overlay URL\'sini URL alanına yapıştır. Genişlik/yüksekliği ayarla (ör. 800×600).', 'Kaynağı OBS sahnesinde konumlandır ve boyutlandır. Göstermek istediğin her widget için tekrarla.'] },
+        { title: '5. Cüzdanı Yükle', lines: ['Paneldeki "Cüzdan" bölümüne git.', '"Yükle"ye tıkla ve kredi miktarını gir (1 Kredi = 1 EUR).', 'Bir kripto para seç (ör. Bitcoin, Ethereum, Litecoin, USDT).', 'Gösterilen cüzdan adresine tam tutarı gönder. Onaylandıktan sonra krediler otomatik eklenir.'] },
+        { title: '6. Paket Aktifleştir', lines: ['Cüzdan bölümünde "Paketler"e git.', 'Bir plan seç: 1 Gün (5€), Aylık (99€), 3 Ay (249€) veya 6 Ay (449€).', '"Satın Al"a tıkla — krediler anında cüzdanından düşülür.', 'Tüm overlay widgetları ve özellikler artık paket süren boyunca açık.'] },
+        { title: '7. Canlıya Geç!', lines: ['OBS yayınını başlat — tüm overlayler otomatik olarak gerçek zamanlı güncellenir.', 'Paneli kullanarak widgetları yönet, bonus hunt başlat, turnuva düzenle vb.', 'Twitch botun sohbet komutlarını ve izleyici etkileşimlerini senin için yönetir.', 'Her şey canlı senkronize olur — sayfa yenileme veya manuel güncelleme gerekmez.'] },
+      ],
     },
     auth: {
       backToHome: 'Ana sayfaya dön',
@@ -1612,9 +1687,10 @@ export const translations = {
       label: 'Configuração em minutos',
       title: 'Como funciona',
       steps: [
-        { title: 'Entrar / Registrar', time: '1–2 min', desc: 'Crie sua conta e acesse o painel com um único ponto de entrada.' },
-        { title: 'Configurar Overlay', time: '2–3 min', desc: 'Monte seu setup de widgets e ajuste os detalhes do layout para seu stream.' },
-        { title: 'Ir ao Vivo', time: 'instantâneo', desc: 'Publique tokens, alimente o BrowserSource do OBS e gerencie interações em tempo real.' },
+        { title: 'Registrar & Confirmar Email', time: '1–2 min', desc: 'Crie sua conta, confirme seu email e acesse seu painel pessoal.' },
+        { title: 'Conectar Twitch & Configurar Widgets', time: '3–5 min', desc: 'Vincule seu canal Twitch, configure seus widgets overlay e personalize-os para seu stream.' },
+        { title: 'Adicionar Overlays ao OBS', time: '2–3 min', desc: 'Copie cada link overlay do painel e cole como Browser Source no OBS Studio.' },
+        { title: 'Recarregar & Ir ao Vivo', time: '1–2 min', desc: 'Adicione créditos via crypto, ative seu pacote e comece a streamar com todos os overlays.' },
       ],
     },
     testimonials: {
@@ -1793,9 +1869,23 @@ export const translations = {
     },
     tools: {
       randomSlot: { title: 'Gerador Aleatório', description: 'Obtenha um provedor e jogo aleatório', selectProvider: 'Filtrar por Provedor', allProviders: 'Todos os Provedores', start: 'Iniciar', result: 'Seu Slot', provider: 'Provedor', game: 'Jogo', spinning: 'Seleção aleatória...', tryAgain: 'Tentar Novamente' },
-      bonusCalc: { title: 'Calculadora Bonus Hunt', description: 'Calcule suas estatísticas de bonus hunt', totalBuyIn: 'Buy-In Total', numberOfBonuses: 'Número de Bônus', averageBuyIn: 'Buy-In Médio', totalResult: 'Resultado Total', profit: 'Lucro', loss: 'Prejuízo', averageMultiplier: 'Multiplicador Médio', breakEven: 'Break-Even X', bestBonus: 'Melhor Bônus', worstBonus: 'Pior Bônus', addBonus: 'Adicionar Bônus', reset: 'Reiniciar', bonusNum: 'Bônus #', buyIn: 'Buy-In', win: 'Ganho', multiplier: 'Multiplicador', noData: 'Adicione bônus para ver estatísticas' },
       volatility: { title: 'Comparador de Slots', description: 'Compare slots lado a lado', selectSlot: 'Selecionar Slot', rtp: 'RTP', volatilityLabel: 'Volatilidade', maxWin: 'Ganho Máximo', hitFrequency: 'Frequência de Acerto', provider: 'Provedor', low: 'Baixa', medium: 'Média', high: 'Alta', extreme: 'Extrema', vs: 'VS', selectBoth: 'Selecione dois slots para comparar' },
-      countdown: { title: 'Contagem Regressiva', description: 'Temporizador para eventos de stream', presets: 'Presets Rápidos', custom: 'Personalizado', minutes: 'min', seconds: 'seg', start: 'Iniciar', pause: 'Pausar', resume: 'Retomar', reset: 'Reiniciar', timeUp: 'Tempo esgotado!' },
+      setupGuide: { title: 'Guia de Configuração' },
+    },
+    setupGuide: {
+      title: 'Guia Completo de Configuração',
+      subtitle: 'Siga estes passos para configurar completamente seu stream — do registro à transmissão ao vivo.',
+      tipTitle: 'Dica Pro',
+      tipText: 'Comece com um ou dois widgets e adicione mais conforme se sentir confortável. Você pode sempre mudar tudo depois.',
+      steps: [
+        { title: '1. Crie sua Conta', lines: ['Vá ao site da Pulseframelabs e clique em "Começar" ou "Registrar".', 'Insira seu nome, endereço de email e uma senha.', 'Você receberá um email de confirmação — clique no link para ativar sua conta.', 'Após a confirmação, você será redirecionado para seu painel pessoal.'] },
+        { title: '2. Conecte seu Canal Twitch', lines: ['No painel, vá em "Configurações" ou "Conexão Twitch".', 'Clique em "Conectar Twitch" — você será redirecionado ao Twitch para autorizar.', 'Conceda as permissões e você será redirecionado de volta. Seu canal está agora vinculado.', 'Isso permite que o bot do Twitch, comandos de chat e interações dos espectadores funcionem.'] },
+        { title: '3. Configure os Widgets', lines: ['Vá para a seção de widgets no painel (ex: Bonus Hunt, Saldo, Barra de Wager, etc.).', 'Cada widget tem sua própria página de configurações — cores, tamanho do texto, layout e mais.', 'Personalize cada widget para combinar com o design do seu stream.', 'Você pode ativar ou desativar widgets individuais a qualquer momento.'] },
+        { title: '4. Copie os Links Overlay para o OBS', lines: ['Cada widget tem um Link Overlay único (URL) — encontre-o nas configurações do widget.', 'Abra o OBS Studio e adicione uma nova "Browser Source".', 'Cole a URL do Overlay no campo URL. Defina largura/altura conforme necessário (ex: 800×600).', 'Posicione e redimensione a fonte na cena do OBS. Repita para cada widget que quiser mostrar.'] },
+        { title: '5. Recarregue a Carteira', lines: ['Vá para a seção "Carteira" no painel.', 'Clique em "Recarregar" e insira o valor em créditos (1 Crédito = 1 EUR).', 'Escolha uma criptomoeda (ex: Bitcoin, Ethereum, Litecoin, USDT).', 'Envie o valor exato para o endereço da carteira exibido. Os créditos são adicionados automaticamente após confirmação.'] },
+        { title: '6. Ative um Pacote', lines: ['Vá em "Pacotes" na seção carteira.', 'Escolha um plano: 1 Dia (5€), Mensal (99€), 3 Meses (249€) ou 6 Meses (449€).', 'Clique em "Comprar" — os créditos serão deduzidos instantaneamente da sua carteira.', 'Todos os widgets overlay e funcionalidades estão agora desbloqueados pela duração do seu pacote.'] },
+        { title: '7. Vá ao Vivo!', lines: ['Inicie seu stream no OBS — todos os overlays atualizam automaticamente em tempo real.', 'Use o painel para controlar widgets, iniciar bonus hunts, realizar torneios, etc.', 'Seu bot do Twitch gerencia comandos de chat e interações dos espectadores para você.', 'Tudo sincroniza ao vivo — sem recarregar página ou atualizações manuais necessárias.'] },
+      ],
     },
     auth: {
       backToHome: 'Voltar para a página inicial',
@@ -1919,9 +2009,10 @@ export const translations = {
       label: 'Configuración en minutos',
       title: 'Cómo funciona',
       steps: [
-        { title: 'Iniciar sesión / Registrarse', time: '1–2 min', desc: 'Crea tu cuenta y accede al panel con un único punto de entrada.' },
-        { title: 'Configurar Overlay', time: '2–3 min', desc: 'Construye tu configuración de widgets y ajusta los detalles del diseño a tu stream.' },
-        { title: 'Ir en Vivo', time: 'instantáneo', desc: 'Publica tokens, alimenta el BrowserSource de OBS y gestiona interacciones en tiempo real.' },
+        { title: 'Registrarse & Confirmar Email', time: '1–2 min', desc: 'Crea tu cuenta, confirma tu email e inicia sesión en tu panel personal.' },
+        { title: 'Conectar Twitch & Configurar Widgets', time: '3–5 min', desc: 'Vincula tu canal de Twitch, configura tus widgets overlay y personalízalos para tu stream.' },
+        { title: 'Añadir Overlays a OBS', time: '2–3 min', desc: 'Copia cada enlace overlay del panel y pégalo como Browser Source en OBS Studio.' },
+        { title: 'Recargar & Ir en Vivo', time: '1–2 min', desc: 'Añade créditos vía crypto, activa tu paquete y empieza a streamear con todos los overlays.' },
       ],
     },
     testimonials: {
@@ -2100,9 +2191,23 @@ export const translations = {
     },
     tools: {
       randomSlot: { title: 'Generador Aleatorio', description: 'Obtén un proveedor y juego aleatorio', selectProvider: 'Filtrar por Proveedor', allProviders: 'Todos los Proveedores', start: 'Iniciar', result: 'Tu Slot', provider: 'Proveedor', game: 'Juego', spinning: 'Selección aleatoria...', tryAgain: 'Intentar de Nuevo' },
-      bonusCalc: { title: 'Calculadora Bonus Hunt', description: 'Calcula tus estadísticas de bonus hunt', totalBuyIn: 'Buy-In Total', numberOfBonuses: 'Número de Bonos', averageBuyIn: 'Buy-In Promedio', totalResult: 'Resultado Total', profit: 'Ganancia', loss: 'Pérdida', averageMultiplier: 'Multiplicador Promedio', breakEven: 'Break-Even X', bestBonus: 'Mejor Bono', worstBonus: 'Peor Bono', addBonus: 'Añadir Bono', reset: 'Reiniciar', bonusNum: 'Bono #', buyIn: 'Buy-In', win: 'Ganancia', multiplier: 'Multiplicador', noData: 'Añade bonos para ver estadísticas' },
       volatility: { title: 'Comparador de Slots', description: 'Compara slots lado a lado', selectSlot: 'Seleccionar Slot', rtp: 'RTP', volatilityLabel: 'Volatilidad', maxWin: 'Ganancia Máx', hitFrequency: 'Frecuencia de Acierto', provider: 'Proveedor', low: 'Baja', medium: 'Media', high: 'Alta', extreme: 'Extrema', vs: 'VS', selectBoth: 'Selecciona dos slots para comparar' },
-      countdown: { title: 'Cuenta Regresiva', description: 'Temporizador para eventos de stream', presets: 'Presets Rápidos', custom: 'Personalizado', minutes: 'min', seconds: 'seg', start: 'Iniciar', pause: 'Pausar', resume: 'Reanudar', reset: 'Reiniciar', timeUp: '¡Tiempo agotado!' },
+      setupGuide: { title: 'Guía de Configuración' },
+    },
+    setupGuide: {
+      title: 'Guía Completa de Configuración',
+      subtitle: 'Sigue estos pasos para configurar completamente tu stream — desde el registro hasta ir en vivo.',
+      tipTitle: 'Consejo Pro',
+      tipText: 'Empieza con uno o dos widgets y añade más cuando te sientas cómodo. Siempre puedes cambiar todo después.',
+      steps: [
+        { title: '1. Crea tu Cuenta', lines: ['Ve al sitio web de Pulseframelabs y haz clic en "Empezar" o "Registrarse".', 'Introduce tu nombre, dirección de email y una contraseña.', 'Recibirás un email de confirmación — haz clic en el enlace para activar tu cuenta.', 'Después de la confirmación serás redirigido a tu panel personal.'] },
+        { title: '2. Conecta tu Canal de Twitch', lines: ['En el panel, ve a "Configuración" o "Conexión Twitch".', 'Haz clic en "Conectar Twitch" — serás redirigido a Twitch para autorizar.', 'Otorga los permisos y serás redirigido de vuelta. Tu canal está ahora vinculado.', 'Esto permite que el bot de Twitch, comandos de chat e interacciones de espectadores funcionen.'] },
+        { title: '3. Configura los Widgets', lines: ['Ve a la sección de widgets en tu panel (ej. Bonus Hunt, Saldo, Barra de Wager, etc.).', 'Cada widget tiene su propia página de ajustes — colores, tamaño de texto, diseño y más.', 'Personaliza cada widget para que coincida con el diseño de tu stream.', 'Puedes activar o desactivar widgets individuales en cualquier momento.'] },
+        { title: '4. Copia los Enlaces Overlay en OBS', lines: ['Cada widget tiene un Enlace Overlay único (URL) — encuéntralo en los ajustes del widget.', 'Abre OBS Studio y añade una nueva "Browser Source".', 'Pega la URL del Overlay en el campo URL. Establece ancho/alto según sea necesario (ej. 800×600).', 'Posiciona y redimensiona la fuente en tu escena OBS. Repite para cada widget que quieras mostrar.'] },
+        { title: '5. Recarga la Billetera', lines: ['Ve a la sección "Billetera" en el panel.', 'Haz clic en "Recargar" e introduce la cantidad en créditos (1 Crédito = 1 EUR).', 'Elige una criptomoneda (ej. Bitcoin, Ethereum, Litecoin, USDT).', 'Envía la cantidad exacta a la dirección de billetera mostrada. Los créditos se añaden automáticamente una vez confirmado.'] },
+        { title: '6. Activa un Paquete', lines: ['Ve a "Paquetes" en la sección billetera.', 'Elige un plan: 1 Día (5€), Mensual (99€), 3 Meses (249€) o 6 Meses (449€).', 'Haz clic en "Comprar" — los créditos se deducirán instantáneamente de tu billetera.', 'Todos los widgets overlay y funcionalidades están ahora desbloqueados durante la duración de tu paquete.'] },
+        { title: '7. ¡Ve en Vivo!', lines: ['Inicia tu stream en OBS — todos los overlays se actualizan automáticamente en tiempo real.', 'Usa el panel para controlar widgets, iniciar bonus hunts, realizar torneos, etc.', 'Tu bot de Twitch gestiona comandos de chat e interacciones de espectadores por ti.', 'Todo se sincroniza en vivo — sin recargar página ni actualizaciones manuales necesarias.'] },
+      ],
     },
     auth: {
       backToHome: 'Volver al inicio',

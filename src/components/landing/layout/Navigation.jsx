@@ -6,9 +6,8 @@ import ThemeToggle from '@/components/landing/ui/ThemeToggle';
 import { useLanguage } from '@/context/LanguageContext';
 import ToolModal from '@/components/landing/tools/ToolModal';
 import RandomSlotGenerator from '@/components/landing/tools/RandomSlotGenerator';
-import BonusHuntCalculator from '@/components/landing/tools/BonusHuntCalculator';
 import SlotVolatilityComparer from '@/components/landing/tools/SlotVolatilityComparer';
-import StreamCountdown from '@/components/landing/tools/StreamCountdown';
+import SetupGuide from '@/components/landing/tools/SetupGuide';
 
 function DiceIcon() {
   return (
@@ -20,16 +19,13 @@ function DiceIcon() {
   );
 }
 
-function CalcIcon() {
+function BookIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-      <rect x="4" y="2" width="16" height="20" rx="2" />
-      <line x1="8" y1="6" x2="16" y2="6" />
-      <line x1="8" y1="10" x2="10" y2="10" />
-      <line x1="14" y1="10" x2="16" y2="10" />
-      <line x1="8" y1="14" x2="10" y2="14" />
-      <line x1="14" y1="14" x2="16" y2="14" />
-      <line x1="8" y1="18" x2="16" y2="18" />
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+      <line x1="9" y1="7" x2="16" y2="7" />
+      <line x1="9" y1="11" x2="14" y2="11" />
     </svg>
   );
 }
@@ -45,22 +41,10 @@ function ChartIcon() {
   );
 }
 
-function TimerIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-      <circle cx="12" cy="13" r="9" />
-      <line x1="12" y1="9" x2="12" y2="13" />
-      <line x1="12" y1="13" x2="15" y2="13" />
-      <line x1="10" y1="2" x2="14" y2="2" />
-    </svg>
-  );
-}
-
 const toolIcons = {
   randomSlot: DiceIcon,
-  bonusCalc: CalcIcon,
   volatility: ChartIcon,
-  countdown: TimerIcon,
+  setupGuide: BookIcon,
 };
 
 export default function Navigation({ theme }) {
@@ -83,9 +67,8 @@ export default function Navigation({ theme }) {
 
   const toolsList = [
     { id: 'randomSlot', label: t.tools.randomSlot.title },
-    { id: 'bonusCalc', label: t.tools.bonusCalc.title },
     { id: 'volatility', label: t.tools.volatility.title },
-    { id: 'countdown', label: t.tools.countdown.title },
+    { id: 'setupGuide', label: t.tools.setupGuide.title },
   ];
 
   useEffect(() => {
@@ -467,14 +450,11 @@ export default function Navigation({ theme }) {
       <ToolModal isOpen={activeToolModal === 'randomSlot'} onClose={() => setActiveToolModal(null)}>
         <RandomSlotGenerator />
       </ToolModal>
-      <ToolModal isOpen={activeToolModal === 'bonusCalc'} onClose={() => setActiveToolModal(null)}>
-        <BonusHuntCalculator />
-      </ToolModal>
       <ToolModal isOpen={activeToolModal === 'volatility'} onClose={() => setActiveToolModal(null)}>
         <SlotVolatilityComparer />
       </ToolModal>
-      <ToolModal isOpen={activeToolModal === 'countdown'} onClose={() => setActiveToolModal(null)}>
-        <StreamCountdown />
+      <ToolModal isOpen={activeToolModal === 'setupGuide'} onClose={() => setActiveToolModal(null)}>
+        <SetupGuide />
       </ToolModal>
     </>
   );

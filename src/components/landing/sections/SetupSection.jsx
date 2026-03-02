@@ -35,7 +35,7 @@ export default function SetupSection() {
           <RevealText as="h2" delay={0.1} className="text-display font-display">{t.setup.title}</RevealText>
         </div>
 
-        <div ref={cardsRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: 'clamp(16px, 2vw, 24px)', maxWidth: '1000px', margin: '0 auto' }}>
+        <div ref={cardsRef} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))', gap: 'clamp(16px, 2vw, 24px)', maxWidth: '1100px', margin: '0 auto' }}>
           {steps.map(step => (
             <GlassCard key={step.number} className="setup-step">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
