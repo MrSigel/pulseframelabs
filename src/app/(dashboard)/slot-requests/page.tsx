@@ -504,7 +504,7 @@ export default function SlotRequestsPage() {
             {/* Body */}
             <div className="px-6 py-5 space-y-5">
               {/* Overlay Link */}
-              <OverlayLink url={overlayUrl} />
+              <OverlayLink url={overlayUrl} obsSize="380 × 180" />
 
               {/* Overlay Preview */}
               <div>

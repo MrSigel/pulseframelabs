@@ -242,7 +242,7 @@ export default function BonushuntsPage() {
 
             {/* Body */}
             <div className="px-6 py-5 space-y-5">
-              <OverlayLink url={overlayUrls[activeTab] || ""} />
+              <OverlayLink url={overlayUrls[activeTab] || ""} obsSize={{ large: "400 × 200", small: "180 × 70", horizontal: "700 × 60", topworse: "340 × 160", guess: "320 × 150" }[activeTab]} />
 
               <div>
                 <Label className="text-sm font-semibold text-slate-400 mb-2 block">Preview</Label>

@@ -490,7 +490,7 @@ export default function PointsBattlePage() {
             <div className="p-5 space-y-4">
               <div>
                 <Label className="text-white font-semibold mb-2 block text-sm">Overlay URL</Label>
-                <OverlayLink url={overlayUrl} />
+                <OverlayLink url={overlayUrl} obsSize="400 × 280" />
                 <p className="text-xs text-slate-500 mt-2">Add this URL as a Browser Source in OBS to display the Points Battle overlay on your stream.</p>
               </div>
 

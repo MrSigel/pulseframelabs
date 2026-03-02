@@ -330,7 +330,7 @@ export default function DuelPage() {
 
             {/* Body */}
             <div className="px-6 py-5 space-y-5">
-              <OverlayLink url={overlayUrl} />
+              <OverlayLink url={overlayUrl} obsSize="450 × 220" />
 
               <div>
                 <Label className="text-sm font-semibold text-slate-400 mb-2 block">Preview</Label>

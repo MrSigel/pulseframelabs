@@ -219,7 +219,7 @@ export default function WagerPage() {
 
               {/* Overlay Small */}
               <TabsContent value="small" className="mt-4 space-y-4">
-                <OverlayLink url={`${overlayBaseUrl}/overlay/wager_bar_small?uid=${uid || ""}`} />
+                <OverlayLink url={`${overlayBaseUrl}/overlay/wager_bar_small?uid=${uid || ""}`} obsSize="450 × 130" />
 
                 <div className="rounded-xl p-6 flex items-center justify-center" style={{ background: "radial-gradient(ellipse at center, rgba(59,130,246,0.05) 0%, transparent 70%)" }}>
                   <div
@@ -311,7 +311,7 @@ export default function WagerPage() {
 
               {/* Overlay Normal */}
               <TabsContent value="normal" className="mt-4 space-y-4">
-                <OverlayLink url={`${overlayBaseUrl}/overlay/wager_bar_normal?uid=${uid || ""}`} />
+                <OverlayLink url={`${overlayBaseUrl}/overlay/wager_bar_normal?uid=${uid || ""}`} obsSize="480 × 220" />
 
                 <div className="rounded-xl p-6 flex items-center justify-center" style={{ background: "radial-gradient(ellipse at center, rgba(59,130,246,0.05) 0%, transparent 70%)" }}>
                   <div

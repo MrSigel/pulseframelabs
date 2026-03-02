@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useThemeContext } from "@/components/providers";
 import { useTwitchBot } from "@/contexts/TwitchBotContext";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 import type { User } from "@supabase/supabase-js";
 import type { UserProfile } from "@/lib/supabase/types";
 
@@ -126,6 +127,7 @@ export function Header() {
 
   const ThemeIcon = themeIcons[preference];
   const { isConnected: botConnected, isConnecting: botConnecting } = useTwitchBot();
+  const { wallet } = useSubscription();
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-xl px-6">
@@ -137,6 +139,16 @@ export function Header() {
 
       {/* Right controls */}
       <div className="flex items-center gap-3">
+        {/* Credits */}
+        <div
+          className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] cursor-pointer transition-colors hover:bg-primary/5"
+          onClick={() => router.push("/wallet")}
+          title="Wallet Credits"
+        >
+          <span className="text-primary">{wallet?.balance ?? 0}</span>
+          <span className="text-muted-foreground">Credits</span>
+        </div>
+
         {/* Bot Status */}
         <div
           className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] cursor-pointer transition-colors hover:bg-primary/5"
