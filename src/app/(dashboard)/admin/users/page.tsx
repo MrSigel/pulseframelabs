@@ -19,6 +19,8 @@ import {
   Trash2,
   Pencil,
   Search,
+  Plus,
+  Minus,
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -51,6 +53,12 @@ export default function AdminUsersPage() {
   const [editName, setEditName] = useState("");
   const [editIps, setEditIps] = useState("");
   const [deleteModal, setDeleteModal] = useState<UserRow | null>(null);
+  const [walletModal, setWalletModal] = useState<{
+    user: UserRow;
+    action: "credit" | "debit";
+  } | null>(null);
+  const [walletAmount, setWalletAmount] = useState("");
+  const [walletDescription, setWalletDescription] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -157,6 +165,36 @@ export default function AdminUsersPage() {
     }
   }
 
+  async function handleWalletAction() {
+    if (!walletModal) return;
+    const numAmount = parseInt(walletAmount, 10);
+    if (!numAmount || numAmount <= 0) return;
+
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/admin/users/${walletModal.user.user_id}/wallet`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: walletModal.action,
+          amount: numAmount,
+          description: walletDescription || `Admin ${walletModal.action}`,
+        }),
+      });
+      if (!res.ok) {
+        setError(`Failed to ${walletModal.action} wallet (${res.status})`);
+      }
+      setWalletModal(null);
+      setWalletAmount("");
+      setWalletDescription("");
+      await loadUsers();
+    } catch {
+      setError("Network error");
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
   return (
     <div>
       <PageHeader title={a.userManagement ?? "User Management"} />
@@ -242,6 +280,32 @@ export default function AdminUsersPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-emerald-400 hover:text-emerald-300"
+                            onClick={() => {
+                              setWalletModal({ user, action: "credit" });
+                              setWalletAmount("");
+                              setWalletDescription("");
+                            }}
+                            title={a.creditWallet ?? "Credit"}
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-rose-400 hover:text-rose-300"
+                            onClick={() => {
+                              setWalletModal({ user, action: "debit" });
+                              setWalletAmount("");
+                              setWalletDescription("");
+                            }}
+                            title={a.debitWallet ?? "Debit"}
+                          >
+                            <Minus className="h-3.5 w-3.5" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -414,6 +478,65 @@ export default function AdminUsersPage() {
               {actionLoading
                 ? (a.loading ?? "Loading...")
                 : (a.deleteUser ?? "Delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Credit/Debit Modal */}
+      <Dialog open={!!walletModal} onOpenChange={() => setWalletModal(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {walletModal?.action === "credit"
+                ? (a.creditWallet ?? "Credit Wallet")
+                : (a.debitWallet ?? "Debit Wallet")}
+            </DialogTitle>
+            <DialogDescription>{walletModal?.user.email}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-sm text-muted-foreground mb-1 block">
+                {a.amount ?? "Amount"} (Credits)
+              </label>
+              <Input
+                type="number"
+                min="1"
+                value={walletAmount}
+                onChange={(e) => setWalletAmount(e.target.value)}
+                placeholder="100"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-muted-foreground mb-1 block">
+                {a.description ?? "Description"}
+              </label>
+              <Input
+                value={walletDescription}
+                onChange={(e) => setWalletDescription(e.target.value)}
+                placeholder="Optional reason..."
+              />
+            </div>
+            {walletModal?.user.wallet && (
+              <p className="text-xs text-muted-foreground">
+                {a.currentBalance ?? "Current balance"}: <span className="font-bold text-foreground">{walletModal.user.wallet.balance}</span> Credits
+              </p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setWalletModal(null)}>
+              {a.cancel ?? "Cancel"}
+            </Button>
+            <Button
+              variant={walletModal?.action === "credit" ? "default" : "destructive"}
+              disabled={actionLoading || !walletAmount}
+              onClick={handleWalletAction}
+            >
+              {actionLoading
+                ? (a.loading ?? "Loading...")
+                : walletModal?.action === "credit"
+                  ? (a.creditWallet ?? "Credit")
+                  : (a.debitWallet ?? "Debit")}
             </Button>
           </DialogFooter>
         </DialogContent>
