@@ -10,8 +10,12 @@ export default function OverlayLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-transparent">
-      {children}
-    </div>
+    <>
+      {/* Override body background for OBS Browser Source transparency */}
+      <style>{`html, body { background: transparent !important; }`}</style>
+      <div className="min-h-screen bg-transparent">
+        {children}
+      </div>
+    </>
   );
 }

@@ -34,11 +34,13 @@ import {
   Loader2,
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import { store as storeDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import type { StoreItem, StoreSettings, StoreRedemption } from "@/lib/supabase/types";
 
 export default function StorePage() {
+  const { canModify } = useFeatureGate();
   const [moreOptionsOpen, setMoreOptionsOpen] = useState(false);
   const [addItemOpen, setAddItemOpen] = useState(false);
   const [storeSettingsOpen, setStoreSettingsOpen] = useState(false);
@@ -153,7 +155,7 @@ export default function StorePage() {
               <ExternalLink className="h-4 w-4" />
               Open Store Page
             </Button>
-            <Button variant="success" className="gap-2" onClick={() => setAddItemOpen(true)}>
+            <Button variant="success" className="gap-2" onClick={() => setAddItemOpen(true)} disabled={!canModify}>
               <Plus className="h-4 w-4" />
               Add new Item
             </Button>
@@ -355,7 +357,7 @@ export default function StorePage() {
                 <span>{item.quantity_available === -1 ? "Unlimited" : item.quantity_available}</span>
                 <span>{item.visible ? <Check className="h-4 w-4 text-green-400" /> : <X className="h-4 w-4 text-red-400" />}</span>
                 <div className="flex items-center gap-1">
-                  <Button variant="destructive" size="icon-sm" onClick={() => handleDeleteItem(item.id)}>
+                  <Button variant="destructive" size="icon-sm" onClick={() => handleDeleteItem(item.id)} disabled={!canModify}>
                     <X className="h-3.5 w-3.5" />
                   </Button>
                 </div>
@@ -598,7 +600,7 @@ export default function StorePage() {
               <Button
                 className="w-full gap-2 py-5 text-sm font-semibold"
                 onClick={handleCreateItem}
-                disabled={creating || !itemName.trim()}
+                disabled={creating || !itemName.trim() || !canModify}
               >
                 {creating ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -769,6 +771,7 @@ export default function StorePage() {
               <Button
                 className="w-full gap-2 py-5 text-sm font-semibold"
                 onClick={handleSaveSettings}
+                disabled={!canModify}
               >
                 <Save className="h-4 w-4" />
                 Save Changes

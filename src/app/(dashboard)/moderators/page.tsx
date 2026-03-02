@@ -9,9 +9,11 @@ import { Separator } from "@/components/ui/separator";
 import { Settings2, Loader2, X, ToggleLeft, ToggleRight } from "lucide-react";
 import { moderators as moderatorsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { Moderator } from "@/lib/supabase/types";
 
 export default function ModeratorsPage() {
+  const { canModify } = useFeatureGate();
   const [adding, setAdding] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
 
@@ -83,7 +85,7 @@ export default function ModeratorsPage() {
               />
               <Button
                 onClick={handleAddModerator}
-                disabled={adding}
+                disabled={adding || !canModify}
               >
                 {adding ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -130,6 +132,7 @@ export default function ModeratorsPage() {
                         size="sm"
                         className="gap-1"
                         onClick={() => handleToggleStatus(mod.id, mod.status)}
+                        disabled={!canModify}
                       >
                         <ToggleRight className="h-3.5 w-3.5" />
                         Deactivate
@@ -139,6 +142,7 @@ export default function ModeratorsPage() {
                         size="sm"
                         className="gap-1"
                         onClick={() => handleRemoveModerator(mod.id)}
+                        disabled={!canModify}
                       >
                         <X className="h-3.5 w-3.5" />
                         Remove
@@ -178,6 +182,7 @@ export default function ModeratorsPage() {
                         size="sm"
                         className="gap-1"
                         onClick={() => handleToggleStatus(mod.id, mod.status)}
+                        disabled={!canModify}
                       >
                         <ToggleLeft className="h-3.5 w-3.5" />
                         Activate
@@ -187,6 +192,7 @@ export default function ModeratorsPage() {
                         size="sm"
                         className="gap-1"
                         onClick={() => handleRemoveModerator(mod.id)}
+                        disabled={!canModify}
                       >
                         <X className="h-3.5 w-3.5" />
                         Remove

@@ -12,6 +12,7 @@ import { useState, useMemo, useEffect } from "react";
 import { duelSessions } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { DuelSession, DuelPlayer as DuelPlayerType } from "@/lib/supabase/types";
 
 interface DuelPlayer {
@@ -24,6 +25,7 @@ interface DuelPlayer {
 }
 
 export default function DuelPage() {
+  const { canModify } = useFeatureGate();
   const uid = useAuthUid();
   const [maxPlayers, setMaxPlayers] = useState("10");
   const [rafflePool, setRafflePool] = useState(false);
@@ -152,7 +154,7 @@ export default function DuelPage() {
         title="Duel Management"
         actions={
           <>
-            <Button variant="destructive" className="gap-2" onClick={handleReset}>
+            <Button variant="destructive" className="gap-2" onClick={handleReset} disabled={!canModify}>
               <RotateCcw className="h-4 w-4" />
               Reset
             </Button>
@@ -180,15 +182,15 @@ export default function DuelPage() {
                   <RefreshCw className="h-3.5 w-3.5" />
                   Reload
                 </Button>
-                <Button variant="accent" className="gap-1" size="sm" onClick={handleRaffle}>
+                <Button variant="accent" className="gap-1" size="sm" onClick={handleRaffle} disabled={!canModify}>
                   <Gift className="h-3.5 w-3.5" />
                   Raffle
                 </Button>
-                <Button variant="success" className="gap-1" size="sm" onClick={handleAddPlayer}>
+                <Button variant="success" className="gap-1" size="sm" onClick={handleAddPlayer} disabled={!canModify}>
                   <Plus className="h-3.5 w-3.5" />
                   Add Row
                 </Button>
-                <Button className="gap-1" size="sm" onClick={handleSaveSession} disabled={saving}>
+                <Button className="gap-1" size="sm" onClick={handleSaveSession} disabled={saving || !canModify}>
                   {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                   {saving ? "Saving..." : "Update"}
                 </Button>
@@ -285,7 +287,7 @@ export default function DuelPage() {
               <Switch checked={rafflePool} onCheckedChange={setRafflePool} />
             </div>
 
-            <Button className="w-full" onClick={handleSaveSession} disabled={saving}>
+            <Button className="w-full" onClick={handleSaveSession} disabled={saving || !canModify}>
               {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
               {saving ? "Saving..." : "Save Settings"}
             </Button>

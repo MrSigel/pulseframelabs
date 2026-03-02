@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Monitor, Plus, Loader2, Trash2 } from "lucide-react";
 import { slideshow as slideshowDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { SlideshowItem } from "@/lib/supabase/types";
 
 export default function SlideshowPage() {
+  const { canModify } = useFeatureGate();
   const [adding, setAdding] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
   const { data: dbItems, loading, refetch } = useDbQuery<SlideshowItem[]>(() => slideshowDb.list(), []);
@@ -38,7 +40,7 @@ export default function SlideshowPage() {
         title="SlideShow Management"
         actions={
           <>
-            <Button variant="success" className="gap-2">
+            <Button variant="success" className="gap-2" disabled={!canModify}>
               <Monitor className="h-4 w-4" />
               Slideshow Overlay
             </Button>
@@ -52,7 +54,7 @@ export default function SlideshowPage() {
               <Button
                 className="gap-2"
                 onClick={handleAddSlide}
-                disabled={adding}
+                disabled={adding || !canModify}
               >
                 {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                 Add Casino to Slideshow
@@ -97,6 +99,7 @@ export default function SlideshowPage() {
                       size="sm"
                       className="gap-1"
                       onClick={() => handleDeleteSlide(item.id)}
+                      disabled={!canModify}
                     >
                       <Trash2 className="h-4 w-4" />
                       Delete

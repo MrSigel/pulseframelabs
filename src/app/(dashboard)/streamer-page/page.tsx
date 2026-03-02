@@ -11,11 +11,13 @@ import {
   Globe, Twitch, Youtube, Twitter, MessageCircle,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import { streamerPage } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import type { StreamerPageSettings } from "@/lib/supabase/types";
 
 export default function StreamerPageSettingsPage() {
+  const { canModify } = useFeatureGate();
   const { data: settings, refetch } = useDbQuery<StreamerPageSettings | null>(
     () => streamerPage.get(),
     [],
@@ -117,7 +119,7 @@ export default function StreamerPageSettingsPage() {
                 </Button>
               </a>
             )}
-            <Button className="gap-2" onClick={handleSave} disabled={saving || !slug.trim()}>
+            <Button className="gap-2" onClick={handleSave} disabled={saving || !slug.trim() || !canModify}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               {saving ? "Saving..." : "Save Changes"}
             </Button>

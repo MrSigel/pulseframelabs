@@ -357,6 +357,8 @@ function AuthLayoutInner({ children }: { children: React.ReactNode }) {
   const theme = useTheme();
   const auth = t.auth || {};
   const isDark = theme.isDark;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Theme-adaptive colors for the left panel
   const panelBg = isDark
@@ -529,8 +531,8 @@ function AuthLayoutInner({ children }: { children: React.ReactNode }) {
               transition: "background 0.8s, box-shadow 0.8s, border-color 0.8s",
             }}
           >
-            {/* Floating overlays inside the frame */}
-            <FloatingOverlays glowColor={glowColor} isDark={isDark} />
+            {/* Floating overlays inside the frame — deferred to avoid hydration mismatch */}
+            {mounted && <FloatingOverlays glowColor={glowColor} isDark={isDark} />}
 
             {/* Scanlines */}
             <div

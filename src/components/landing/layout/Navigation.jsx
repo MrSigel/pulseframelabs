@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import ThemeToggle from '@/components/landing/ui/ThemeToggle';
+
 import { useLanguage } from '@/context/LanguageContext';
 import ToolModal from '@/components/landing/tools/ToolModal';
 import RandomSlotGenerator from '@/components/landing/tools/RandomSlotGenerator';
@@ -273,7 +273,6 @@ export default function Navigation({ theme }) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <ThemeToggle preference={theme.preference} onCycle={theme.cycleTheme} />
             <a
               href="/login"
               className="hide-mobile"

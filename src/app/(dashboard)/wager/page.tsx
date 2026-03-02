@@ -19,10 +19,12 @@ import { useState, useMemo, useEffect } from "react";
 import { wagerSessions } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { WagerSession } from "@/lib/supabase/types";
 
 export default function WagerPage() {
   const uid = useAuthUid();
+  const { canModify } = useFeatureGate();
   const [casinoName, setCasinoName] = useState("Casinoname");
   const [headerText, setHeaderText] = useState("PULSEFRAMELABS.COM");
   const [bonusType, setBonusType] = useState("sticky");
@@ -126,7 +128,7 @@ export default function WagerPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg text-white">Wager Settings</CardTitle>
-            <Button variant="destructive" size="sm" className="gap-1" onClick={handleReset}>
+            <Button variant="destructive" size="sm" className="gap-1" onClick={handleReset} disabled={!canModify}>
               <RotateCcw className="h-3.5 w-3.5" />
               Reset
             </Button>
@@ -201,7 +203,7 @@ export default function WagerPage() {
               </div>
             </div>
 
-            <Button className="w-full gap-2" onClick={handleSave} disabled={saving}>
+            <Button className="w-full gap-2" onClick={handleSave} disabled={saving || !canModify}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               {saving ? "Saving..." : "Update"}
             </Button>

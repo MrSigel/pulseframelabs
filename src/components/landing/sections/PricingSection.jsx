@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import RevealText from '@/components/landing/ui/RevealText';
@@ -12,6 +13,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 export default function PricingSection() {
   const { t } = useLanguage();
+  const router = useRouter();
   const cardsRef = useRef(null);
 
   const plans = t.pricing.plans.map((p, i) => ({
@@ -105,7 +107,7 @@ export default function PricingSection() {
                 ))}
               </div>
 
-              <MagneticButton variant={plan.popular ? 'primary' : 'secondary'} style={{ width: '100%', justifyContent: 'center' }}>
+              <MagneticButton variant={plan.popular ? 'primary' : 'secondary'} onClick={() => router.push('/register')} style={{ width: '100%', justifyContent: 'center' }}>
                 {plan.cta}
               </MagneticButton>
             </GlassCard>

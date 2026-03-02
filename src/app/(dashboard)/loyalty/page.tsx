@@ -18,6 +18,7 @@ import { giveaways, loyalty as loyaltyDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useTwitchBot } from "@/contexts/TwitchBotContext";
 import { createLoyaltyHandler } from "@/lib/twitch/handlers";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { LoyaltyPreset, GiveawayHistoryEntry } from "@/lib/supabase/types";
 
 interface Preset {
@@ -29,6 +30,7 @@ interface Preset {
 }
 
 export default function LoyaltyPage() {
+  const { canModify } = useFeatureGate();
   const { isConnected, addHandler, removeHandler } = useTwitchBot();
   const [keyword, setKeyword] = useState("");
   const [pointsAmount, setPointsAmount] = useState("1");
@@ -291,7 +293,7 @@ export default function LoyaltyPage() {
             variant="success"
             className="w-full gap-2 py-5"
             onClick={handleStartGiveaway}
-            disabled={!!activeSessionId || !keyword.trim()}
+            disabled={!canModify || !!activeSessionId || !keyword.trim()}
           >
             <Play className="h-4 w-4" />
             {activeSessionId ? `Giveaway Active (${timeRemaining}s)` : "Start Giveaway"}
@@ -375,7 +377,7 @@ export default function LoyaltyPage() {
                         setPresetsView("create");
                       }
                     }}
-                    disabled={presets.length >= MAX_PRESETS}
+                    disabled={!canModify || presets.length >= MAX_PRESETS}
                   >
                     <Plus className="h-4 w-4" />
                     Create new preset ({presets.length}/{MAX_PRESETS})
@@ -443,7 +445,7 @@ export default function LoyaltyPage() {
                     variant="success"
                     className="w-full gap-2 py-5 text-sm font-semibold"
                     onClick={handleCreatePreset}
-                    disabled={!newPresetName.trim() || !newPresetKeyword.trim()}
+                    disabled={!canModify || !newPresetName.trim() || !newPresetKeyword.trim()}
                   >
                     <Plus className="h-4 w-4" />
                     Create Preset
@@ -487,7 +489,8 @@ export default function LoyaltyPage() {
                           </div>
                           <button
                             onClick={() => handleDeletePreset(preset.id)}
-                            className="text-slate-600 hover:text-red-400 transition-colors ml-3 opacity-0 group-hover:opacity-100"
+                            disabled={!canModify}
+                            className="text-slate-600 hover:text-red-400 transition-colors ml-3 opacity-0 group-hover:opacity-100 disabled:opacity-50 disabled:pointer-events-none"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>

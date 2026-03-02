@@ -19,11 +19,13 @@ import { slotRequests as srDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
 import { useTwitchBot } from "@/contexts/TwitchBotContext";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { SlotRequestSettings, SlotRequest, RaffleHistoryEntry } from "@/lib/supabase/types";
 
 const defaultEmojis = ["❓", "❓", "❓", "❓", "❓", "❓", "⭐", "✨", "🤩"];
 
 export default function SlotRequestsPage() {
+  const { canModify } = useFeatureGate();
   const uid = useAuthUid();
   const { isConnected } = useTwitchBot();
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -140,7 +142,7 @@ export default function SlotRequestsPage() {
             </CardHeader>
             <CardContent>
               <div className="flex gap-3">
-                <Button className="gap-2" onClick={handleRaffleGame}>
+                <Button className="gap-2" onClick={handleRaffleGame} disabled={!canModify}>
                   <Gift className="h-4 w-4" />
                   Raffle a Game
                 </Button>
@@ -148,11 +150,12 @@ export default function SlotRequestsPage() {
                   variant={slotRequestsOpen ? "destructive" : "success"}
                   className="gap-2"
                   onClick={handleToggleSlotRequests}
+                  disabled={!canModify}
                 >
                   <MessageSquare className="h-4 w-4" />
                   {slotRequestsOpen ? "Close Slot Requests" : "Open Slot Requests"}
                 </Button>
-                <Button variant="destructive" className="gap-2" onClick={handleClearAll}>
+                <Button variant="destructive" className="gap-2" onClick={handleClearAll} disabled={!canModify}>
                   <Trash2 className="h-4 w-4" />
                   Clear All Requests
                 </Button>
@@ -383,6 +386,7 @@ export default function SlotRequestsPage() {
                 variant="default"
                 className="gap-2 px-8"
                 onClick={handleSaveSettings}
+                disabled={!canModify}
               >
                 <Save className="h-4 w-4" />
                 Save Settings

@@ -19,6 +19,7 @@ import { useState, useMemo, useEffect } from "react";
 import { balanceProfiles } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { BalanceProfile } from "@/lib/supabase/types";
 
 const currencies = [
@@ -62,6 +63,7 @@ const currencies = [
 
 export default function DepositWithdrawalsPage() {
   const uid = useAuthUid();
+  const { canModify } = useFeatureGate();
   const [currency, setCurrency] = useState("usd");
   const [deposits, setDeposits] = useState("0");
   const [depositsAdd, setDepositsAdd] = useState("0");
@@ -237,11 +239,11 @@ export default function DepositWithdrawalsPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button className="flex-1 gap-2" onClick={handleSave} disabled={saving}>
+              <Button className="flex-1 gap-2" onClick={handleSave} disabled={saving || !canModify}>
                 {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 {saving ? "Saving..." : "Update Profile"}
               </Button>
-              <Button variant="destructive" className="flex-1 gap-2" onClick={handleReset}>
+              <Button variant="destructive" className="flex-1 gap-2" onClick={handleReset} disabled={!canModify}>
                 <RotateCcw className="h-4 w-4" />
                 Reset Current Profile
               </Button>

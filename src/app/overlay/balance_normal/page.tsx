@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useOverlayData } from "@/hooks/useOverlayData";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useGlobalCurrency, currencySymbol } from "@/hooks/useGlobalCurrency";
 
 interface BalanceProfile {
   deposits: number;
@@ -15,12 +16,10 @@ interface BalanceProfile {
   currency: string;
 }
 
-const currencySymbol = (code: string | null | undefined) =>
-  ({ USD: "$", EUR: "\u20ac", GBP: "\u00a3" }[code ?? ""] || code || "$");
-
 function BalanceNormalContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { symbol: globalCurrency } = useGlobalCurrency(uid);
 
   const { data, loading } = useOverlayData<BalanceProfile>({
     table: "balance_profiles",
@@ -35,7 +34,7 @@ function BalanceNormalContent() {
     const deposits = data ? data.deposits + data.deposits_add : 0;
     const withdrawals = data ? data.withdrawals + data.withdrawals_add : 0;
     const leftover = data ? data.leftover + data.leftover_add : 0;
-    const currency = currencySymbol(data?.currency);
+    const currency = data?.currency ? currencySymbol(data.currency) : globalCurrency;
 
     return (
       <BalanceNormalView

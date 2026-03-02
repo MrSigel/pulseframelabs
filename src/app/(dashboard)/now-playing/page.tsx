@@ -18,6 +18,7 @@ import { useState, useMemo } from "react";
 import { games as gamesDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { Game } from "@/lib/supabase/types";
 
 interface GameInfo {
@@ -333,6 +334,7 @@ function GameImage({ src, name, providerColor }: { src: string | null; name: str
 
 export default function NowPlayingPage() {
   const uid = useAuthUid();
+  const { canModify } = useFeatureGate();
   const [selectedProvider, setSelectedProvider] = useState("pragmatic");
   const [selectedGameIndex, setSelectedGameIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -515,6 +517,7 @@ export default function NowPlayingPage() {
                   <Button
                     variant="success"
                     className="font-bold"
+                    disabled={!canModify}
                     onClick={() => {
                       if (currentGame) {
                         handleCreateGame(currentGame.name, currentGame.provider, currentGame.image);
@@ -587,7 +590,7 @@ export default function NowPlayingPage() {
               <Input placeholder="" className="w-16" />
               <Input placeholder="" className="w-16" />
               <span className="text-sm text-slate-500">N/Ax</span>
-              <Button size="icon" variant="success" className="shrink-0">
+              <Button size="icon" variant="success" className="shrink-0" disabled={!canModify}>
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
@@ -612,14 +615,16 @@ export default function NowPlayingPage() {
                     <div className="flex gap-1">
                       <button
                         onClick={() => handleSetPlaying(game.id)}
-                        className="h-6 w-6 rounded flex items-center justify-center hover:bg-green-500/10 transition-colors"
+                        disabled={!canModify}
+                        className="h-6 w-6 rounded flex items-center justify-center hover:bg-green-500/10 transition-colors disabled:opacity-50 disabled:pointer-events-none"
                         title="Set as playing"
                       >
                         <Play className="h-3 w-3 text-green-400" />
                       </button>
                       <button
                         onClick={() => handleDeleteGame(game.id)}
-                        className="h-6 w-6 rounded flex items-center justify-center hover:bg-red-500/10 transition-colors"
+                        disabled={!canModify}
+                        className="h-6 w-6 rounded flex items-center justify-center hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:pointer-events-none"
                         title="Delete"
                       >
                         <Trash2 className="h-3 w-3 text-red-400" />

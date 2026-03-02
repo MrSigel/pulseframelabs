@@ -123,10 +123,7 @@ export default function LanguageWidget() {
 
   return (
     <div ref={ref} style={{
-      position: 'fixed',
-      bottom: '24px',
-      right: '24px',
-      zIndex: 1001,
+      position: 'relative',
     }}>
       <AnimatePresence>
         {open && (

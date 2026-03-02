@@ -6,6 +6,7 @@ import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { TwitchBotProvider } from "@/contexts/TwitchBotContext";
 import { UpgradeBanner } from "@/components/upgrade-banner";
+import { OnboardingWizard } from "@/components/onboarding-wizard";
 import AnimatedBackground3D from "@/components/landing/background/AnimatedBackground3D";
 import LanguageWidget from "@/components/landing/ui/LanguageWidget";
 
@@ -38,7 +39,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         </div>
 
         {/* Language widget (bottom-right, above z-index of content) */}
-        <LanguageWidget />
+        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1001 }}>
+          <LanguageWidget />
+        </div>
+
+        {/* First-login onboarding wizard */}
+        <OnboardingWizard />
       </div>
       </TwitchBotProvider>
     </DashboardProviders>

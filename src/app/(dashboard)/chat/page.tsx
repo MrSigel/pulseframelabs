@@ -4,7 +4,8 @@ import { PageHeader } from "@/components/page-header";
 import { OverlayLink } from "@/components/overlay-link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, Info, ExternalLink } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { chatMessages as chatDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
@@ -35,6 +36,25 @@ export default function ChatPage() {
   return (
     <div>
       <PageHeader title="Chat Overlay" />
+
+      {/* Connection Info Banner */}
+      <div className="max-w-3xl mx-auto mb-4">
+        <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 flex items-start gap-3">
+          <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+          <div className="text-sm space-y-1">
+            <p className="text-slate-300">
+              Chat overlay requires an active <strong>Twitch Bot</strong> connection. The bot reads your Twitch chat and relays messages to the overlay in real-time.
+            </p>
+            <p className="text-slate-400 text-xs">
+              <strong>Using Restream?</strong> Connect your Twitch account on the{" "}
+              <Link href="/bot" className="text-primary hover:underline inline-flex items-center gap-1">
+                Twitch Bot page <ExternalLink className="h-3 w-3" />
+              </Link>
+              {" "}— Restream forwards chat to Twitch, so the bot picks it up automatically.
+            </p>
+          </div>
+        </div>
+      </div>
 
       <Card className="max-w-3xl mx-auto">
         <CardContent className="pt-6">

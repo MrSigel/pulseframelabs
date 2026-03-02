@@ -6,6 +6,7 @@ import { Bot, Wifi, WifiOff, Unplug, ToggleLeft, ToggleRight } from "lucide-reac
 import { useTwitchBot } from "@/contexts/TwitchBotContext";
 import { twitchConnections } from "@/lib/supabase/db";
 import { PageHeader } from "@/components/page-header";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 
 const featureLabels: Record<string, { name: string; description: string }> = {
   chat: { name: "Chat Relay", description: "Relay all Twitch chat messages to overlays" },
@@ -17,6 +18,7 @@ const featureLabels: Record<string, { name: string; description: string }> = {
 };
 
 export default function BotPage() {
+  const { canModify } = useFeatureGate();
   const params = useSearchParams();
   const {
     isConnected,
@@ -120,18 +122,28 @@ export default function BotPage() {
             {/* Action buttons */}
             <div className="flex flex-wrap gap-2">
               {!hasConnection ? (
-                <a
-                  href="/api/twitch/auth"
-                  className="inline-flex items-center gap-2 rounded-lg bg-[#9146ff] px-4 py-2 text-sm font-medium text-white transition-all hover:bg-[#7c3ae6] hover:shadow-lg hover:shadow-[#9146ff]/20"
-                >
-                  <Wifi className="h-4 w-4" />
-                  Connect Twitch
-                </a>
+                canModify ? (
+                  <a
+                    href="/api/twitch/auth"
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#9146ff] px-4 py-2 text-sm font-medium text-white transition-all hover:bg-[#7c3ae6] hover:shadow-lg hover:shadow-[#9146ff]/20"
+                  >
+                    <Wifi className="h-4 w-4" />
+                    Connect Twitch
+                  </a>
+                ) : (
+                  <button
+                    disabled
+                    className="inline-flex items-center gap-2 rounded-lg bg-[#9146ff]/50 px-4 py-2 text-sm font-medium text-white/50 cursor-not-allowed"
+                  >
+                    <Wifi className="h-4 w-4" />
+                    Connect Twitch
+                  </button>
+                )
               ) : !isConnected ? (
                 <button
                   onClick={connect}
-                  disabled={isConnecting}
-                  className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-emerald-500 disabled:opacity-50"
+                  disabled={isConnecting || !canModify}
+                  className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Wifi className="h-4 w-4" />
                   {isConnecting ? "Connecting..." : "Start Bot"}
@@ -139,7 +151,8 @@ export default function BotPage() {
               ) : (
                 <button
                   onClick={disconnect}
-                  className="inline-flex items-center gap-2 rounded-lg bg-red-600/80 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-red-500"
+                  disabled={!canModify}
+                  className="inline-flex items-center gap-2 rounded-lg bg-red-600/80 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <WifiOff className="h-4 w-4" />
                   Stop Bot
@@ -149,7 +162,8 @@ export default function BotPage() {
               {hasConnection && (
                 <button
                   onClick={handleDisconnectAccount}
-                  className="inline-flex items-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400 transition-all hover:bg-red-500/10"
+                  disabled={!canModify}
+                  className="inline-flex items-center gap-2 rounded-lg border border-red-500/30 px-4 py-2 text-sm font-medium text-red-400 transition-all hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Unplug className="h-4 w-4" />
                   Disconnect Account
@@ -168,8 +182,9 @@ export default function BotPage() {
               return (
                 <button
                   key={key}
-                  onClick={() => toggleFeature(key, !enabled)}
-                  className="flex w-full items-center justify-between rounded-lg border border-border/50 bg-background/50 px-4 py-3 transition-all hover:border-primary/30"
+                  onClick={() => canModify && toggleFeature(key, !enabled)}
+                  disabled={!canModify}
+                  className={`flex w-full items-center justify-between rounded-lg border border-border/50 bg-background/50 px-4 py-3 transition-all ${canModify ? "hover:border-primary/30" : "opacity-50 cursor-not-allowed"}`}
                 >
                   <div className="text-left">
                     <div className="text-sm font-medium text-foreground">{name}</div>

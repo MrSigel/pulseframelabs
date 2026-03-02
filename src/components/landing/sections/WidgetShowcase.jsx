@@ -354,54 +354,61 @@ function SlotBattleOverlay() {
   );
 }
 
-// ── 5. Tournament Normal ────────────────────────────────
+// ── 5. Tournament Bracket ────────────────────────────────
 function TournamentOverlay() {
-  const [multi, setMulti] = useState(187);
-  useEffect(() => {
-    const id = setInterval(() => setMulti((m) => m + Math.floor(Math.random() * 30 + 5)), 3500);
-    return () => clearInterval(id);
-  }, []);
   const c = useOverlayTheme();
+  const players = ["SlotKing99", "BigWin42", "LuckyRoll", "ProSpin", "MaxBet77", "GoldHit", "WildCard", "AceSpin"];
+  const semis = ["SlotKing99", "LuckyRoll", "MaxBet77", "WildCard"];
+  const finals = ["SlotKing99", "MaxBet77"];
 
   return (
     <div className="inline-block w-full">
       <div className="rounded-xl overflow-hidden" style={{ background: c.cardBg, border: c.cardBorderSubtle, boxShadow: c.cardShadow }}>
         {/* Header */}
-        <div className="px-5 pt-5 pb-3 text-center">
-          <div className="flex items-center justify-center gap-2.5 mb-1">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: c.rowDivider }}>
+          <div className="flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
             </svg>
-            <span className="font-black text-base tracking-wide" style={{ background: "linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>
-              VIEWER TOURNAMENT
-            </span>
+            <span className="font-bold text-[11px]" style={{ background: "linear-gradient(90deg, #f59e0b, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>TOURNAMENT</span>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: c.textMuted }}>TOURNAMENT FINISHED</span>
+          <span className="text-[9px] font-semibold uppercase" style={{ color: c.textMuted }}>8 Players · 3 Rounds</span>
         </div>
 
-        {/* Winner Card */}
-        <div className="px-5 pb-4">
-          <div className="relative rounded-lg overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0.05) 100%)", border: "1px solid rgba(239, 68, 68, 0.25)", boxShadow: "0 0 20px rgba(239, 68, 68, 0.1)" }}>
-            <div className="flex items-center gap-3 px-4 py-3">
-              <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, #78350f, #92400e)", border: "2px solid rgba(245, 158, 11, 0.4)", boxShadow: "0 0 12px rgba(245, 158, 11, 0.2)" }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b" stroke="none">
-                  <circle cx="12" cy="8" r="5" /><path d="M20 21a8 8 0 0 0-16 0" />
-                </svg>
+        {/* Bracket */}
+        <div className="px-3 py-3 flex gap-3">
+          {/* Round 1 */}
+          <div className="shrink-0">
+            <span className="text-[7px] font-bold uppercase tracking-wider block mb-1.5" style={{ color: c.textMuted }}>Round 1</span>
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="mb-1">
+                <div className="px-2 py-0.5 rounded-t text-[8px] font-semibold w-[72px]" style={{ background: c.rowBg, border: c.rowDividerFaint, color: c.textSub }}>{players[i * 2]}</div>
+                <div className="px-2 py-0.5 rounded-b text-[8px] font-semibold w-[72px]" style={{ background: c.rowBg, border: c.rowDividerFaint, color: c.textMuted }}>{players[i * 2 + 1]}</div>
               </div>
-              <div className="flex-1">
-                <span className="font-bold text-sm block" style={{ color: c.textMain }}>SlotKing99</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: c.textSub }}>HIGHEST X-FACTOR</span>
+            ))}
+          </div>
+          {/* Semis */}
+          <div className="shrink-0 pt-3">
+            <span className="text-[7px] font-bold uppercase tracking-wider block mb-1.5" style={{ color: c.textMuted }}>Semis</span>
+            {[0, 1].map((i) => (
+              <div key={i} className="mb-1 mt-2">
+                <div className="px-2 py-0.5 rounded-t text-[8px] font-semibold w-[72px]" style={{ background: c.rowBg, border: c.rowDividerFaint, color: c.textSub }}>{semis[i * 2]}</div>
+                <div className="px-2 py-0.5 rounded-b text-[8px] font-semibold w-[72px]" style={{ background: c.rowBg, border: c.rowDividerFaint, color: c.textMuted }}>{semis[i * 2 + 1]}</div>
               </div>
-              <motion.div key={multi} initial={{ scale: 1.2 }} animate={{ scale: 1 }} className="px-2.5 py-1 rounded-md text-xs font-black" style={{ background: "rgba(239, 68, 68, 0.15)", color: "#ef4444", border: "1px solid rgba(239, 68, 68, 0.2)" }}>
-                {multi}X
-              </motion.div>
+            ))}
+          </div>
+          {/* Final */}
+          <div className="shrink-0 pt-7">
+            <span className="text-[7px] font-bold uppercase tracking-wider block mb-1.5" style={{ color: c.textMuted }}>Final</span>
+            <div className="mt-2">
+              <div className="px-2 py-0.5 rounded-t text-[8px] font-semibold w-[72px]" style={{ background: c.rowBg, border: c.rowDividerFaint, color: c.textSub }}>{finals[0]}</div>
+              <div className="px-2 py-0.5 rounded-b text-[8px] font-semibold w-[72px]" style={{ background: c.rowBg, border: c.rowDividerFaint, color: c.textMuted }}>{finals[1]}</div>
+            </div>
+            <div className="mt-2 px-2 py-1.5 rounded text-center" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.15)" }}>
+              <span className="text-[7px] uppercase tracking-widest block" style={{ color: c.textMuted }}>Winner</span>
+              <span className="text-amber-400 font-bold text-[9px]">SlotKing99</span>
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="px-5 py-3 text-center" style={{ borderTop: c.rowDividerSubtle }}>
-          <span className="text-sm font-black tracking-wider" style={{ color: "#10b981" }}>SlotKing99</span>
         </div>
       </div>
     </div>
@@ -416,13 +423,9 @@ function NowPlayingOverlay() {
     <div className="inline-block w-full">
       <div className="rounded-xl overflow-hidden" style={{ background: c.cardBg, border: c.cardBorder, boxShadow: c.cardShadow }}>
         <div className="flex items-stretch">
-          {/* Game Image placeholder */}
+          {/* Game Image */}
           <div className="w-[100px] shrink-0 relative overflow-hidden">
-            <div className="h-full w-full flex items-center justify-center" style={{ background: c.isDark ? "linear-gradient(135deg, #1a73e833, #1a73e811)" : "linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.04))" }}>
-              <motion.span animate={{ opacity: [0.4, 0.7, 0.4] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }} className="text-[10px] font-bold text-center px-2" style={{ color: c.textMuted }}>
-                Sweet Bonanza
-              </motion.span>
-            </div>
+            <img src="/games/sweet-bonanza.png" alt="Sweet Bonanza" className="h-full w-full object-cover" style={{ minHeight: "80px" }} />
             <div className="absolute inset-y-0 right-0 w-6" style={{ background: `linear-gradient(to right, transparent, ${c.imgFadeTo})` }} />
           </div>
 

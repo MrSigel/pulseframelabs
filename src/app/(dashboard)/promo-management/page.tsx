@@ -9,9 +9,11 @@ import { Plus, Trash2, X, Loader2, Tag, Pencil } from "lucide-react";
 import { useState } from "react";
 import { promotions as promosDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { Promotion } from "@/lib/supabase/types";
 
 export default function PromoManagementPage() {
+  const { canModify } = useFeatureGate();
   const { data: dbPromos, loading, refetch } = useDbQuery<Promotion[]>(() => promosDb.list(), []);
   const [showAdd, setShowAdd] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -59,7 +61,7 @@ export default function PromoManagementPage() {
       <PageHeader
         title="Promo Management"
         actions={
-          <Button variant="success" className="gap-2" onClick={() => setShowAdd(true)}>
+          <Button variant="success" className="gap-2" onClick={() => setShowAdd(true)} disabled={!canModify}>
             <Plus className="h-4 w-4" />
             Add Promo
           </Button>
@@ -88,7 +90,7 @@ export default function PromoManagementPage() {
               <Label className="text-xs text-slate-500 uppercase font-bold mb-1.5 block">Code</Label>
               <Input value={newCode} onChange={(e) => setNewCode(e.target.value)} placeholder="Promo code (optional)" />
             </div>
-            <Button variant="success" className="gap-2" onClick={handleCreate}>
+            <Button variant="success" className="gap-2" onClick={handleCreate} disabled={!canModify}>
               <Plus className="h-4 w-4" />
               Create Promotion
             </Button>
@@ -129,6 +131,7 @@ export default function PromoManagementPage() {
                       onClick={() => handleToggleActive(promo.id, promo.is_active)}
                       className="h-7 w-7 rounded flex items-center justify-center hover:bg-primary/10 transition-colors"
                       title={promo.is_active ? "Deactivate" : "Activate"}
+                      disabled={!canModify}
                     >
                       <Pencil className="h-3.5 w-3.5 text-primary" />
                     </button>
@@ -136,6 +139,7 @@ export default function PromoManagementPage() {
                       onClick={() => handleDelete(promo.id)}
                       className="h-7 w-7 rounded flex items-center justify-center hover:bg-red-500/10 transition-colors"
                       title="Delete"
+                      disabled={!canModify}
                     >
                       <Trash2 className="h-3.5 w-3.5 text-red-400" />
                     </button>

@@ -10,6 +10,7 @@ import { spinner as spinnerDb } from "@/lib/supabase/db";
 import { createClient } from "@/lib/supabase/client";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { SpinnerPrize } from "@/lib/supabase/types";
 import { Plus, Shuffle, Save, Play, Trash2, Monitor, X, Loader2 } from "lucide-react";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -53,6 +54,7 @@ function PokerChip({ size = 48 }: { size?: number }) {
 
 export default function SpinnerPage() {
   const uid = useAuthUid();
+  const { canModify } = useFeatureGate();
   const [prizes, setPrizes] = useState<PrizeRow[]>([
     { id: 1, prize: "", color: "#f43f5e" },
     { id: 2, prize: "", color: "#3b82f6" },
@@ -193,15 +195,15 @@ export default function SpinnerPage() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-lg text-white">Prize List</CardTitle>
               <div className="flex gap-2">
-                <Button onClick={handleAddPrize} className="gap-1" size="sm">
+                <Button onClick={handleAddPrize} className="gap-1" size="sm" disabled={!canModify}>
                   <Plus className="h-3.5 w-3.5" />
                   Add Row
                 </Button>
-                <Button variant="accent" className="gap-1" size="sm" onClick={randomizeColors}>
+                <Button variant="accent" className="gap-1" size="sm" onClick={randomizeColors} disabled={!canModify}>
                   <Shuffle className="h-3.5 w-3.5" />
                   Random Colors
                 </Button>
-                <Button className="gap-1" size="sm">
+                <Button className="gap-1" size="sm" disabled={!canModify}>
                   <Save className="h-3.5 w-3.5" />
                   Save Prizes
                 </Button>
@@ -243,7 +245,7 @@ export default function SpinnerPage() {
                     variant="destructive"
                     size="icon"
                     onClick={() => handleRemovePrize(idx)}
-                    disabled={prizes.length <= 2}
+                    disabled={prizes.length <= 2 || !canModify}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -435,7 +437,7 @@ export default function SpinnerPage() {
                 variant="success"
                 className="w-full gap-2 py-6 text-lg"
                 onClick={spinWheel}
-                disabled={spinning || activePrizes.length < 2}
+                disabled={spinning || activePrizes.length < 2 || !canModify}
               >
                 <Play className="h-5 w-5" />
                 {spinning ? "Spinning..." : "Spin The Wheel"}

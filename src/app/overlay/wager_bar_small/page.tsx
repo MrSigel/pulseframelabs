@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useOverlayData } from "@/hooks/useOverlayData";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
+import { useGlobalCurrency, currencySymbol } from "@/hooks/useGlobalCurrency";
 
 interface WagerSession {
   casino_name: string;
@@ -15,12 +16,10 @@ interface WagerSession {
   currency: string;
 }
 
-const currencySymbol = (code: string | null | undefined) =>
-  ({ USD: "$", EUR: "\u20ac", GBP: "\u00a3" }[code ?? ""] || code || "$");
-
 function WagerBarSmallContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { symbol: globalCurrency } = useGlobalCurrency(uid);
 
   const { data, loading } = useOverlayData<WagerSession>({
     table: "wager_sessions",
@@ -38,7 +37,7 @@ function WagerBarSmallContent() {
     const wagered = data?.wagered_amount || 0;
     const deposit = data?.deposit_amount || 0;
     const bonus = data?.bonus_amount || 0;
-    const currency = currencySymbol(data?.currency);
+    const currency = data?.currency ? currencySymbol(data.currency) : globalCurrency;
     const game = ""; // game/provider not in wager_sessions table
     const provider = "";
 

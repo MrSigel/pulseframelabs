@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -73,21 +74,40 @@ const overlayOptions = [
   { value: "spinner", label: "Spinner" },
 ];
 
+const fontFamilies = [
+  { value: "Inter", label: "Inter (Default)" },
+  { value: "Roboto", label: "Roboto" },
+  { value: "Poppins", label: "Poppins" },
+  { value: "Montserrat", label: "Montserrat" },
+  { value: "Open Sans", label: "Open Sans" },
+  { value: "Lato", label: "Lato" },
+  { value: "Oswald", label: "Oswald" },
+  { value: "Raleway", label: "Raleway" },
+  { value: "Nunito", label: "Nunito" },
+  { value: "Source Code Pro", label: "Source Code Pro" },
+  { value: "JetBrains Mono", label: "JetBrains Mono" },
+];
+
 const defaultCustom = {
   bgColor: "#1a1f2e",
   bgOpacity: 45,
   iconColor: "#06b6d4",
   highlightColor: "#3b82f6",
+  textColor: "#ffffff",
+  fontFamily: "Inter",
   borderRadius: 10,
   borderEnabled: true,
   shadowEnabled: true,
 };
 
 export default function ThemeSettingsPage() {
+  const { canModify } = useFeatureGate();
   const [bgColor, setBgColor] = useState(defaultCustom.bgColor);
   const [bgOpacity, setBgOpacity] = useState(defaultCustom.bgOpacity);
   const [iconColor, setIconColor] = useState(defaultCustom.iconColor);
   const [highlightColor, setHighlightColor] = useState(defaultCustom.highlightColor);
+  const [textColor, setTextColor] = useState(defaultCustom.textColor);
+  const [fontFamily, setFontFamily] = useState(defaultCustom.fontFamily);
   const [borderRadius, setBorderRadius] = useState(defaultCustom.borderRadius);
   const [borderEnabled, setBorderEnabled] = useState(defaultCustom.borderEnabled);
   const [shadowEnabled, setShadowEnabled] = useState(defaultCustom.shadowEnabled);
@@ -108,6 +128,8 @@ export default function ThemeSettingsPage() {
         if (c.bgOpacity !== undefined) setBgOpacity(c.bgOpacity as number);
         if (c.iconColor) setIconColor(c.iconColor as string);
         if (c.highlightColor) setHighlightColor(c.highlightColor as string);
+        if (c.textColor) setTextColor(c.textColor as string);
+        if (c.fontFamily) setFontFamily(c.fontFamily as string);
         if (c.borderRadius !== undefined) setBorderRadius(c.borderRadius as number);
         if (c.borderEnabled !== undefined) setBorderEnabled(c.borderEnabled as boolean);
         if (c.shadowEnabled !== undefined) setShadowEnabled(c.shadowEnabled as boolean);
@@ -126,6 +148,8 @@ export default function ThemeSettingsPage() {
           bgOpacity,
           iconColor,
           highlightColor,
+          textColor,
+          fontFamily,
           borderRadius,
           borderEnabled,
           shadowEnabled,
@@ -155,6 +179,8 @@ export default function ThemeSettingsPage() {
     setBgOpacity(defaultCustom.bgOpacity);
     setIconColor(defaultCustom.iconColor);
     setHighlightColor(defaultCustom.highlightColor);
+    setTextColor(defaultCustom.textColor);
+    setFontFamily(defaultCustom.fontFamily);
     setBorderRadius(defaultCustom.borderRadius);
     setBorderEnabled(defaultCustom.borderEnabled);
     setShadowEnabled(defaultCustom.shadowEnabled);
@@ -174,7 +200,7 @@ export default function ThemeSettingsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Settings */}
-        <Tabs defaultValue="presets">
+        <Tabs defaultValue="custom">
           <TabsList className="bg-white/[0.04] border border-white/[0.06]">
             <TabsTrigger value="presets">Presets</TabsTrigger>
             <TabsTrigger value="custom">Custom</TabsTrigger>
@@ -237,7 +263,7 @@ export default function ThemeSettingsPage() {
                     <RotateCcw className="h-3.5 w-3.5" />
                     Reset
                   </Button>
-                  <Button className="gap-1" onClick={handleSave} disabled={saving}>
+                  <Button className="gap-1" onClick={handleSave} disabled={!canModify || saving}>
                     <Save className="h-3.5 w-3.5" />
                     {saving ? "Saving..." : "Save Changes"}
                   </Button>
@@ -275,6 +301,30 @@ export default function ThemeSettingsPage() {
                 </div>
 
                 <div>
+                  <Label className="text-xs text-muted-foreground uppercase font-bold mb-2 block">Text Color</Label>
+                  <div className="flex items-center gap-3">
+                    <Input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="h-10 w-12 cursor-pointer" />
+                    <Input value={textColor} onChange={(e) => setTextColor(e.target.value)} className="w-28 font-mono text-xs" />
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-xs text-muted-foreground uppercase font-bold mb-2 block">Font Family</Label>
+                  <Select value={fontFamily} onValueChange={setFontFamily}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fontFamilies.map((f) => (
+                        <SelectItem key={f.value} value={f.value}>
+                          <span style={{ fontFamily: f.value }}>{f.label}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
                   <Label className="text-xs text-muted-foreground uppercase font-bold mb-2 block">Border Radius</Label>
                   <div className="flex items-center gap-3">
                     <Input type="range" min="0" max="30" value={borderRadius} onChange={(e) => setBorderRadius(Number(e.target.value))} className="flex-1" />
@@ -297,7 +347,7 @@ export default function ThemeSettingsPage() {
                     <RotateCcw className="h-3.5 w-3.5" />
                     Reset
                   </Button>
-                  <Button className="gap-1" onClick={handleSave} disabled={saving}>
+                  <Button className="gap-1" onClick={handleSave} disabled={!canModify || saving}>
                     <Save className="h-3.5 w-3.5" />
                     {saving ? "Saving..." : "Save Changes"}
                   </Button>

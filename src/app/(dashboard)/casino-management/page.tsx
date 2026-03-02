@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Plus, Loader2, Trash2 } from "lucide-react";
 import { casinos as casinosDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { Casino } from "@/lib/supabase/types";
 
 export default function CasinoManagementPage() {
+  const { canModify } = useFeatureGate();
   const [adding, setAdding] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
   const { data: dbCasinos, loading, refetch } = useDbQuery<Casino[]>(() => casinosDb.list(), []);
@@ -48,7 +50,7 @@ export default function CasinoManagementPage() {
               variant="success"
               className="gap-2"
               onClick={handleAddCasino}
-              disabled={adding}
+              disabled={adding || !canModify}
             >
               {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               Add Casino
@@ -89,6 +91,7 @@ export default function CasinoManagementPage() {
                     size="sm"
                     className="gap-1"
                     onClick={() => handleDeleteCasino(casino.id)}
+                    disabled={!canModify}
                   >
                     <Trash2 className="h-4 w-4" />
                     Delete

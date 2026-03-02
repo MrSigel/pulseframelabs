@@ -7,9 +7,11 @@ import { Search, FolderOpen, Trophy, Loader2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { personalBests as pbDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { PersonalBest } from "@/lib/supabase/types";
 
 export default function PersonalBestsPage() {
+  const { canModify } = useFeatureGate();
   const [searchQuery, setSearchQuery] = useState("");
   const { data: dbBests, loading } = useDbQuery<PersonalBest[]>(() => pbDb.list(), []);
 

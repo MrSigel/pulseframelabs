@@ -18,6 +18,7 @@ import { useState, useMemo } from "react";
 import { bonushunts as bonushuntsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { Bonushunt } from "@/lib/supabase/types";
 
 const overlayTabs = [
@@ -45,6 +46,7 @@ const currencies = [
 
 export default function BonushuntsPage() {
   const uid = useAuthUid();
+  const { canModify } = useFeatureGate();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<OverlayTab>("large");
@@ -110,7 +112,7 @@ export default function BonushuntsPage() {
               <Monitor className="h-4 w-4" />
               Bonushunt Overlay
             </Button>
-            <Button variant="warning" className="gap-2" onClick={() => setCreateOpen(true)}>
+            <Button variant="warning" className="gap-2" onClick={() => setCreateOpen(true)} disabled={!canModify}>
               <Plus className="h-4 w-4" />
               Create Bonushunt
             </Button>
@@ -159,7 +161,7 @@ export default function BonushuntsPage() {
                       <span>Created: {new Date(hunt.created_at).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <button onClick={() => handleDeleteHunt(hunt.id)} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                  <button onClick={() => handleDeleteHunt(hunt.id)} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -375,7 +377,7 @@ export default function BonushuntsPage() {
               {/* Create Button */}
               <Button
                 className="w-full gap-2 py-5 text-sm font-semibold"
-                disabled={creating || !huntName.trim()}
+                disabled={creating || !huntName.trim() || !canModify}
                 onClick={handleCreateHunt}
               >
                 {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}

@@ -23,6 +23,9 @@ interface UseOverlayDataResult<T> {
  * Hook for overlay pages: fetches data from Supabase filtered by user_id
  * and subscribes to Realtime changes for live updates.
  *
+ * Before fetching, checks if the user has an active subscription via
+ * /api/overlay/check-access. If not, returns null data (overlay shows fallback).
+ *
  * When `single` is true, returns a single row (T).
  * When `single` is false (default), returns an array (T[]).
  */
@@ -38,6 +41,22 @@ export function useOverlayData<T>({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const accessCheckedRef = useRef<{ uid: string; allowed: boolean } | null>(null);
+
+  const checkAccess = useCallback(async (uid: string): Promise<boolean> => {
+    // Cache the result for the same uid within this hook instance
+    if (accessCheckedRef.current?.uid === uid) {
+      return accessCheckedRef.current.allowed;
+    }
+    try {
+      const res = await fetch(`/api/overlay/check-access?uid=${uid}`);
+      const { allowed } = await res.json();
+      accessCheckedRef.current = { uid, allowed };
+      return allowed;
+    } catch {
+      return false;
+    }
+  }, []);
 
   const fetchData = useCallback(async () => {
     if (!userId) {
@@ -46,6 +65,14 @@ export function useOverlayData<T>({
     }
 
     try {
+      // Check subscription access before fetching data
+      const allowed = await checkAccess(userId);
+      if (!allowed) {
+        setData(null);
+        setLoading(false);
+        return;
+      }
+
       const supabase = createClient();
       let query = supabase.from(table).select("*").eq("user_id", userId);
 
@@ -75,7 +102,7 @@ export function useOverlayData<T>({
     } finally {
       setLoading(false);
     }
-  }, [table, userId, single, orderBy, ascending, filter]);
+  }, [table, userId, single, orderBy, ascending, filter, checkAccess]);
 
   useEffect(() => {
     fetchData();

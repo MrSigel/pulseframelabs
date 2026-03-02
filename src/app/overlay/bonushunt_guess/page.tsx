@@ -4,14 +4,13 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { useGlobalCurrency, currencySymbol } from "@/hooks/useGlobalCurrency";
 import type { Bonushunt, BonushuntEntry } from "@/lib/supabase/types";
-
-const currencySymbol = (code: string | undefined) =>
-  ({ USD: "$", EUR: "\u20ac", GBP: "\u00a3", CAD: "C$", AUD: "A$" }[code || ""] || code || "$");
 
 function BonushuntGuessContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { symbol: globalCurrency } = useGlobalCurrency(uid);
 
   /* ---- Supabase realtime data ---- */
   const { data: hunt } = useOverlayData<Bonushunt>({
@@ -33,7 +32,7 @@ function BonushuntGuessContent() {
     ? allEntries.filter((e) => e.bonushunt_id === hunt.id)
     : [];
 
-  const sym = hunt ? currencySymbol(hunt.currency) : "$";
+  const sym = hunt?.currency ? currencySymbol(hunt.currency) : globalCurrency;
   const totalWins = entries.reduce((s, e) => s + e.win_amount, 0);
   const startBal = hunt ? hunt.start_balance : 0;
   const currentBalance = startBal + totalWins;

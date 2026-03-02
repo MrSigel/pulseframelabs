@@ -12,11 +12,13 @@ import { hotwords as hotwordsDb } from "@/lib/supabase/db";
 import { useTwitchBot } from "@/contexts/TwitchBotContext";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { HotwordSettings, HotwordEntry } from "@/lib/supabase/types";
 
 export default function HotwordsPage() {
   const uid = useAuthUid();
   const { isConnected } = useTwitchBot();
+  const { canModify } = useFeatureGate();
   const [overlayOpen, setOverlayOpen] = useState(false);
 
   // Form state
@@ -87,7 +89,7 @@ export default function HotwordsPage() {
                 <p className={`text-[10px] font-bold ${isConnected ? "text-green-400" : "text-red-400"}`}>{isConnected ? "Online" : "Offline"}</p>
               </div>
             </div>
-            <Button variant="destructive" className="gap-2" onClick={handleClearHotwords}>
+            <Button variant="destructive" className="gap-2" onClick={handleClearHotwords} disabled={!canModify}>
               <Trash2 className="h-4 w-4" />
               Clear Hot Words
             </Button>
@@ -151,7 +153,7 @@ export default function HotwordsPage() {
               </p>
             </div>
             <div className="flex-1" />
-            <Button variant="success" className="gap-2 w-full" onClick={handleSaveSettings}>
+            <Button variant="success" className="gap-2 w-full" onClick={handleSaveSettings} disabled={!canModify}>
               <Save className="h-4 w-4" />
               Save
             </Button>
@@ -187,7 +189,7 @@ export default function HotwordsPage() {
               </p>
             </div>
             <div className="flex-1" />
-            <Button variant="success" className="gap-2 w-full" onClick={handleSaveSettings}>
+            <Button variant="success" className="gap-2 w-full" onClick={handleSaveSettings} disabled={!canModify}>
               <Save className="h-4 w-4" />
               Save
             </Button>

@@ -18,6 +18,7 @@ import { useState, useMemo } from "react";
 import { tournaments as tournamentsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { Tournament } from "@/lib/supabase/types";
 
 const overlayTabs = [
@@ -29,6 +30,7 @@ type OverlayTab = (typeof overlayTabs)[number]["key"];
 
 export default function TournamentsPage() {
   const uid = useAuthUid();
+  const { canModify } = useFeatureGate();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<OverlayTab>("normal");
@@ -96,7 +98,7 @@ export default function TournamentsPage() {
               <Monitor className="h-4 w-4" />
               Tournament Overlay
             </Button>
-            <Button variant="warning" className="gap-2" onClick={() => setCreateOpen(true)}>
+            <Button variant="warning" className="gap-2" onClick={() => setCreateOpen(true)} disabled={!canModify}>
               <Plus className="h-4 w-4" />
               + Create Tournament
             </Button>
@@ -167,16 +169,16 @@ export default function TournamentsPage() {
                   <span className="text-xs text-slate-500">{new Date(t.updated_at).toLocaleDateString()}</span>
                   <div className="flex justify-end gap-1">
                     {t.status === 'pending' && (
-                      <button onClick={() => handleStatusChange(t.id, 'ongoing')} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all" title="Start Tournament">
+                      <button onClick={() => handleStatusChange(t.id, 'ongoing')} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none" title="Start Tournament">
                         <Play className="h-4 w-4" />
                       </button>
                     )}
                     {t.status === 'ongoing' && (
-                      <button onClick={() => handleStatusChange(t.id, 'finished')} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 transition-all" title="Finish Tournament">
+                      <button onClick={() => handleStatusChange(t.id, 'finished')} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none" title="Finish Tournament">
                         <CheckCircle className="h-4 w-4" />
                       </button>
                     )}
-                    <button onClick={() => handleDelete(t.id)} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all" title="Delete">
+                    <button onClick={() => handleDelete(t.id)} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none" title="Delete">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
@@ -379,7 +381,7 @@ export default function TournamentsPage() {
               <Button
                 className="w-full gap-2 py-5 text-sm font-semibold"
                 onClick={handleCreate}
-                disabled={creating || !name.trim()}
+                disabled={creating || !name.trim() || !canModify}
               >
                 {creating ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

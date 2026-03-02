@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,7 @@ interface HistoryEntry {
 }
 
 export default function QuickGuessesPage() {
+  const { canModify } = useFeatureGate();
   const { isConnected, addHandler, removeHandler } = useTwitchBot();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -250,7 +252,7 @@ export default function QuickGuessesPage() {
                 Enter your twitch username to enable live hotwords on twitch, leave blank to disable.
               </p>
             </div>
-            <Button className="gap-2">
+            <Button className="gap-2" disabled={!canModify}>
               <Save className="h-4 w-4" />
               Save
             </Button>
@@ -275,15 +277,15 @@ export default function QuickGuessesPage() {
             <p className="text-xs text-slate-500">
               If you clear the guesses, it will be saved in the Quick Guess History.
             </p>
-            <Button variant="destructive" className="w-full gap-2" onClick={handleClearGuesses} disabled={!sessionId}>
+            <Button variant="destructive" className="w-full gap-2" onClick={handleClearGuesses} disabled={!canModify || !sessionId}>
               <Trash2 className="h-4 w-4" />
               Clear Guesses
             </Button>
-            <Button variant="success" className="w-full gap-2" onClick={handleAnnounceWinner} disabled={!sessionId || guesses.length === 0}>
+            <Button variant="success" className="w-full gap-2" onClick={handleAnnounceWinner} disabled={!canModify || !sessionId || guesses.length === 0}>
               <Megaphone className="h-4 w-4" />
               Announce Guess Winner to Chat
             </Button>
-            <Button variant="outline" className="w-full gap-2" onClick={handleToggleGuesses}>
+            <Button variant="outline" className="w-full gap-2" onClick={handleToggleGuesses} disabled={!canModify}>
               <X className="h-4 w-4" />
               {guessesOpen ? "Close Guesses" : "Open Guesses"}
             </Button>
@@ -480,7 +482,7 @@ export default function QuickGuessesPage() {
             {/* Footer */}
             <div className="px-6 py-4 border-t border-white/[0.06] flex justify-end gap-3">
               <Button variant="outline" onClick={() => setSettingsOpen(false)}>Close</Button>
-              <Button onClick={handleSaveSettings}>Save changes</Button>
+              <Button onClick={handleSaveSettings} disabled={!canModify}>Save changes</Button>
             </div>
           </div>
         </div>

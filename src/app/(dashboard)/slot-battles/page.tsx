@@ -18,6 +18,7 @@ import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2, Loa
 import { useState, useMemo } from "react";
 import { slotBattles as slotBattlesDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { SlotBattle } from "@/lib/supabase/types";
 
 const currencies = [
@@ -33,6 +34,7 @@ const tableColumns = ["Slot Battle", "Start", "Number of Buys", "Status", "Creat
 
 export default function SlotBattlesPage() {
   const uid = useAuthUid();
+  const { canModify } = useFeatureGate();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [name, setName] = useState("");
@@ -88,7 +90,7 @@ export default function SlotBattlesPage() {
               <Monitor className="h-4 w-4" />
               Slot Battle Overlays
             </Button>
-            <Button variant="warning" className="gap-2" onClick={() => setCreateOpen(true)}>
+            <Button variant="warning" className="gap-2" onClick={() => setCreateOpen(true)} disabled={!canModify}>
               <Plus className="h-4 w-4" />
               + Create Slot Battle
             </Button>
@@ -156,7 +158,8 @@ export default function SlotBattlesPage() {
                   <div className="flex justify-end">
                     <button
                       onClick={() => handleDelete(battle.id)}
-                      className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                      disabled={!canModify}
+                      className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -341,7 +344,7 @@ export default function SlotBattlesPage() {
               <Button
                 className="w-full gap-2 py-5 text-sm font-semibold"
                 onClick={handleCreate}
-                disabled={creating || !name.trim()}
+                disabled={creating || !name.trim() || !canModify}
               >
                 {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                 {creating ? "Creating..." : "Create Slot Battle"}

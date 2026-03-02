@@ -23,6 +23,8 @@ export interface UserProfile {
   twitch_username: string | null;
   kick_username: string | null;
   timezone: string;
+  currency: string;
+  onboarding_completed: boolean;
   is_locked: boolean;
   locked_at: string | null;
   locked_reason: string | null;

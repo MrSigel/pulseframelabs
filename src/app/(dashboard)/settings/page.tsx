@@ -1,6 +1,7 @@
 "use client";
 
 import { PageHeader } from "@/components/page-header";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Settings2, Search, Link, ChevronLeft, ChevronRight, X, ArrowLeft, Plus, Minus, Info, Coins, Loader2, Camera, Trash2, Save } from "lucide-react";
+import { Settings2, Search, Link, ChevronLeft, ChevronRight, X, ArrowLeft, Plus, Minus, Info, Coins, Loader2, Camera, Trash2, Save, DollarSign } from "lucide-react";
 import { useState, useMemo, useRef, useCallback } from "react";
 import { streamViewers as viewersDb, userProfiles } from "@/lib/supabase/db";
 import { createClient } from "@/lib/supabase/client";
@@ -23,6 +24,7 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB
 
 export default function SettingsPage() {
+  const { canModify } = useFeatureGate();
   const [showMoreOptions, setShowMoreOptions] = useState(false);
   const [moreOptionsView, setMoreOptionsView] = useState<"main" | "manage-points">("main");
   const [pointsAmount, setPointsAmount] = useState("");
@@ -36,7 +38,9 @@ export default function SettingsPage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState<string | null>(null);
   const [displayNameInput, setDisplayNameInput] = useState("");
+  const [currencyInput, setCurrencyInput] = useState("USD");
   const [savingProfile, setSavingProfile] = useState(false);
+  const [savingCurrency, setSavingCurrency] = useState(false);
   const [profileInitialized, setProfileInitialized] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -47,6 +51,7 @@ export default function SettingsPage() {
   if (profile && !profileInitialized) {
     setDisplayNameInput(profile.display_name || "");
     setAvatarPreview(profile.avatar_url || null);
+    setCurrencyInput(profile.currency || "USD");
     setProfileInitialized(true);
   }
 
@@ -129,6 +134,19 @@ export default function SettingsPage() {
       console.error("Failed to save profile:", err);
     } finally {
       setSavingProfile(false);
+    }
+  }
+
+  async function handleSaveCurrency(newCurrency: string) {
+    setCurrencyInput(newCurrency);
+    setSavingCurrency(true);
+    try {
+      await userProfiles.update({ currency: newCurrency });
+      await refetchProfile();
+    } catch (err) {
+      console.error("Failed to save currency:", err);
+    } finally {
+      setSavingCurrency(false);
     }
   }
 
@@ -252,7 +270,7 @@ export default function SettingsPage() {
                       size="sm"
                       className="gap-1.5"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
+                      disabled={!canModify || uploading}
                     >
                       {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
                       {uploading ? "Uploading..." : "Upload Image"}
@@ -263,6 +281,7 @@ export default function SettingsPage() {
                         size="sm"
                         className="gap-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/5"
                         onClick={handleRemoveAvatar}
+                        disabled={!canModify}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         Remove
@@ -282,12 +301,44 @@ export default function SettingsPage() {
                     placeholder="Your display name"
                     className="flex-1"
                   />
-                  <Button className="gap-1.5" onClick={handleSaveProfile} disabled={savingProfile}>
+                  <Button className="gap-1.5" onClick={handleSaveProfile} disabled={!canModify || savingProfile}>
                     {savingProfile ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
                     Save
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">Shown in the header and profile dropdown</p>
+              </div>
+
+              {/* Global Currency */}
+              <div className="space-y-2 pt-2 border-t border-border/50">
+                <Label className="text-white flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-primary" />
+                  Global Currency
+                </Label>
+                <div className="flex gap-2 items-center">
+                  <Select value={currencyInput} onValueChange={handleSaveCurrency}>
+                    <SelectTrigger className="w-48">
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">$ USD — US Dollar</SelectItem>
+                      <SelectItem value="EUR">&euro; EUR — Euro</SelectItem>
+                      <SelectItem value="GBP">&pound; GBP — British Pound</SelectItem>
+                      <SelectItem value="CAD">$ CAD — Canadian Dollar</SelectItem>
+                      <SelectItem value="AUD">$ AUD — Australian Dollar</SelectItem>
+                      <SelectItem value="JPY">&yen; JPY — Japanese Yen</SelectItem>
+                      <SelectItem value="CHF">Fr CHF — Swiss Franc</SelectItem>
+                      <SelectItem value="SEK">kr SEK — Swedish Krona</SelectItem>
+                      <SelectItem value="NOK">kr NOK — Norwegian Krone</SelectItem>
+                      <SelectItem value="BRL">R$ BRL — Brazilian Real</SelectItem>
+                      <SelectItem value="TRY">&lira; TRY — Turkish Lira</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {savingCurrency && <Loader2 className="h-4 w-4 text-primary animate-spin" />}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Applies to all overlays (Balance, Wager Bar, Bonushunts, etc.)
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -374,10 +425,19 @@ export default function SettingsPage() {
               Linked Accounts
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full gap-2">
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5">
+              <p className="text-xs text-slate-300 mb-2">
+                <strong>Twitch / Restream:</strong> Connect your Twitch account on the{" "}
+                <a href="/bot" className="text-primary hover:underline font-medium">Twitch Bot</a> page to enable chat overlays, hotwords, and slot requests.
+              </p>
+              <p className="text-xs text-slate-400">
+                If you stream via <strong>Restream</strong>, your Twitch chat is automatically forwarded — just connect Twitch and the bot handles the rest.
+              </p>
+            </div>
+            <Button variant="outline" className="w-full gap-2" onClick={() => window.location.href = "/bot"}>
               <Link className="h-4 w-4" />
-              Link More Accounts
+              Connect Twitch Account
             </Button>
           </CardContent>
         </Card>
@@ -456,6 +516,7 @@ export default function SettingsPage() {
                     variant="success"
                     className="w-full gap-2 py-4 text-sm font-semibold"
                     onClick={handleAddPoints}
+                    disabled={!canModify}
                   >
                     <Plus className="h-4 w-4" />
                     Add Points
@@ -464,6 +525,7 @@ export default function SettingsPage() {
                     variant="destructive"
                     className="w-full gap-2 py-4 text-sm font-semibold"
                     onClick={handleRemovePoints}
+                    disabled={!canModify}
                   >
                     <Minus className="h-4 w-4" />
                     Remove Points

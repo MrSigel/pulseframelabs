@@ -20,6 +20,7 @@ import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
 import { useTwitchBot } from "@/contexts/TwitchBotContext";
 import { createPointsBattleHandler } from "@/lib/twitch/handlers/points-battle-handler";
+import { useFeatureGate } from "@/hooks/useFeatureGate";
 import type { PointsBattlePreset } from "@/lib/supabase/types";
 
 interface BetOption {
@@ -38,6 +39,7 @@ interface PBPreset {
 }
 
 export default function PointsBattlePage() {
+  const { canModify } = useFeatureGate();
   const uid = useAuthUid();
   const [minPoints, setMinPoints] = useState("");
   const [maxPoints, setMaxPoints] = useState("");
@@ -458,12 +460,12 @@ export default function PointsBattlePage() {
               </div>
 
               {isPredictionActive ? (
-                <Button className="w-full gap-2 py-5" variant="destructive" onClick={handleStopPrediction}>
+                <Button className="w-full gap-2 py-5" variant="destructive" onClick={handleStopPrediction} disabled={!canModify}>
                   <Square className="h-4 w-4" />
                   Stop Prediction
                 </Button>
               ) : (
-                <Button className="w-full gap-2 py-5" onClick={handleStartPrediction}>
+                <Button className="w-full gap-2 py-5" onClick={handleStartPrediction} disabled={!canModify}>
                   <Play className="h-4 w-4" />
                   Start Prediction
                 </Button>
@@ -564,7 +566,7 @@ export default function PointsBattlePage() {
                         setPresetsView("create");
                       }
                     }}
-                    disabled={presets.length >= MAX_PRESETS}
+                    disabled={!canModify || presets.length >= MAX_PRESETS}
                   >
                     <Plus className="h-4 w-4" />
                     Create New Preset ({presets.length}/{MAX_PRESETS})
@@ -694,6 +696,7 @@ export default function PointsBattlePage() {
                     variant="success"
                     className="w-full gap-2 py-5 text-sm font-semibold"
                     onClick={handleCreatePreset}
+                    disabled={!canModify}
                   >
                     <Plus className="h-4 w-4" />
                     Create Preset
@@ -737,7 +740,8 @@ export default function PointsBattlePage() {
                           </div>
                           <button
                             onClick={() => handleDeletePreset(preset.id)}
-                            className="text-slate-600 hover:text-red-400 transition-colors ml-3 opacity-0 group-hover:opacity-100"
+                            disabled={!canModify}
+                            className="text-slate-600 hover:text-red-400 transition-colors ml-3 opacity-0 group-hover:opacity-100 disabled:opacity-50 disabled:pointer-events-none"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
