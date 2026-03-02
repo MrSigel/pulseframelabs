@@ -18,3 +18,25 @@ services:
         sync: false
       - key: NEXT_PUBLIC_SITE_URL
         value: https://pulseframelabs.onrender.com
+      # Wallet & Credit System
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: CRYPTAPI_WEBHOOK_SECRET
+        sync: false
+      - key: CRYPTAPI_ADDRESS_BTC
+        sync: false
+      - key: CRYPTAPI_ADDRESS_ETH
+        sync: false
+      - key: CRYPTAPI_ADDRESS_LTC
+        sync: false
+      - key: CRYPTAPI_ADDRESS_USDT_ERC20
+        sync: false
+      - key: CRYPTAPI_ADDRESS_USDT_TRC20
+        sync: false
+      - key: CRYPTAPI_ADDRESS_USDT_BEP20
+        sync: false
+      # Admin Panel
+      - key: ADMIN_EMAILS
+        sync: false
+      - key: ROYAL_PARTNERS_TOKEN
+        sync: false
