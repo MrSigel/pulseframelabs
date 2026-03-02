@@ -63,8 +63,8 @@ export default function DuelPage() {
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    return `${window.location.origin}/overlay/duel_normal?uid=${uid || ""}&title=DUEL`;
-  }, []);
+    return `${window.location.origin}/overlay/duel_normal?uid=${uid || ""}`;
+  }, [uid]);
 
   async function handleAddPlayer() {
     const newPlayer = { id: nextId, name: "", game: "", buyIn: "", result: "", rank: "" };

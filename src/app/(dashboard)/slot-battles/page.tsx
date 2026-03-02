@@ -75,8 +75,8 @@ export default function SlotBattlesPage() {
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    return `${window.location.origin}/overlay/slot_battle_normal?uid=${uid || ""}&title=SLOT%20BATTLE`;
-  }, []);
+    return `${window.location.origin}/overlay/slot_battle_normal?uid=${uid || ""}`;
+  }, [uid]);
 
   return (
     <div>

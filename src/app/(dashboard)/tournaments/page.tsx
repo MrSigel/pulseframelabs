@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2, Loader2 } from "lucide-react";
+import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2, Loader2, Play, Pause, CheckCircle } from "lucide-react";
 import { useState, useMemo } from "react";
 import { tournaments as tournamentsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
@@ -68,14 +68,23 @@ export default function TournamentsPage() {
     }
   }
 
+  async function handleStatusChange(id: string, newStatus: 'pending' | 'ongoing' | 'finished') {
+    try {
+      await tournamentsDb.update(id, { status: newStatus });
+      await refetch();
+    } catch (err) {
+      console.error("Failed to update status:", err);
+    }
+  }
+
   const overlayUrls = useMemo(() => {
     if (typeof window === "undefined") return {} as Record<OverlayTab, string>;
     const base = window.location.origin;
     return {
-      normal: `${base}/overlay/tournament_normal?uid=${uid || ""}&title=SLOT%20BATTLE&status=TOURNAMENT%20FINISHED`,
-      bracket: `${base}/overlay/tournament_bracket?uid=${uid || ""}&title=TOURNAMENT&participants=8`,
+      normal: `${base}/overlay/tournament_normal?uid=${uid || ""}`,
+      bracket: `${base}/overlay/tournament_bracket?uid=${uid || ""}`,
     };
-  }, []);
+  }, [uid]);
 
   return (
     <div>
@@ -156,8 +165,18 @@ export default function TournamentsPage() {
                   </span>
                   <span className="text-xs text-slate-500">{new Date(t.created_at).toLocaleDateString()}</span>
                   <span className="text-xs text-slate-500">{new Date(t.updated_at).toLocaleDateString()}</span>
-                  <div className="flex justify-end">
-                    <button onClick={() => handleDelete(t.id)} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                  <div className="flex justify-end gap-1">
+                    {t.status === 'pending' && (
+                      <button onClick={() => handleStatusChange(t.id, 'ongoing')} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all" title="Start Tournament">
+                        <Play className="h-4 w-4" />
+                      </button>
+                    )}
+                    {t.status === 'ongoing' && (
+                      <button onClick={() => handleStatusChange(t.id, 'finished')} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 transition-all" title="Finish Tournament">
+                        <CheckCircle className="h-4 w-4" />
+                      </button>
+                    )}
+                    <button onClick={() => handleDelete(t.id)} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all" title="Delete">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>

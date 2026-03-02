@@ -35,7 +35,7 @@ export default function SlotRequestsPage() {
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
     return `${window.location.origin}/overlay/slot_requests?uid=${uid || ""}`;
-  }, []);
+  }, [uid]);
 
   // Settings state
   const [pointsCost, setPointsCost] = useState("0");

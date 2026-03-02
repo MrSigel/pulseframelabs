@@ -30,7 +30,7 @@ export default function ChatPage() {
       small: `${origin}/overlay/chat_small?uid=${uid || ""}`,
       normal: `${origin}/overlay/chat_normal?uid=${uid || ""}`,
     };
-  }, []);
+  }, [uid]);
 
   return (
     <div>

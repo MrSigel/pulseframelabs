@@ -1,9 +1,10 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useState, useCallback, useMemo } from "react";
+import { Suspense, useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { createClient } from "@/lib/supabase/client";
 
 interface SpinnerPrizeRow {
   prize: string;
@@ -65,12 +66,17 @@ function SpinnerOverlayContent() {
   const totalSize = wheelSize + 24;
   const wheelCenter = wheelSize / 2;
 
-  const spin = useCallback(() => {
-    if (spinning || prizes.length === 0) return;
+  // Ref to track current rotation for broadcast-triggered spins
+  const rotationRef = useRef(rotation);
+  rotationRef.current = rotation;
+  const spinningRef = useRef(spinning);
+  spinningRef.current = spinning;
+
+  const spinWithRotation = useCallback((extra: number, duration: number) => {
+    if (spinningRef.current || prizes.length === 0) return;
     setSpinning(true);
     setWinner(null);
-    const extra = 1800 + Math.random() * 1800;
-    const newRotation = rotation + extra;
+    const newRotation = rotationRef.current + extra;
     setRotation(newRotation);
     setTimeout(() => {
       const normalizedAngle = newRotation % 360;
@@ -78,8 +84,30 @@ function SpinnerOverlayContent() {
       const winnerIdx = Math.floor(pointerAngle / segAngle) % prizes.length;
       setWinner(prizes[winnerIdx]);
       setSpinning(false);
-    }, 4500);
-  }, [spinning, rotation, prizes, segAngle]);
+    }, duration);
+  }, [prizes, segAngle]);
+
+  const spin = useCallback(() => {
+    const extra = 1800 + Math.random() * 1800;
+    spinWithRotation(extra, 4500);
+  }, [spinWithRotation]);
+
+  // Listen for broadcast spin events from the dashboard
+  useEffect(() => {
+    if (!uid) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`spinner-spin-${uid}`)
+      .on("broadcast", { event: "spin" }, (payload) => {
+        const { rotation: extra, duration } = payload.payload;
+        spinWithRotation(extra, duration);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [uid, spinWithRotation]);
 
   const conicStops = prizes
     .map((_, i) => {

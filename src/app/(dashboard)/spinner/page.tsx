@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { OverlayLink } from "@/components/overlay-link";
 import { spinner as spinnerDb } from "@/lib/supabase/db";
+import { createClient } from "@/lib/supabase/client";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
 import type { SpinnerPrize } from "@/lib/supabase/types";
@@ -80,7 +81,7 @@ export default function SpinnerPage() {
     const names = activePrizes.map((p) => p.prize).join(",");
     const cols = activePrizes.map((p) => p.color).join(",");
     return `${window.location.origin}/overlay/spinner?uid=${uid || ""}&prizes=${encodeURIComponent(names)}&colors=${encodeURIComponent(cols)}`;
-  }, [activePrizes]);
+  }, [activePrizes, uid]);
 
   async function handleAddPrize() {
     const colors = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
@@ -135,12 +136,30 @@ export default function SpinnerPage() {
   });
 
   const spinWheel = useCallback(() => {
-    if (spinning || activePrizes.length < 2) return;
+    if (spinning || activePrizes.length < 2 || !uid) return;
     setSpinning(true);
     setWinner(null);
     const extra = 2000 + Math.random() * 2000;
     const newRotation = rotation + extra;
     setRotation(newRotation);
+
+    // Broadcast spin event to overlay via Supabase Realtime
+    try {
+      const supabase = createClient();
+      const channel = supabase.channel(`spinner-spin-${uid}`);
+      channel.subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          channel.send({
+            type: "broadcast",
+            event: "spin",
+            payload: { rotation: extra, duration: 4500 },
+          });
+          // Unsubscribe after sending
+          setTimeout(() => supabase.removeChannel(channel), 1000);
+        }
+      });
+    } catch {}
+
     setTimeout(async () => {
       const normalizedAngle = newRotation % 360;
       const segA = 360 / activePrizes.length;
@@ -151,7 +170,7 @@ export default function SpinnerPage() {
       setSpinning(false);
       try { await spinnerDb.history.create({ winner: winnerName }); } catch {}
     }, 4500);
-  }, [spinning, rotation, activePrizes]);
+  }, [spinning, rotation, activePrizes, uid]);
 
   return (
     <div>

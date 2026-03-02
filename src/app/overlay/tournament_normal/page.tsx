@@ -19,7 +19,8 @@ function TournamentNormalContent() {
   const { data: dbTournament, loading } = useOverlayData<TournamentRow>({
     table: "tournaments",
     userId: uid,
-    filter: { status: "ongoing" },
+    orderBy: "created_at",
+    ascending: false,
     single: true,
   });
 

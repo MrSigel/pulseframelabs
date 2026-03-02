@@ -92,13 +92,13 @@ export default function BonushuntsPage() {
     if (typeof window === "undefined") return {} as Record<OverlayTab, string>;
     const base = window.location.origin;
     return {
-      large: `${base}/overlay/bonushunt_large?uid=${uid || ""}&title=%25TITLE%25&hunt=HUNT%20%23000`,
-      small: `${base}/overlay/bonushunt_small?uid=${uid || ""}&title=%25TITLE%25&hunt=HUNT%20%23000`,
-      horizontal: `${base}/overlay/bonushunt_horizontal?uid=${uid || ""}&title=%25TITLE%25&hunt=HUNT%20%23000`,
-      topworse: `${base}/overlay/bonushunt_topworse?uid=${uid || ""}&title=%25TITLE%25`,
-      guess: `${base}/overlay/bonushunt_guess?uid=${uid || ""}&title=%25TITLE%25&balance=%240.00`,
+      large: `${base}/overlay/bonushunt_large?uid=${uid || ""}`,
+      small: `${base}/overlay/bonushunt_small?uid=${uid || ""}`,
+      horizontal: `${base}/overlay/bonushunt_horizontal?uid=${uid || ""}`,
+      topworse: `${base}/overlay/bonushunt_topworse?uid=${uid || ""}`,
+      guess: `${base}/overlay/bonushunt_guess?uid=${uid || ""}`,
     };
-  }, []);
+  }, [uid]);
 
   return (
     <div>

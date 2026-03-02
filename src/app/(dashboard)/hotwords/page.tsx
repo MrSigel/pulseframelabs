@@ -27,7 +27,7 @@ export default function HotwordsPage() {
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
     return `${window.location.origin}/overlay/hotwords?uid=${uid || ""}`;
-  }, []);
+  }, [uid]);
 
   // --- Supabase queries ---
   const { data: dbSettings, refetch: refetchSettings } = useDbQuery<HotwordSettings | null>(

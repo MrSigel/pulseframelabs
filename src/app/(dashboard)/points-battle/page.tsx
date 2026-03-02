@@ -72,7 +72,7 @@ export default function PointsBattlePage() {
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
     return `${window.location.origin}/overlay/points_battle?uid=${uid || ""}`;
-  }, []);
+  }, [uid]);
 
   // Create preset form
   const [newPresetOptions, setNewPresetOptions] = useState<BetOption[]>([

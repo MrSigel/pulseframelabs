@@ -60,7 +60,7 @@ export function useOverlayData<T>({
       }
 
       if (single) {
-        const { data: row, error: err } = await query.maybeSingle();
+        const { data: row, error: err } = await query.limit(1).maybeSingle();
         if (err) throw err;
         setData(row as T);
       } else {
