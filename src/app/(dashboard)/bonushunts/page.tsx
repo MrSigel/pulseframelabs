@@ -13,8 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2, Loader2 } from "lucide-react";
+import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2, Loader2, ExternalLink } from "lucide-react";
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { bonushunts as bonushuntsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
@@ -51,7 +52,6 @@ export default function BonushuntsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<OverlayTab>("large");
   const [huntName, setHuntName] = useState("");
-  const [huntDesc, setHuntDesc] = useState("");
   const [startBalance, setStartBalance] = useState("");
   const [currency, setCurrency] = useState("USD");
   const [creating, setCreating] = useState(false);
@@ -71,13 +71,11 @@ export default function BonushuntsPage() {
     try {
       await bonushuntsDb.create({
         name: huntName.trim(),
-        description: huntDesc.trim(),
         start_balance: parseFloat(startBalance) || 0,
         currency,
       });
       setCreateOpen(false);
       setHuntName("");
-      setHuntDesc("");
       setStartBalance("");
       await refetch();
     } catch (err) {
@@ -168,9 +166,17 @@ export default function BonushuntsPage() {
                       <span className="text-slate-500">🎰 {entryCountPerHunt.get(hunt.id) ?? 0} entries</span>
                     </div>
                   </div>
-                  <button onClick={() => handleDeleteHunt(hunt.id)} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <Link href={`/bonushunts/${hunt.id}`}>
+                      <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+                        <ExternalLink className="h-3 w-3" />
+                        Öffnen
+                      </Button>
+                    </Link>
+                    <button onClick={() => handleDeleteHunt(hunt.id)} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -321,34 +327,6 @@ export default function BonushuntsPage() {
                 />
                 <p className="text-[11px] text-slate-500 mt-1.5">
                   Provide a short, clear name for your hunt. This will be visible to viewers.
-                </p>
-              </div>
-
-              {/* Hunt Description */}
-              <div>
-                <Label className="text-sm font-semibold text-white mb-2 block">Hunt Description</Label>
-                <textarea
-                  placeholder="Enter hunt description"
-                  value={huntDesc}
-                  onChange={(e) => setHuntDesc(e.target.value)}
-                  rows={3}
-                  className="w-full rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-600 resize-none"
-                  style={{
-                    background: "rgba(56, 79, 125, 0.12)",
-                    border: "1px solid rgba(56, 79, 125, 0.25)",
-                    outline: "none",
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(59, 130, 246, 0.5)";
-                    e.currentTarget.style.boxShadow = "0 0 0 2px rgba(59, 130, 246, 0.15)";
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = "rgba(56, 79, 125, 0.25)";
-                    e.currentTarget.style.boxShadow = "none";
-                  }}
-                />
-                <p className="text-[11px] text-slate-500 mt-1.5">
-                  Provide a brief description of your hunt. This will be visible to viewers.
                 </p>
               </div>
 

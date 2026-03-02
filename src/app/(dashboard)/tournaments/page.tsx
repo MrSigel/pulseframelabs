@@ -13,13 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2, Loader2, Play, Pause, CheckCircle } from "lucide-react";
+import { Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2, Loader2, Play, CheckCircle, Users } from "lucide-react";
 import { useState, useMemo } from "react";
 import { tournaments as tournamentsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
-import type { Tournament } from "@/lib/supabase/types";
+import type { Tournament, TournamentParticipant } from "@/lib/supabase/types";
 
 const overlayTabs = [
   { key: "normal", label: "Overlay Normal" },
@@ -33,6 +33,7 @@ export default function TournamentsPage() {
   const { canModify } = useFeatureGate();
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [participantsModal, setParticipantsModal] = useState<Tournament | null>(null);
   const [activeTab, setActiveTab] = useState<OverlayTab>("normal");
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
@@ -40,6 +41,10 @@ export default function TournamentsPage() {
   const [creating, setCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { data: tournamentsList, loading, refetch } = useDbQuery<Tournament[]>(() => tournamentsDb.list(), []);
+  const { data: participantsList, refetch: refetchParticipants } = useDbQuery<TournamentParticipant[]>(
+    () => participantsModal ? tournamentsDb.participants.list(participantsModal.id) : Promise.resolve([]),
+    [participantsModal?.id]
+  );
   const filteredTournaments = (tournamentsList ?? []).filter(t => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   async function handleCreate() {
@@ -70,12 +75,21 @@ export default function TournamentsPage() {
     }
   }
 
-  async function handleStatusChange(id: string, newStatus: 'pending' | 'ongoing' | 'finished') {
+  async function handleStatusChange(id: string, newStatus: Tournament['status']) {
     try {
       await tournamentsDb.update(id, { status: newStatus });
       await refetch();
     } catch (err) {
       console.error("Failed to update status:", err);
+    }
+  }
+
+  async function handleClearParticipants(tournamentId: string) {
+    try {
+      await tournamentsDb.participants.clear(tournamentId);
+      await refetchParticipants();
+    } catch (err) {
+      console.error("Failed to clear participants:", err);
     }
   }
 
@@ -162,16 +176,26 @@ export default function TournamentsPage() {
                     {t.description && <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{t.description}</p>}
                   </div>
                   <span className="text-slate-300">{t.participant_count}</span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit ${t.status === 'ongoing' ? 'bg-emerald-500/10 text-emerald-400' : t.status === 'pending' ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-500/10 text-slate-400'}`}>
-                    {t.status.toUpperCase()}
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit ${t.status === 'ongoing' ? 'bg-emerald-500/10 text-emerald-400' : t.status === 'join_open' ? 'bg-blue-500/10 text-blue-400' : t.status === 'pending' ? 'bg-amber-500/10 text-amber-400' : 'bg-slate-500/10 text-slate-400'}`}>
+                    {t.status === 'join_open' ? 'JOIN OPEN' : t.status.toUpperCase()}
                   </span>
                   <span className="text-xs text-slate-500">{new Date(t.created_at).toLocaleDateString()}</span>
                   <span className="text-xs text-slate-500">{new Date(t.updated_at).toLocaleDateString()}</span>
                   <div className="flex justify-end gap-1">
                     {t.status === 'pending' && (
-                      <button onClick={() => handleStatusChange(t.id, 'ongoing')} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none" title="Start Tournament">
-                        <Play className="h-4 w-4" />
+                      <button onClick={() => handleStatusChange(t.id, 'join_open')} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none" title="Join Mode öffnen (!join)">
+                        <Users className="h-4 w-4" />
                       </button>
+                    )}
+                    {t.status === 'join_open' && (
+                      <>
+                        <button onClick={() => { setParticipantsModal(t); }} className="h-8 w-8 rounded-lg flex items-center justify-center text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 transition-all" title="Teilnehmer anzeigen">
+                          <Users className="h-4 w-4" />
+                        </button>
+                        <button onClick={() => handleStatusChange(t.id, 'ongoing')} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none" title="Turnier starten">
+                          <Play className="h-4 w-4" />
+                        </button>
+                      </>
                     )}
                     {t.status === 'ongoing' && (
                       <button onClick={() => handleStatusChange(t.id, 'finished')} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none" title="Finish Tournament">
@@ -390,6 +414,84 @@ export default function TournamentsPage() {
                 )}
                 {creating ? "Creating..." : "Create Tournament"}
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ====== Participants Modal ====== */}
+      {participantsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            style={{ animation: "fadeIn 0.2s ease-out" }}
+            onClick={() => setParticipantsModal(null)}
+          />
+          <div
+            className="relative z-10 w-full max-w-md rounded-xl border border-white/[0.08] shadow-2xl"
+            style={{
+              background: "linear-gradient(135deg, #0f1521 0%, #1a2235 50%, #0f1521 100%)",
+              animation: "modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+              boxShadow: "0 0 60px rgba(59, 130, 246, 0.08), 0 25px 50px rgba(0,0,0,0.5)",
+            }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+              <div className="flex items-center gap-3">
+                <h2 className="text-white font-bold text-lg">Teilnehmer</h2>
+                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  !join aktiv
+                </span>
+              </div>
+              <button
+                onClick={() => setParticipantsModal(null)}
+                className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Info */}
+            <div className="px-6 pt-4 pb-2">
+              <p className="text-xs text-slate-400">
+                Zuschauer können mit <span className="text-blue-400 font-semibold">!join</span> im Chat beitreten.
+                Turnier: <span className="text-white font-semibold">{participantsModal.name}</span>
+              </p>
+            </div>
+
+            {/* Participant list */}
+            <div className="px-6 pb-4 max-h-64 overflow-y-auto">
+              {!participantsList || participantsList.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-slate-500">
+                  <Users className="h-8 w-8 mb-2 text-slate-600" />
+                  <p className="text-sm">Noch keine Teilnehmer</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {participantsList.map((p, i) => (
+                    <div key={p.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[0.03] transition-colors">
+                      <span className="text-[10px] text-slate-600 w-5 text-right shrink-0">{i + 1}</span>
+                      <span className="text-sm text-white font-medium">{p.viewer_username}</span>
+                      <span className="ml-auto text-[10px] text-slate-600">
+                        {new Date(p.joined_at).toLocaleTimeString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-white/[0.06] flex items-center justify-between">
+              <span className="text-xs text-slate-500">
+                {participantsList?.length ?? 0} Teilnehmer
+              </span>
+              <div className="flex gap-2">
+                <Button variant="destructive" size="sm" onClick={() => handleClearParticipants(participantsModal.id)}>
+                  Liste leeren
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setParticipantsModal(null)}>Schließen</Button>
+              </div>
             </div>
           </div>
         </div>

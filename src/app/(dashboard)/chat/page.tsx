@@ -6,11 +6,37 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { MessageCircle, Info, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { chatMessages as chatDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
 import type { ChatMessage } from "@/lib/supabase/types";
+
+type Platform = "twitch" | "kick" | "restream";
+
+const platforms: { key: Platform; label: string; color: string; badge: string; info: string }[] = [
+  {
+    key: "twitch",
+    label: "Twitch",
+    color: "border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20",
+    badge: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+    info: "Aktiviere den Bot auf der Bot-Seite — er liest deinen Twitch-Chat direkt mit.",
+  },
+  {
+    key: "kick",
+    label: "Kick",
+    color: "border-green-500/40 bg-green-500/10 text-green-300 hover:bg-green-500/20",
+    badge: "bg-green-500/15 text-green-300 border-green-500/30",
+    info: "Kick-Chat via Restream an Twitch weiterleiten → Twitch Bot liest automatisch mit.",
+  },
+  {
+    key: "restream",
+    label: "Restream",
+    color: "border-blue-500/40 bg-blue-500/10 text-blue-300 hover:bg-blue-500/20",
+    badge: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+    info: "Verbinde Restream → Chat landet automatisch in Twitch, der Bot liest alles mit.",
+  },
+];
 
 const tabs = [
   { key: "small", label: "Overlay Small", path: "chat_small" },
@@ -22,7 +48,20 @@ type TabKey = (typeof tabs)[number]["key"];
 export default function ChatPage() {
   const uid = useAuthUid();
   const [activeTab, setActiveTab] = useState<TabKey>("small");
+  const [platform, setPlatform] = useState<Platform>("twitch");
   const { data: dbMessages } = useDbQuery<ChatMessage[]>(() => chatDb.list(), []);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("chat_platform") as Platform | null;
+    if (saved && platforms.some((p) => p.key === saved)) setPlatform(saved);
+  }, []);
+
+  function handlePlatform(p: Platform) {
+    setPlatform(p);
+    localStorage.setItem("chat_platform", p);
+  }
+
+  const activePlatform = platforms.find((p) => p.key === platform)!;
 
   const overlayUrls = useMemo(() => {
     if (typeof window === "undefined") return { small: "", normal: "" };
@@ -37,23 +76,37 @@ export default function ChatPage() {
     <div>
       <PageHeader title="Chat Overlay" />
 
-      {/* Connection Info Banner */}
+      {/* Platform Selector */}
       <div className="max-w-3xl mx-auto mb-4">
-        <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 flex items-start gap-3">
-          <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-          <div className="text-sm space-y-1">
-            <p className="text-slate-300">
-              Chat overlay requires an active <strong>Twitch Bot</strong> connection. The bot reads your Twitch chat and relays messages to the overlay in real-time.
-            </p>
-            <p className="text-slate-400 text-xs">
-              <strong>Using Restream?</strong> Connect your Twitch account on the{" "}
-              <Link href="/bot" className="text-primary hover:underline inline-flex items-center gap-1">
-                Twitch Bot page <ExternalLink className="h-3 w-3" />
-              </Link>
-              {" "}— Restream forwards chat to Twitch, so the bot picks it up automatically.
-            </p>
-          </div>
-        </div>
+        <Card>
+          <CardContent className="pt-5 pb-4">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-sm font-semibold text-slate-300">Streaming-Plattform</span>
+              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full border ${activePlatform.badge}`}>
+                {activePlatform.label}
+              </span>
+            </div>
+            <div className="flex gap-2 mb-3">
+              {platforms.map((p) => (
+                <button
+                  key={p.key}
+                  onClick={() => handlePlatform(p.key)}
+                  className={`px-4 py-1.5 rounded-lg border text-sm font-medium transition-all duration-200 ${
+                    platform === p.key
+                      ? p.color + " ring-1 ring-inset ring-current"
+                      : "border-white/[0.08] bg-white/[0.03] text-slate-500 hover:text-slate-300 hover:bg-white/[0.06]"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-start gap-2 text-xs text-slate-400">
+              <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-slate-500" />
+              <span>{activePlatform.info}</span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Card className="max-w-3xl mx-auto">

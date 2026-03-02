@@ -5,3 +5,4 @@ export { createQuickGuessHandler } from "./quick-guess-handler";
 export { createPointsBattleHandler } from "./points-battle-handler";
 export { createLoyaltyHandler } from "./loyalty-handler";
 export { createPointsDropHandler } from "./points-drop-handler";
+export { createTournamentJoinHandler } from "./tournament-join-handler";

@@ -15,6 +15,7 @@ import {
   createChatHandler,
   createHotwordHandler,
   createSlotRequestHandler,
+  createTournamentJoinHandler,
 } from "@/lib/twitch/handlers";
 import type { MessageHandler } from "@/lib/twitch/types";
 
@@ -59,6 +60,7 @@ export function TwitchBotProvider({ children }: { children: ReactNode }) {
     "quick-guesses": false,
     "points-battle": false,
     loyalty: false,
+    "tournament-join": true,
   });
 
   const handlersRef = useRef<Map<string, MessageHandler>>(new Map());
@@ -111,6 +113,16 @@ export function TwitchBotProvider({ children }: { children: ReactNode }) {
     } else if (!enabledFeatures["slot-requests"] && handlersRef.current.has("slot-requests")) {
       handlersRef.current.delete("slot-requests");
       twitchBot.removeHandler("slot-requests");
+    }
+
+    // Tournament join handler
+    if (enabledFeatures["tournament-join"] && !handlersRef.current.has("tournament-join")) {
+      const handler = createTournamentJoinHandler();
+      handlersRef.current.set("tournament-join", handler);
+      twitchBot.addHandler(handler);
+    } else if (!enabledFeatures["tournament-join"] && handlersRef.current.has("tournament-join")) {
+      handlersRef.current.delete("tournament-join");
+      twitchBot.removeHandler("tournament-join");
     }
   }, [enabledFeatures]);
 

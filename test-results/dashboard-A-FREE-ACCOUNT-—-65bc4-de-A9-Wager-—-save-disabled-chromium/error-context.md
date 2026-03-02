@@ -1,0 +1,252 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - link "PULSEFRAME LABS" [ref=e4] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e6]
+        - generic [ref=e10]:
+          - generic [ref=e11]: PULSEFRAME
+          - generic [ref=e12]: LABS
+      - navigation [ref=e13]:
+        - generic [ref=e15]:
+          - link "Dashboard" [ref=e16] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e17]
+            - generic [ref=e20]: Dashboard
+          - link "Wager Bar" [ref=e21] [cursor=pointer]:
+            - /url: /wager
+            - img [ref=e23]
+            - generic [ref=e26]: Wager Bar
+          - link "Deposit/Withdrawals" [ref=e27] [cursor=pointer]:
+            - /url: /deposit-withdrawals
+            - img [ref=e28]
+            - generic [ref=e31]: Deposit/Withdrawals
+          - generic [ref=e32]:
+            - img [ref=e33]
+            - generic [ref=e39]: Personal Bests
+            - generic [ref=e40]: Soon
+          - generic [ref=e41]:
+            - img [ref=e42]
+            - generic [ref=e44]: Now Playing
+            - generic [ref=e45]: Soon
+          - link "Stream Points" [ref=e46] [cursor=pointer]:
+            - /url: /stream-points
+            - img [ref=e47]
+            - generic [ref=e49]: Stream Points
+          - link "Hotwords" [ref=e50] [cursor=pointer]:
+            - /url: /hotwords
+            - img [ref=e51]
+            - generic [ref=e53]: Hotwords
+          - link "Slot Requests" [ref=e54] [cursor=pointer]:
+            - /url: /slot-requests
+            - img [ref=e55]
+            - generic [ref=e57]: Slot Requests
+          - link "Spinner" [ref=e58] [cursor=pointer]:
+            - /url: /spinner
+            - img [ref=e59]
+            - generic [ref=e61]: Spinner
+          - link "Bonushunts" [ref=e62] [cursor=pointer]:
+            - /url: /bonushunts
+            - img [ref=e63]
+            - generic [ref=e67]: Bonushunts
+          - link "Tournaments" [ref=e68] [cursor=pointer]:
+            - /url: /tournaments
+            - img [ref=e69]
+            - generic [ref=e78]: Tournaments
+          - link "Slot Battles" [ref=e79] [cursor=pointer]:
+            - /url: /slot-battles
+            - img [ref=e80]
+            - generic [ref=e85]: Slot Battles
+          - link "Duel" [ref=e86] [cursor=pointer]:
+            - /url: /duel
+            - img [ref=e87]
+            - generic [ref=e89]: Duel
+          - link "Quick Guesses" [ref=e90] [cursor=pointer]:
+            - /url: /quick-guesses
+            - img [ref=e91]
+            - generic [ref=e93]: Quick Guesses
+          - link "Chat" [ref=e94] [cursor=pointer]:
+            - /url: /chat
+            - img [ref=e95]
+            - generic [ref=e97]: Chat
+          - link "Theme Settings" [ref=e98] [cursor=pointer]:
+            - /url: /theme-settings
+            - img [ref=e99]
+            - generic [ref=e103]: Theme Settings
+        - generic [ref=e104]:
+          - heading "Casinos" [level=3] [ref=e106]
+          - generic [ref=e107]:
+            - link "Casino Management" [ref=e108] [cursor=pointer]:
+              - /url: /casino-management
+              - img [ref=e109]
+              - generic [ref=e113]: Casino Management
+            - link "Promo Management" [ref=e114] [cursor=pointer]:
+              - /url: /promo-management
+              - img [ref=e115]
+              - generic [ref=e118]: Promo Management
+            - link "Slideshow" [ref=e119] [cursor=pointer]:
+              - /url: /slideshow
+              - img [ref=e120]
+              - generic [ref=e125]: Slideshow
+        - generic [ref=e126]:
+          - heading "Stream" [level=3] [ref=e128]
+          - generic [ref=e129]:
+            - link "Twitch Bot" [ref=e130] [cursor=pointer]:
+              - /url: /bot
+              - img [ref=e131]
+              - generic [ref=e134]: Twitch Bot
+            - link "Streamer Page" [ref=e135] [cursor=pointer]:
+              - /url: /streamer-page
+              - img [ref=e136]
+              - generic [ref=e139]: Streamer Page
+            - link "Store" [ref=e140] [cursor=pointer]:
+              - /url: /store
+              - img [ref=e141]
+              - generic [ref=e145]: Store
+            - link "Loyalty" [ref=e146] [cursor=pointer]:
+              - /url: /loyalty
+              - img [ref=e147]
+              - generic [ref=e149]: Loyalty
+            - link "Points Battle" [ref=e150] [cursor=pointer]:
+              - /url: /points-battle
+              - img [ref=e151]
+              - generic [ref=e155]: Points Battle
+            - link "Settings" [ref=e156] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e157]
+              - generic [ref=e160]: Settings
+        - generic [ref=e161]:
+          - heading "Account" [level=3] [ref=e163]
+          - link "Wallet & Credits" [ref=e165] [cursor=pointer]:
+            - /url: /wallet
+            - img [ref=e166]
+            - generic [ref=e169]: Wallet & Credits
+      - generic [ref=e170]: 2026© Pulseframelabs
+    - generic [ref=e171]:
+      - banner [ref=e172]:
+        - generic [ref=e174]:
+          - generic "Wallet Credits" [ref=e175] [cursor=pointer]:
+            - generic [ref=e176]: "0"
+            - generic [ref=e177]: Credits
+          - generic "Bot Disconnected" [ref=e178] [cursor=pointer]:
+            - img [ref=e179]
+          - button "Dark" [ref=e183]:
+            - img [ref=e185]
+            - generic [ref=e187]: Dark
+          - generic [ref=e189] [cursor=pointer]:
+            - generic [ref=e192]: G
+            - generic [ref=e193]:
+              - generic [ref=e194]: gross_enrico
+              - generic [ref=e195]: gross_enrico@gmx.de
+            - img [ref=e197]
+      - main [ref=e199]:
+        - generic [ref=e200]:
+          - generic [ref=e201]:
+            - img [ref=e203]
+            - generic [ref=e206]:
+              - paragraph [ref=e207]: Read-Only Mode
+              - paragraph [ref=e208]: You are in analyze-only mode. Purchase a package to unlock all features.
+          - button "Get Credits" [ref=e209] [cursor=pointer]:
+            - img
+            - text: Get Credits
+        - generic [ref=e210]:
+          - heading "Wager" [level=1] [ref=e212]
+          - generic [ref=e213]:
+            - generic [ref=e214]:
+              - generic [ref=e215]:
+                - generic [ref=e216]: Wager Settings
+                - button "Reset" [disabled]:
+                  - img
+                  - text: Reset
+              - generic [ref=e217]:
+                - generic [ref=e218]:
+                  - generic [ref=e219]:
+                    - generic [ref=e220]: Casino Name
+                    - textbox [ref=e221]: Casinoname
+                  - generic [ref=e222]:
+                    - generic [ref=e223]: Header Text
+                    - textbox [ref=e224]: PULSEFRAMELABS.COM
+                - generic [ref=e225]:
+                  - generic [ref=e226]:
+                    - generic [ref=e227]: Bonus Type
+                    - combobox [ref=e228]:
+                      - generic: Sticky/Non-Sticky
+                      - img
+                  - generic [ref=e229]:
+                    - generic [ref=e230]: Currency
+                    - combobox [ref=e231]:
+                      - generic: $ - (US Dollar)
+                      - img
+                - generic [ref=e232]:
+                  - generic [ref=e233]:
+                    - generic [ref=e234]: Deposit Amount
+                    - generic [ref=e235]:
+                      - spinbutton [ref=e236]: "100"
+                      - generic [ref=e237]: $
+                  - generic [ref=e238]:
+                    - generic [ref=e239]: Bonus Amount
+                    - generic [ref=e240]:
+                      - spinbutton [ref=e241]: "50"
+                      - generic [ref=e242]: $
+                - generic [ref=e243]:
+                  - generic [ref=e244]:
+                    - generic [ref=e245]: Wager Amount
+                    - generic [ref=e246]:
+                      - spinbutton [ref=e247]: "3500"
+                      - generic [ref=e248]: $
+                  - generic [ref=e249]:
+                    - generic [ref=e250]: Wagered Amount
+                    - generic [ref=e251]:
+                      - spinbutton [ref=e252]: "1200"
+                      - generic [ref=e253]: $
+                - button "Update" [disabled]:
+                  - img
+                  - text: Update
+            - generic [ref=e256]:
+              - tablist [ref=e257]:
+                - tab "Overlay Small" [selected] [ref=e258]
+                - tab "Overlay Normal" [ref=e259]
+              - tabpanel "Overlay Small" [ref=e260]:
+                - generic [ref=e261]:
+                  - generic [ref=e262]:
+                    - generic [ref=e263]:
+                      - img [ref=e264]
+                      - generic [ref=e267]: Subscribe to unlock overlay URL
+                    - button "Upgrade" [ref=e268] [cursor=pointer]
+                  - generic [ref=e269]:
+                    - img [ref=e270]
+                    - generic [ref=e272]: "OBS Size: 450 × 130"
+                - generic [ref=e274]:
+                  - generic [ref=e275]:
+                    - generic [ref=e276]: "WAGER: $3,500"
+                    - generic [ref=e277]:
+                      - generic [ref=e278]:
+                        - text: "LEFT:"
+                        - generic [ref=e279]: $2,300
+                      - generic [ref=e280]: 34.3%
+                  - generic [ref=e283]:
+                    - generic [ref=e284]: CASINONAME
+                    - generic [ref=e286]:
+                      - generic [ref=e287]: ▶
+                      - generic [ref=e289]: Sweet BonanzaPRAGMATIC PLAYSweet BonanzaPRAGMATIC PLAY
+                  - generic [ref=e290]:
+                    - generic [ref=e291]: $50
+                    - generic [ref=e292]:
+                      - generic [ref=e293]: 12.0X
+                      - generic [ref=e294]: "|"
+                      - generic [ref=e295]: $1,200
+                      - generic [ref=e296]: "|"
+                      - generic [ref=e297]: 12.0X
+      - contentinfo [ref=e298]:
+        - generic [ref=e299]: 2026© Pulseframelabs
+    - button "en" [ref=e302] [cursor=pointer]:
+      - img [ref=e304]
+      - generic [ref=e311]: en
+      - img [ref=e312]
+  - button "Open Next.js Dev Tools" [ref=e319] [cursor=pointer]:
+    - img [ref=e320]
+  - alert [ref=e323]
+```

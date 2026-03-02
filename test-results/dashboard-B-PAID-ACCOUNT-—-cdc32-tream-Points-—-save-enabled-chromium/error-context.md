@@ -1,0 +1,241 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - generic:
+    - complementary:
+      - link:
+        - /url: /dashboard
+        - generic:
+          - img
+        - generic:
+          - generic: PULSEFRAME
+          - generic: LABS
+      - navigation:
+        - generic:
+          - generic:
+            - link:
+              - /url: /dashboard
+              - img
+              - generic: Dashboard
+            - link:
+              - /url: /wager
+              - img
+              - generic: Wager Bar
+            - link:
+              - /url: /deposit-withdrawals
+              - img
+              - generic: Deposit/Withdrawals
+            - generic:
+              - img
+              - generic: Personal Bests
+              - generic: Soon
+            - generic:
+              - img
+              - generic: Now Playing
+              - generic: Soon
+            - link:
+              - /url: /stream-points
+              - img
+              - generic: Stream Points
+            - link:
+              - /url: /hotwords
+              - img
+              - generic: Hotwords
+            - link:
+              - /url: /slot-requests
+              - img
+              - generic: Slot Requests
+            - link:
+              - /url: /spinner
+              - img
+              - generic: Spinner
+            - link:
+              - /url: /bonushunts
+              - img
+              - generic: Bonushunts
+            - link:
+              - /url: /tournaments
+              - img
+              - generic: Tournaments
+            - link:
+              - /url: /slot-battles
+              - img
+              - generic: Slot Battles
+            - link:
+              - /url: /duel
+              - img
+              - generic: Duel
+            - link:
+              - /url: /quick-guesses
+              - img
+              - generic: Quick Guesses
+            - link:
+              - /url: /chat
+              - img
+              - generic: Chat
+            - link:
+              - /url: /theme-settings
+              - img
+              - generic: Theme Settings
+        - generic:
+          - generic:
+            - heading [level=3]: Casinos
+          - generic:
+            - link:
+              - /url: /casino-management
+              - img
+              - generic: Casino Management
+            - link:
+              - /url: /promo-management
+              - img
+              - generic: Promo Management
+            - link:
+              - /url: /slideshow
+              - img
+              - generic: Slideshow
+        - generic:
+          - generic:
+            - heading [level=3]: Stream
+          - generic:
+            - link:
+              - /url: /bot
+              - img
+              - generic: Twitch Bot
+            - link:
+              - /url: /streamer-page
+              - img
+              - generic: Streamer Page
+            - link:
+              - /url: /store
+              - img
+              - generic: Store
+            - link:
+              - /url: /loyalty
+              - img
+              - generic: Loyalty
+            - link:
+              - /url: /points-battle
+              - img
+              - generic: Points Battle
+            - link:
+              - /url: /settings
+              - img
+              - generic: Settings
+        - generic:
+          - generic:
+            - heading [level=3]: Account
+          - generic:
+            - link:
+              - /url: /wallet
+              - img
+              - generic: Wallet & Credits
+      - generic: 2026© Pulseframelabs
+    - generic:
+      - banner:
+        - generic:
+          - generic:
+            - generic: "51"
+            - generic: Credits
+          - generic:
+            - img
+          - button:
+            - generic:
+              - img
+            - generic: Dark
+          - generic:
+            - generic:
+              - generic:
+                - generic: E
+              - generic:
+                - generic: Enrico
+                - generic: freelancer.enricofullstack@gmail.com
+              - generic:
+                - img
+      - main:
+        - generic:
+          - generic:
+            - heading [level=1]: Stream Points
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic: ⚡
+                  - text: Points Configuration
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Points per Minute
+                    - spinbutton: "1"
+                    - paragraph: Points earned per minute of watch time.
+                  - generic:
+                    - generic: Points per Follow
+                    - spinbutton: "0"
+                  - generic:
+                    - generic: Points per Sub
+                    - spinbutton: "0"
+                  - generic:
+                    - generic: Points per Donation
+                    - spinbutton: "0"
+                  - generic:
+                    - generic:
+                      - checkbox
+                      - generic: Inactive
+                  - button:
+                    - img
+                    - text: Save Configuration
+            - generic:
+              - generic:
+                - generic:
+                  - img
+                  - text: Points Drop
+              - generic:
+                - generic: Connect your Twitch Bot first to use Points Drop.
+                - generic:
+                  - generic: Keyword
+                  - textbox:
+                    - /placeholder: "!claim"
+                    - text: "!claim"
+                  - paragraph: Viewers type this in chat to claim points.
+                - generic:
+                  - generic: Points Amount
+                  - spinbutton: "50"
+                  - paragraph: How many points each viewer receives.
+                - generic:
+                  - generic: Duration (Seconds)
+                  - spinbutton: "60"
+                  - paragraph: How long the drop stays active.
+                - button [disabled]:
+                  - img
+                  - text: Start Points Drop
+      - contentinfo:
+        - generic: 2026© Pulseframelabs
+    - generic:
+      - generic:
+        - button:
+          - generic:
+            - img
+          - generic: en
+          - img
+  - generic [ref=e5] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e6]:
+      - img [ref=e7]
+    - generic [ref=e10]:
+      - button "Open issues overlay" [ref=e11]:
+        - generic [ref=e12]:
+          - generic [ref=e13]: "0"
+          - generic [ref=e14]: "1"
+        - generic [ref=e15]: Issue
+      - button "Collapse issues badge" [ref=e16]:
+        - img [ref=e17]
+  - alert
+  - dialog [ref=e20]:
+    - generic [ref=e24]:
+      - img [ref=e26]
+      - generic [ref=e29]:
+        - heading "Welcome to Pulseframelabs" [level=2] [ref=e30]
+        - paragraph [ref=e31]: Let's set up your dashboard in a few quick steps. You can always change these later in Settings.
+      - button "Get Started" [active] [ref=e32] [cursor=pointer]:
+        - text: Get Started
+        - img
+```

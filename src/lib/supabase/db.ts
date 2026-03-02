@@ -11,7 +11,7 @@ import type {
   SlotBattle, SlotBattleEntry, SlotRequest, SlotRequestSettings,
   SlideshowItem, SpinnerPrize, SpinnerHistoryEntry, StoreItem,
   StoreRedemption, StoreSettings, StreamerPageSettings, StreamPointsConfig,
-  StreamViewer, ThemeSettings, Tournament, TwitchConnection, UserProfile,
+  StreamViewer, ThemeSettings, Tournament, TournamentParticipant, TwitchConnection, UserProfile,
   UserSubscription, WagerSession, Wallet, WalletTransaction,
 } from "./types";
 
@@ -37,7 +37,8 @@ async function selectByUser<T>(
   ascending = true,
 ): Promise<T[]> {
   const supabase = getSupabase();
-  let query = supabase.from(table).select("*");
+  const userId = await getUserId();
+  let query = supabase.from(table).select("*").eq("user_id", userId);
   if (orderBy) query = query.order(orderBy, { ascending });
   const { data, error } = await query;
   if (error) throw error;
@@ -161,7 +162,7 @@ export const bonushunts = {
       return (data ?? []) as BonushuntEntry[];
     },
     listAll: () => selectByUser<BonushuntEntry>("bonushunt_entries", "created_at", false),
-    create: (data: { bonushunt_id: string; game_name: string; provider?: string; buy_in?: number }) =>
+    create: (data: { bonushunt_id: string; game_name: string; provider?: string; buy_in?: number; win_amount?: number; multiplier?: number; position?: number }) =>
       insertRow<BonushuntEntry>("bonushunt_entries", data),
     update: (id: string, updates: Partial<BonushuntEntry>) =>
       updateRow<BonushuntEntry>("bonushunt_entries", id, updates),
@@ -274,6 +275,51 @@ export const tournaments = {
     insertRow<Tournament>("tournaments", data),
   update: (id: string, updates: Partial<Tournament>) => updateRow<Tournament>("tournaments", id, updates),
   remove: (id: string) => deleteRow("tournaments", id),
+  getJoinOpen: async (userId: string): Promise<Tournament | null> => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("tournaments")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("status", "join_open")
+      .maybeSingle();
+    if (error) throw error;
+    return data as Tournament | null;
+  },
+  participants: {
+    list: async (tournamentId: string): Promise<TournamentParticipant[]> => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { data, error } = await supabase
+        .from("tournament_participants")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("tournament_id", tournamentId)
+        .order("joined_at");
+      if (error) throw error;
+      return (data ?? []) as TournamentParticipant[];
+    },
+    add: async (tournamentId: string, viewerUsername: string, streamerId: string): Promise<void> => {
+      const supabase = getSupabase();
+      const { error } = await supabase
+        .from("tournament_participants")
+        .upsert(
+          { user_id: streamerId, tournament_id: tournamentId, viewer_username: viewerUsername },
+          { onConflict: "tournament_id,viewer_username", ignoreDuplicates: true }
+        );
+      if (error) throw error;
+    },
+    clear: async (tournamentId: string): Promise<void> => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { error } = await supabase
+        .from("tournament_participants")
+        .delete()
+        .eq("user_id", userId)
+        .eq("tournament_id", tournamentId);
+      if (error) throw error;
+    },
+  },
 };
 
 // ============================================================

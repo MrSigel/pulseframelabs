@@ -167,9 +167,17 @@ export interface Tournament {
   description: string;
   participant_count: number;
   bracket_data: Json;
-  status: 'pending' | 'ongoing' | 'finished';
+  status: 'pending' | 'join_open' | 'ongoing' | 'finished';
   created_at: string;
   updated_at: string;
+}
+
+export interface TournamentParticipant {
+  id: string;
+  user_id: string;
+  tournament_id: string;
+  viewer_username: string;
+  joined_at: string;
 }
 
 export interface SpinnerPrize {

@@ -1,0 +1,212 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - link "PULSEFRAME LABS" [ref=e4] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e6]
+        - generic [ref=e10]:
+          - generic [ref=e11]: PULSEFRAME
+          - generic [ref=e12]: LABS
+      - navigation [ref=e13]:
+        - generic [ref=e15]:
+          - link "Dashboard" [ref=e16] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e17]
+            - generic [ref=e20]: Dashboard
+          - link "Wager Bar" [ref=e21] [cursor=pointer]:
+            - /url: /wager
+            - img [ref=e22]
+            - generic [ref=e25]: Wager Bar
+          - link "Deposit/Withdrawals" [ref=e26] [cursor=pointer]:
+            - /url: /deposit-withdrawals
+            - img [ref=e27]
+            - generic [ref=e30]: Deposit/Withdrawals
+          - generic [ref=e31]:
+            - img [ref=e32]
+            - generic [ref=e38]: Personal Bests
+            - generic [ref=e39]: Soon
+          - generic [ref=e40]:
+            - img [ref=e41]
+            - generic [ref=e43]: Now Playing
+            - generic [ref=e44]: Soon
+          - link "Stream Points" [ref=e45] [cursor=pointer]:
+            - /url: /stream-points
+            - img [ref=e46]
+            - generic [ref=e48]: Stream Points
+          - link "Hotwords" [ref=e49] [cursor=pointer]:
+            - /url: /hotwords
+            - img [ref=e50]
+            - generic [ref=e52]: Hotwords
+          - link "Slot Requests" [ref=e53] [cursor=pointer]:
+            - /url: /slot-requests
+            - img [ref=e54]
+            - generic [ref=e56]: Slot Requests
+          - link "Spinner" [ref=e57] [cursor=pointer]:
+            - /url: /spinner
+            - img [ref=e58]
+            - generic [ref=e60]: Spinner
+          - link "Bonushunts" [ref=e61] [cursor=pointer]:
+            - /url: /bonushunts
+            - img [ref=e62]
+            - generic [ref=e66]: Bonushunts
+          - link "Tournaments" [ref=e67] [cursor=pointer]:
+            - /url: /tournaments
+            - img [ref=e68]
+            - generic [ref=e77]: Tournaments
+          - link "Slot Battles" [ref=e78] [cursor=pointer]:
+            - /url: /slot-battles
+            - img [ref=e79]
+            - generic [ref=e84]: Slot Battles
+          - link "Duel" [ref=e85] [cursor=pointer]:
+            - /url: /duel
+            - img [ref=e86]
+            - generic [ref=e88]: Duel
+          - link "Quick Guesses" [ref=e89] [cursor=pointer]:
+            - /url: /quick-guesses
+            - img [ref=e90]
+            - generic [ref=e92]: Quick Guesses
+          - link "Chat" [ref=e93] [cursor=pointer]:
+            - /url: /chat
+            - img [ref=e94]
+            - generic [ref=e96]: Chat
+          - link "Theme Settings" [ref=e97] [cursor=pointer]:
+            - /url: /theme-settings
+            - img [ref=e98]
+            - generic [ref=e102]: Theme Settings
+        - generic [ref=e103]:
+          - heading "Casinos" [level=3] [ref=e105]
+          - generic [ref=e106]:
+            - link "Casino Management" [ref=e107] [cursor=pointer]:
+              - /url: /casino-management
+              - img [ref=e108]
+              - generic [ref=e112]: Casino Management
+            - link "Promo Management" [ref=e113] [cursor=pointer]:
+              - /url: /promo-management
+              - img [ref=e114]
+              - generic [ref=e117]: Promo Management
+            - link "Slideshow" [ref=e118] [cursor=pointer]:
+              - /url: /slideshow
+              - img [ref=e119]
+              - generic [ref=e124]: Slideshow
+        - generic [ref=e125]:
+          - heading "Stream" [level=3] [ref=e127]
+          - generic [ref=e128]:
+            - link "Twitch Bot" [ref=e129] [cursor=pointer]:
+              - /url: /bot
+              - img [ref=e131]
+              - generic [ref=e134]: Twitch Bot
+            - link "Streamer Page" [ref=e135] [cursor=pointer]:
+              - /url: /streamer-page
+              - img [ref=e136]
+              - generic [ref=e139]: Streamer Page
+            - link "Store" [ref=e140] [cursor=pointer]:
+              - /url: /store
+              - img [ref=e141]
+              - generic [ref=e145]: Store
+            - link "Loyalty" [ref=e146] [cursor=pointer]:
+              - /url: /loyalty
+              - img [ref=e147]
+              - generic [ref=e149]: Loyalty
+            - link "Points Battle" [ref=e150] [cursor=pointer]:
+              - /url: /points-battle
+              - img [ref=e151]
+              - generic [ref=e155]: Points Battle
+            - link "Settings" [ref=e156] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e157]
+              - generic [ref=e160]: Settings
+        - generic [ref=e161]:
+          - heading "Account" [level=3] [ref=e163]
+          - link "Wallet & Credits" [ref=e165] [cursor=pointer]:
+            - /url: /wallet
+            - img [ref=e166]
+            - generic [ref=e169]: Wallet & Credits
+      - generic [ref=e170]: 2026© Pulseframelabs
+    - generic [ref=e171]:
+      - banner [ref=e172]:
+        - generic [ref=e174]:
+          - generic "Wallet Credits" [ref=e175] [cursor=pointer]:
+            - generic [ref=e176]: "0"
+            - generic [ref=e177]: Credits
+          - generic "Bot Disconnected" [ref=e178] [cursor=pointer]:
+            - img [ref=e179]
+          - button "Dark" [ref=e183]:
+            - img [ref=e185]
+            - generic [ref=e187]: Dark
+          - generic [ref=e189] [cursor=pointer]:
+            - generic [ref=e192]: G
+            - generic [ref=e193]:
+              - generic [ref=e194]: gross_enrico
+              - generic [ref=e195]: gross_enrico@gmx.de
+            - img [ref=e197]
+      - main [ref=e199]:
+        - generic [ref=e200]:
+          - generic [ref=e201]:
+            - img [ref=e203]
+            - generic [ref=e206]:
+              - paragraph [ref=e207]: Read-Only Mode
+              - paragraph [ref=e208]: You are in analyze-only mode. Purchase a package to unlock all features.
+          - button "Get Credits" [ref=e209] [cursor=pointer]:
+            - img
+            - text: Get Credits
+        - generic [ref=e210]:
+          - heading "Twitch Bot" [level=1] [ref=e212]
+          - generic [ref=e213]:
+            - generic [ref=e214]:
+              - heading "Connection" [level=2] [ref=e215]:
+                - img [ref=e216]
+                - text: Connection
+              - generic [ref=e219]:
+                - generic [ref=e222]: Disconnected
+                - button "Connect Twitch" [disabled] [ref=e224]:
+                  - img [ref=e225]
+                  - text: Connect Twitch
+            - generic [ref=e229]:
+              - heading "Feature Toggles" [level=2] [ref=e230]
+              - generic [ref=e231]:
+                - button "Chat Relay Relay all Twitch chat messages to overlays" [disabled] [ref=e232]:
+                  - generic [ref=e233]:
+                    - generic [ref=e234]: Chat Relay
+                    - generic [ref=e235]: Relay all Twitch chat messages to overlays
+                  - img [ref=e236]
+                - button "Hotwords Count word frequency from chat messages" [disabled] [ref=e239]:
+                  - generic [ref=e240]:
+                    - generic [ref=e241]: Hotwords
+                    - generic [ref=e242]: Count word frequency from chat messages
+                  - img [ref=e243]
+                - button "Slot Requests Handle !sr <game> commands from viewers" [disabled] [ref=e246]:
+                  - generic [ref=e247]:
+                    - generic [ref=e248]: Slot Requests
+                    - generic [ref=e249]: Handle !sr <game> commands from viewers
+                  - img [ref=e250]
+                - button "Quick Guesses Handle guess commands from viewers" [disabled] [ref=e253]:
+                  - generic [ref=e254]:
+                    - generic [ref=e255]: Quick Guesses
+                    - generic [ref=e256]: Handle guess commands from viewers
+                  - img [ref=e257]
+                - button "Points Battle Handle !bet commands for predictions" [disabled] [ref=e260]:
+                  - generic [ref=e261]:
+                    - generic [ref=e262]: Points Battle
+                    - generic [ref=e263]: Handle !bet commands for predictions
+                  - img [ref=e264]
+                - button "Loyalty Giveaways Track keyword entries for giveaways" [disabled] [ref=e267]:
+                  - generic [ref=e268]:
+                    - generic [ref=e269]: Loyalty Giveaways
+                    - generic [ref=e270]: Track keyword entries for giveaways
+                  - img [ref=e271]
+          - generic [ref=e274]:
+            - heading "Activity Log" [level=2] [ref=e276]
+            - generic [ref=e278]: No activity yet. Connect your bot to start seeing events.
+      - contentinfo [ref=e279]:
+        - generic [ref=e280]: 2026© Pulseframelabs
+    - button "en" [ref=e283] [cursor=pointer]:
+      - img [ref=e285]
+      - generic [ref=e292]: en
+      - img [ref=e293]
+  - button "Open Next.js Dev Tools" [ref=e300] [cursor=pointer]:
+    - img [ref=e301]
+  - alert [ref=e304]
+```

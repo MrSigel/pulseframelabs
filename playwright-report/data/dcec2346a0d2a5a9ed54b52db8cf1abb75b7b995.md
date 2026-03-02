@@ -1,0 +1,245 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - link "PULSEFRAME LABS" [ref=e4] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e6]
+        - generic [ref=e10]:
+          - generic [ref=e11]: PULSEFRAME
+          - generic [ref=e12]: LABS
+      - navigation [ref=e13]:
+        - generic [ref=e15]:
+          - link "Dashboard" [ref=e16] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e17]
+            - generic [ref=e20]: Dashboard
+          - link "Wager Bar" [ref=e21] [cursor=pointer]:
+            - /url: /wager
+            - img [ref=e22]
+            - generic [ref=e25]: Wager Bar
+          - link "Deposit/Withdrawals" [ref=e26] [cursor=pointer]:
+            - /url: /deposit-withdrawals
+            - img [ref=e27]
+            - generic [ref=e30]: Deposit/Withdrawals
+          - generic [ref=e31]:
+            - img [ref=e32]
+            - generic [ref=e38]: Personal Bests
+            - generic [ref=e39]: Soon
+          - generic [ref=e40]:
+            - img [ref=e41]
+            - generic [ref=e43]: Now Playing
+            - generic [ref=e44]: Soon
+          - link "Stream Points" [ref=e45] [cursor=pointer]:
+            - /url: /stream-points
+            - img [ref=e46]
+            - generic [ref=e48]: Stream Points
+          - link "Hotwords" [ref=e49] [cursor=pointer]:
+            - /url: /hotwords
+            - img [ref=e51]
+            - generic [ref=e53]: Hotwords
+          - link "Slot Requests" [ref=e54] [cursor=pointer]:
+            - /url: /slot-requests
+            - img [ref=e55]
+            - generic [ref=e57]: Slot Requests
+          - link "Spinner" [ref=e58] [cursor=pointer]:
+            - /url: /spinner
+            - img [ref=e59]
+            - generic [ref=e61]: Spinner
+          - link "Bonushunts" [ref=e62] [cursor=pointer]:
+            - /url: /bonushunts
+            - img [ref=e63]
+            - generic [ref=e67]: Bonushunts
+          - link "Tournaments" [ref=e68] [cursor=pointer]:
+            - /url: /tournaments
+            - img [ref=e69]
+            - generic [ref=e78]: Tournaments
+          - link "Slot Battles" [ref=e79] [cursor=pointer]:
+            - /url: /slot-battles
+            - img [ref=e80]
+            - generic [ref=e85]: Slot Battles
+          - link "Duel" [ref=e86] [cursor=pointer]:
+            - /url: /duel
+            - img [ref=e87]
+            - generic [ref=e89]: Duel
+          - link "Quick Guesses" [ref=e90] [cursor=pointer]:
+            - /url: /quick-guesses
+            - img [ref=e91]
+            - generic [ref=e93]: Quick Guesses
+          - link "Chat" [ref=e94] [cursor=pointer]:
+            - /url: /chat
+            - img [ref=e95]
+            - generic [ref=e97]: Chat
+          - link "Theme Settings" [ref=e98] [cursor=pointer]:
+            - /url: /theme-settings
+            - img [ref=e99]
+            - generic [ref=e103]: Theme Settings
+        - generic [ref=e104]:
+          - heading "Casinos" [level=3] [ref=e106]
+          - generic [ref=e107]:
+            - link "Casino Management" [ref=e108] [cursor=pointer]:
+              - /url: /casino-management
+              - img [ref=e109]
+              - generic [ref=e113]: Casino Management
+            - link "Promo Management" [ref=e114] [cursor=pointer]:
+              - /url: /promo-management
+              - img [ref=e115]
+              - generic [ref=e118]: Promo Management
+            - link "Slideshow" [ref=e119] [cursor=pointer]:
+              - /url: /slideshow
+              - img [ref=e120]
+              - generic [ref=e125]: Slideshow
+        - generic [ref=e126]:
+          - heading "Stream" [level=3] [ref=e128]
+          - generic [ref=e129]:
+            - link "Twitch Bot" [ref=e130] [cursor=pointer]:
+              - /url: /bot
+              - img [ref=e131]
+              - generic [ref=e134]: Twitch Bot
+            - link "Streamer Page" [ref=e135] [cursor=pointer]:
+              - /url: /streamer-page
+              - img [ref=e136]
+              - generic [ref=e139]: Streamer Page
+            - link "Store" [ref=e140] [cursor=pointer]:
+              - /url: /store
+              - img [ref=e141]
+              - generic [ref=e145]: Store
+            - link "Loyalty" [ref=e146] [cursor=pointer]:
+              - /url: /loyalty
+              - img [ref=e147]
+              - generic [ref=e149]: Loyalty
+            - link "Points Battle" [ref=e150] [cursor=pointer]:
+              - /url: /points-battle
+              - img [ref=e151]
+              - generic [ref=e155]: Points Battle
+            - link "Settings" [ref=e156] [cursor=pointer]:
+              - /url: /settings
+              - img [ref=e157]
+              - generic [ref=e160]: Settings
+        - generic [ref=e161]:
+          - heading "Account" [level=3] [ref=e163]
+          - link "Wallet & Credits" [ref=e165] [cursor=pointer]:
+            - /url: /wallet
+            - img [ref=e166]
+            - generic [ref=e169]: Wallet & Credits
+      - generic [ref=e170]: 2026© Pulseframelabs
+    - generic [ref=e171]:
+      - banner [ref=e172]:
+        - generic [ref=e174]:
+          - generic "Wallet Credits" [ref=e175] [cursor=pointer]:
+            - generic [ref=e176]: "0"
+            - generic [ref=e177]: Credits
+          - generic "Bot Disconnected" [ref=e178] [cursor=pointer]:
+            - img [ref=e179]
+          - button "Dark" [ref=e183]:
+            - img [ref=e185]
+            - generic [ref=e187]: Dark
+          - generic [ref=e189] [cursor=pointer]:
+            - generic [ref=e192]: G
+            - generic [ref=e193]:
+              - generic [ref=e194]: gross_enrico
+              - generic [ref=e195]: gross_enrico@gmx.de
+            - img [ref=e197]
+      - main [ref=e199]:
+        - generic [ref=e200]:
+          - generic [ref=e201]:
+            - img [ref=e203]
+            - generic [ref=e206]:
+              - paragraph [ref=e207]: Read-Only Mode
+              - paragraph [ref=e208]: You are in analyze-only mode. Purchase a package to unlock all features.
+          - button "Get Credits" [ref=e209] [cursor=pointer]:
+            - img
+            - text: Get Credits
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - heading "Hot Words" [level=1] [ref=e212]
+            - generic [ref=e214]:
+              - generic [ref=e215]:
+                - img [ref=e217]
+                - generic [ref=e219]:
+                  - paragraph [ref=e220]: Twitch Bot
+                  - paragraph [ref=e221]: Offline
+              - button "Clear Hot Words" [disabled]:
+                - img
+                - text: Clear Hot Words
+              - button "HotWords Overlay" [active] [ref=e222] [cursor=pointer]:
+                - img
+                - text: HotWords Overlay
+          - generic [ref=e223]:
+            - generic [ref=e224]:
+              - generic [ref=e226]:
+                - img [ref=e227]
+                - text: Live Hot Words
+              - generic [ref=e229]:
+                - generic [ref=e230]:
+                  - generic [ref=e231]: "!bet (1)"
+                  - generic [ref=e232]: "!sr (1)"
+                  - generic [ref=e233]: big (1)
+                  - generic [ref=e234]: bass (1)
+                - button "Open Live Preview" [ref=e236] [cursor=pointer]:
+                  - img
+                  - text: Open Live Preview
+            - generic [ref=e237]:
+              - generic [ref=e239]: ▼ Word Filter
+              - generic [ref=e240]:
+                - generic [ref=e241]:
+                  - generic [ref=e242]: Excluded Words
+                  - textbox "Enter words to exclude separated by comma" [ref=e243]
+                  - paragraph [ref=e244]: ⓘ Enter words to exclude from hotwords. Separate words with a comma.
+                - button "Save" [disabled]:
+                  - img
+                  - text: Save
+            - generic [ref=e246]:
+              - generic [ref=e248]: Configuration
+              - generic [ref=e249]:
+                - generic [ref=e250]:
+                  - generic [ref=e251]: Twitch Username
+                  - textbox "Enter your twitch username" [ref=e252]
+                  - paragraph [ref=e253]: ⓘ Enter your twitch username to enable live hotwords on twitch, leave blank to disable.
+                - generic [ref=e254]:
+                  - generic [ref=e255]: Kick Username
+                  - textbox "Enter your kick username" [ref=e256]
+                  - paragraph [ref=e257]: ⓘ Enter your kick username to enable live hotwords on kick, leave blank to disable.
+                - button "Save" [disabled]:
+                  - img
+                  - text: Save
+          - generic [ref=e260]:
+            - generic [ref=e261]:
+              - heading "Hot Words Overlay" [level=2] [ref=e262]
+              - button [ref=e263]:
+                - img [ref=e264]
+            - generic [ref=e267]:
+              - generic [ref=e268]:
+                - generic [ref=e269]: Overlay URL
+                - generic [ref=e270]:
+                  - generic [ref=e271]:
+                    - generic [ref=e272]:
+                      - img [ref=e273]
+                      - generic [ref=e276]: Subscribe to unlock overlay URL
+                    - button "Upgrade" [ref=e277] [cursor=pointer]
+                  - generic [ref=e278]:
+                    - img [ref=e279]
+                    - generic [ref=e281]: "OBS Size: 320 × 120"
+              - generic [ref=e282]:
+                - generic [ref=e283]: Preview
+                - generic [ref=e286]:
+                  - generic [ref=e287]: HOT WORDS
+                  - generic [ref=e288]:
+                    - generic [ref=e289]: GG
+                    - generic [ref=e290]: HYPE
+                    - generic [ref=e291]: LET'S GO
+                    - generic [ref=e292]: WIN
+                    - generic [ref=e293]: CLUTCH
+            - button "Close" [ref=e295] [cursor=pointer]
+      - contentinfo [ref=e296]:
+        - generic [ref=e297]: 2026© Pulseframelabs
+    - button "en" [ref=e300] [cursor=pointer]:
+      - img [ref=e302]
+      - generic [ref=e309]: en
+      - img [ref=e310]
+  - button "Open Next.js Dev Tools" [ref=e317] [cursor=pointer]:
+    - img [ref=e318]
+  - alert [ref=e321]
+```
