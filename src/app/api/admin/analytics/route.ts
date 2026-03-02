@@ -16,12 +16,25 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const date_from = searchParams.get("date_from") ?? "";
   const date_to = searchParams.get("date_to") ?? "";
-  const group_by = (searchParams.get("group_by") as "day" | "week" | "month" | "campaign") || "day";
+  const group_by_raw = searchParams.get("group_by") || "day";
   const campaign_id = searchParams.get("campaign_id") ?? undefined;
 
   if (!date_from || !date_to) {
     return NextResponse.json({ error: "date_from and date_to are required" }, { status: 400 });
   }
+
+  // Validate date format (YYYY-MM-DD)
+  const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRe.test(date_from) || !dateRe.test(date_to)) {
+    return NextResponse.json({ error: "Invalid date format. Use YYYY-MM-DD" }, { status: 400 });
+  }
+
+  // Validate group_by
+  const validGroupBy = ["day", "week", "month", "campaign"] as const;
+  if (!validGroupBy.includes(group_by_raw as typeof validGroupBy[number])) {
+    return NextResponse.json({ error: "Invalid group_by value" }, { status: 400 });
+  }
+  const group_by = group_by_raw as typeof validGroupBy[number];
 
   try {
     const report = await getReport({ date_from, date_to, group_by, campaign_id });

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
-  const limit = parseInt(searchParams.get("limit") ?? "50", 10);
+  const limit = Math.min(Math.max(parseInt(searchParams.get("limit") ?? "50", 10), 1), 500);
 
   const admin = createAdminClient();
   const { data, error } = await admin

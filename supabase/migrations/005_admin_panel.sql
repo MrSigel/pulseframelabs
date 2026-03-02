@@ -69,7 +69,7 @@ BEGIN
 
   -- Insert ledger entry
   INSERT INTO wallet_transactions (user_id, wallet_id, type, amount, balance_after, description, reference_id)
-    VALUES (p_target_user_id, v_wallet_id, 'admin_credit', p_amount, v_new_balance, p_description, p_admin_id::text);
+    VALUES (p_target_user_id, v_wallet_id, 'admin_credit', p_amount, v_new_balance, p_description, NULL);
 
   -- Audit log
   INSERT INTO admin_audit_logs (admin_user_id, action, target_user_id, details)
@@ -119,7 +119,7 @@ BEGIN
     RETURNING balance INTO v_new_balance;
 
   INSERT INTO wallet_transactions (user_id, wallet_id, type, amount, balance_after, description, reference_id)
-    VALUES (p_target_user_id, v_wallet_id, 'admin_debit', p_amount, v_new_balance, p_description, p_admin_id::text);
+    VALUES (p_target_user_id, v_wallet_id, 'admin_debit', -p_amount, v_new_balance, p_description, NULL);
 
   INSERT INTO admin_audit_logs (admin_user_id, action, target_user_id, details)
     VALUES (p_admin_id, 'debit_wallet', p_target_user_id,

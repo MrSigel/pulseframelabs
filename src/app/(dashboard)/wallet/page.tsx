@@ -34,7 +34,7 @@ import { wallet as walletDb, packages as packagesDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useLanguage } from "@/context/LanguageContext";
 import type { Package as PackageType, WalletTransaction, PaymentRequest } from "@/lib/supabase/types";
-import { getSupportedCoins } from "@/lib/cryptapi";
+import { getSupportedCoins } from "@/lib/coins";
 
 export default function WalletPage() {
   const { wallet, subscription, hasActiveSubscription, refetch } = useSubscription();

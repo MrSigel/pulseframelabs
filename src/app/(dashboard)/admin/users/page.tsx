@@ -52,15 +52,21 @@ export default function AdminUsersPage() {
   const [editIps, setEditIps] = useState("");
   const [deleteModal, setDeleteModal] = useState<UserRow | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function loadUsers() {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/admin/users");
-      if (res.ok) {
-        const { users: data } = await res.json();
-        setUsers(data);
+      if (!res.ok) {
+        setError(`Failed to load users (${res.status})`);
+        return;
       }
+      const { users: data } = await res.json();
+      setUsers(data);
+    } catch {
+      setError("Network error loading users");
     } finally {
       setLoading(false);
     }
@@ -83,7 +89,7 @@ export default function AdminUsersPage() {
   async function handleLock(user: UserRow) {
     setActionLoading(true);
     try {
-      await fetch(`/api/admin/users/${user.user_id}`, {
+      const res = await fetch(`/api/admin/users/${user.user_id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -91,9 +97,14 @@ export default function AdminUsersPage() {
           locked_reason: user.is_locked ? null : lockReason,
         }),
       });
+      if (!res.ok) {
+        setError(`Failed to ${user.is_locked ? "unlock" : "lock"} user (${res.status})`);
+      }
       setLockModal(null);
       setLockReason("");
       await loadUsers();
+    } catch {
+      setError("Network error");
     } finally {
       setActionLoading(false);
     }
@@ -107,7 +118,7 @@ export default function AdminUsersPage() {
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean);
-      await fetch(`/api/admin/users/${editModal.user_id}`, {
+      const res = await fetch(`/api/admin/users/${editModal.user_id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -115,8 +126,13 @@ export default function AdminUsersPage() {
           ip_whitelist: ipArr.length > 0 ? ipArr : null,
         }),
       });
+      if (!res.ok) {
+        setError(`Failed to update user (${res.status})`);
+      }
       setEditModal(null);
       await loadUsers();
+    } catch {
+      setError("Network error");
     } finally {
       setActionLoading(false);
     }
@@ -126,11 +142,16 @@ export default function AdminUsersPage() {
     if (!deleteModal) return;
     setActionLoading(true);
     try {
-      await fetch(`/api/admin/users/${deleteModal.user_id}`, {
+      const res = await fetch(`/api/admin/users/${deleteModal.user_id}`, {
         method: "DELETE",
       });
+      if (!res.ok) {
+        setError(`Failed to delete user (${res.status})`);
+      }
       setDeleteModal(null);
       await loadUsers();
+    } catch {
+      setError("Network error");
     } finally {
       setActionLoading(false);
     }
@@ -139,6 +160,14 @@ export default function AdminUsersPage() {
   return (
     <div>
       <PageHeader title={a.userManagement ?? "User Management"} />
+
+      {/* Error Banner */}
+      {error && (
+        <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="text-destructive/60 hover:text-destructive ml-4">&times;</button>
+        </div>
+      )}
 
       {/* Search */}
       <div className="relative mb-6 max-w-sm">

@@ -29,26 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Package not found" }, { status: 404 });
     }
 
-    // Check wallet balance
-    const { data: walletData, error: walletError } = await admin
-      .from("wallets")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
-
-    if (walletError || !walletData) {
-      return NextResponse.json({ error: "Wallet not found" }, { status: 404 });
-    }
-
-    if (walletData.balance < pkg.price_credits) {
-      return NextResponse.json({
-        error: "Insufficient credits",
-        balance: walletData.balance,
-        required: pkg.price_credits,
-      }, { status: 400 });
-    }
-
-    // Check if user already has an active subscription
+    // Check if user already has an active subscription (needed for extension calc)
     const { data: existingSub } = await admin
       .from("user_subscriptions")
       .select("*")
@@ -59,13 +40,30 @@ export async function POST(request: NextRequest) {
       .limit(1)
       .maybeSingle();
 
+    // DEBIT FIRST (atomic — debit_wallet checks balance with FOR UPDATE lock)
+    const { error: debitError } = await admin.rpc("debit_wallet", {
+      p_user_id: user.id,
+      p_amount: pkg.price_credits,
+      p_description: `Purchased ${pkg.name} package`,
+      p_reference_id: null,
+    });
+
+    if (debitError) {
+      // debit_wallet raises exception if insufficient balance
+      const msg = debitError.message || "Debit failed";
+      if (msg.includes("Insufficient")) {
+        return NextResponse.json({ error: "Insufficient credits" }, { status: 400 });
+      }
+      throw debitError;
+    }
+
     // If user has active subscription, extend from its expiry
     const startsAt = existingSub
       ? new Date(existingSub.expires_at)
       : new Date();
     const expiresAt = new Date(startsAt.getTime() + pkg.duration_days * 24 * 60 * 60 * 1000);
 
-    // Create subscription
+    // Create subscription (debit already succeeded)
     const { data: newSub, error: subError } = await admin
       .from("user_subscriptions")
       .insert({
@@ -78,26 +76,28 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    if (subError) throw subError;
-
-    // Debit wallet atomically via RPC function
-    const { error: debitError } = await admin.rpc("debit_wallet", {
-      p_user_id: user.id,
-      p_amount: pkg.price_credits,
-      p_description: `Purchased ${pkg.name} package`,
-      p_reference_id: newSub.id,
-    });
-
-    if (debitError) {
-      // Rollback subscription if debit fails
-      await admin.from("user_subscriptions").delete().eq("id", newSub.id);
-      throw debitError;
+    if (subError) {
+      // Refund credits if subscription creation fails
+      await admin.rpc("credit_wallet", {
+        p_user_id: user.id,
+        p_amount: pkg.price_credits,
+        p_description: `Refund: subscription creation failed for ${pkg.name}`,
+        p_reference_id: null,
+      });
+      throw subError;
     }
+
+    // Get updated balance
+    const { data: updatedWallet } = await admin
+      .from("wallets")
+      .select("balance")
+      .eq("user_id", user.id)
+      .single();
 
     return NextResponse.json({
       subscription: newSub,
       package: pkg,
-      new_balance: walletData.balance - pkg.price_credits,
+      new_balance: updatedWallet?.balance ?? 0,
     });
   } catch (err) {
     console.error("Purchase error:", err);

@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Admin guard utilities.
  * Checks the current user's email against ADMIN_EMAILS env var (comma-separated).

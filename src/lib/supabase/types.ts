@@ -23,6 +23,10 @@ export interface UserProfile {
   twitch_username: string | null;
   kick_username: string | null;
   timezone: string;
+  is_locked: boolean;
+  locked_at: string | null;
+  locked_reason: string | null;
+  ip_whitelist: string[] | null;
   created_at: string;
   updated_at: string;
 }

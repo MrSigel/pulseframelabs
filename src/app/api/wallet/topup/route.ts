@@ -1,6 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createPaymentAddress, convertToCrypto, getReceivingAddress, getQRCode } from "@/lib/cryptapi";
+import { createPaymentAddress, convertToCrypto, getReceivingAddress, getQRCode, getSupportedCoins } from "@/lib/cryptapi";
+import { createHmac } from "crypto";
+
+function generateSignature(paymentId: string, secret: string): string {
+  return createHmac("sha256", secret).update(paymentId).digest("hex");
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,8 +23,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid coin" }, { status: 400 });
     }
 
+    // Validate coin against supported list
+    const supportedCoins = getSupportedCoins().map((c) => c.coin);
+    if (!supportedCoins.includes(coin)) {
+      return NextResponse.json({ error: "Unsupported coin" }, { status: 400 });
+    }
+
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
     const webhookSecret = process.env.CRYPTAPI_WEBHOOK_SECRET;
+
+    if (!webhookSecret) {
+      return NextResponse.json({ error: "Payment system not configured" }, { status: 500 });
+    }
+
     const addressOut = getReceivingAddress(coin);
 
     // Create payment_request row first to get its ID
@@ -40,8 +56,9 @@ export async function POST(request: NextRequest) {
 
     if (insertError) throw insertError;
 
-    // Build callback URL with payment request ID and secret
-    const callbackUrl = `${siteUrl}/api/cryptapi/webhook?payment_id=${paymentReq.id}&secret=${webhookSecret}`;
+    // Build callback URL with payment ID and HMAC signature (not raw secret)
+    const signature = generateSignature(paymentReq.id, webhookSecret);
+    const callbackUrl = `${siteUrl}/api/cryptapi/webhook?payment_id=${paymentReq.id}&sig=${signature}`;
 
     // Create CryptAPI address
     const cryptapiResp = await createPaymentAddress(coin, addressOut, callbackUrl);

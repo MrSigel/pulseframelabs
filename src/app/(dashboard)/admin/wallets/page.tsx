@@ -51,15 +51,19 @@ export default function AdminWalletsPage() {
   const [pkgModal, setPkgModal] = useState<UserWalletRow | null>(null);
   const [selectedPkg, setSelectedPkg] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function loadData() {
     setLoading(true);
+    setError(null);
     try {
       const [usersRes, pkgRes] = await Promise.all([
         fetch("/api/admin/users"),
         fetch("/api/packages"),
       ]);
-      if (usersRes.ok) {
+      if (!usersRes.ok) {
+        setError(`Failed to load users (${usersRes.status})`);
+      } else {
         const { users: data } = await usersRes.json();
         setUsers(data);
       }
@@ -67,6 +71,8 @@ export default function AdminWalletsPage() {
         const pkgs = await pkgRes.json();
         setPackages(Array.isArray(pkgs) ? pkgs : pkgs.packages ?? []);
       }
+    } catch {
+      setError("Network error loading data");
     } finally {
       setLoading(false);
     }
@@ -93,7 +99,7 @@ export default function AdminWalletsPage() {
 
     setActionLoading(true);
     try {
-      await fetch(`/api/admin/users/${walletModal.user.user_id}/wallet`, {
+      const res = await fetch(`/api/admin/users/${walletModal.user.user_id}/wallet`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -102,10 +108,15 @@ export default function AdminWalletsPage() {
           description: description || `Admin ${walletModal.action}`,
         }),
       });
+      if (!res.ok) {
+        setError(`Failed to ${walletModal.action} wallet (${res.status})`);
+      }
       setWalletModal(null);
       setAmount("");
       setDescription("");
       await loadData();
+    } catch {
+      setError("Network error");
     } finally {
       setActionLoading(false);
     }
@@ -115,14 +126,19 @@ export default function AdminWalletsPage() {
     if (!pkgModal || !selectedPkg) return;
     setActionLoading(true);
     try {
-      await fetch(`/api/admin/users/${pkgModal.user_id}/subscription`, {
+      const res = await fetch(`/api/admin/users/${pkgModal.user_id}/subscription`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ package_id: selectedPkg }),
       });
+      if (!res.ok) {
+        setError(`Failed to assign package (${res.status})`);
+      }
       setPkgModal(null);
       setSelectedPkg("");
       await loadData();
+    } catch {
+      setError("Network error");
     } finally {
       setActionLoading(false);
     }
@@ -131,6 +147,14 @@ export default function AdminWalletsPage() {
   return (
     <div>
       <PageHeader title={a.walletAdmin ?? "Wallet Administration"} />
+
+      {/* Error Banner */}
+      {error && (
+        <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive flex items-center justify-between">
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className="text-destructive/60 hover:text-destructive ml-4">&times;</button>
+        </div>
+      )}
 
       <div className="relative mb-6 max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

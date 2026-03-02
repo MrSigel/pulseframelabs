@@ -1,5 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createHmac } from "crypto";
+
+function verifySignature(paymentId: string, signature: string, secret: string): boolean {
+  const expected = createHmac("sha256", secret).update(paymentId).digest("hex");
+  return signature === expected;
+}
 
 export async function POST(request: NextRequest) {
   return handleWebhook(request);
@@ -13,15 +19,16 @@ async function handleWebhook(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const paymentId = url.searchParams.get("payment_id");
-    const secret = url.searchParams.get("secret");
+    const signature = url.searchParams.get("sig");
 
-    // Validate secret
-    const expectedSecret = process.env.CRYPTAPI_WEBHOOK_SECRET;
-    if (!secret || secret !== expectedSecret) {
+    if (!paymentId) {
       return new NextResponse("*ok*", { status: 200 });
     }
 
-    if (!paymentId) {
+    // Validate HMAC signature
+    const webhookSecret = process.env.CRYPTAPI_WEBHOOK_SECRET;
+    if (!webhookSecret || !signature || !verifySignature(paymentId, signature, webhookSecret)) {
+      console.warn("Webhook called with invalid or missing signature for payment:", paymentId);
       return new NextResponse("*ok*", { status: 200 });
     }
 
