@@ -462,3 +462,67 @@
   stroke-dashoffset: 60;
   animation: pulse-draw 3s ease-in-out infinite;
 }
+
+/* ══════════════════════════════════════════════
+   OVERLAY — Semi-transparent card system
+   Single source of truth for all /overlay/* pages.
+   Cards are 75% opaque (25% reduction) so the
+   OBS/stream background shows through.
+   ══════════════════════════════════════════════ */
+
+:root {
+  --overlay-bg-dark:   rgba(12, 16, 24, 0.75);
+  --overlay-bg-mid:    rgba(17, 24, 39, 0.75);
+  --overlay-border:    rgba(59, 130, 246, 0.10);
+  --overlay-shadow-sm: 0 2px 16px rgba(0, 0, 0, 0.25);
+  --overlay-shadow-md: 0 4px 24px rgba(0, 0, 0, 0.30);
+  --overlay-shadow-lg: 0 4px 32px rgba(0, 0, 0, 0.35);
+}
+
+/* Standard card — 135° diagonal gradient, medium shadow */
+.overlay-card {
+  background: linear-gradient(135deg, var(--overlay-bg-dark) 0%, var(--overlay-bg-mid) 50%, var(--overlay-bg-dark) 100%);
+  border: 1px solid var(--overlay-border);
+  box-shadow: var(--overlay-shadow-md);
+}
+
+/* Small/compact card — lighter shadow */
+.overlay-card-sm {
+  background: linear-gradient(135deg, var(--overlay-bg-dark) 0%, var(--overlay-bg-mid) 50%, var(--overlay-bg-dark) 100%);
+  border: 1px solid var(--overlay-border);
+  box-shadow: var(--overlay-shadow-sm);
+}
+
+/* Large/prominent card — stronger shadow */
+.overlay-card-lg {
+  background: linear-gradient(135deg, var(--overlay-bg-dark) 0%, var(--overlay-bg-mid) 50%, var(--overlay-bg-dark) 100%);
+  border: 1px solid var(--overlay-border);
+  box-shadow: var(--overlay-shadow-lg);
+}
+
+/* Vertical gradient variant — used by wager_bar_normal */
+.overlay-card-vertical {
+  background: linear-gradient(180deg, var(--overlay-bg-dark) 0%, var(--overlay-bg-mid) 100%);
+  border: 1px solid var(--overlay-border);
+  box-shadow: var(--overlay-shadow-md);
+}
+
+/* Inner stat cell (bonushunt_large) */
+.overlay-stat-cell {
+  background: linear-gradient(180deg, rgba(15, 21, 33, 0.60) 0%, rgba(12, 16, 24, 0.70) 100%);
+}
+
+/* Image-to-card edge fade (now_playing_normal) */
+.overlay-image-fade {
+  background: linear-gradient(to right, transparent, var(--overlay-bg-dark));
+}
+
+/* Spinner decorative ring — reduced shadow */
+.overlay-spinner-ring {
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.35), inset 0 0 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Spinner wheel — reduced shadow */
+.overlay-spinner-wheel {
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.30), inset 0 0 35px rgba(0, 0, 0, 0.15);
+}

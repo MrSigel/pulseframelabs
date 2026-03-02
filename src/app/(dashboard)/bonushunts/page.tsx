@@ -19,7 +19,7 @@ import { bonushunts as bonushuntsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
-import type { Bonushunt } from "@/lib/supabase/types";
+import type { Bonushunt, BonushuntEntry } from "@/lib/supabase/types";
 
 const overlayTabs = [
   { key: "large", label: "Overlay Large" },
@@ -57,6 +57,12 @@ export default function BonushuntsPage() {
   const [creating, setCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { data: huntsList, loading, refetch } = useDbQuery<Bonushunt[]>(() => bonushuntsDb.list(), []);
+  const { data: allEntries } = useDbQuery<BonushuntEntry[]>(() => bonushuntsDb.entries.listAll(), []);
+  const entryCountPerHunt = useMemo(() => {
+    const map = new Map<string, number>();
+    (allEntries ?? []).forEach((e) => map.set(e.bonushunt_id, (map.get(e.bonushunt_id) ?? 0) + 1));
+    return map;
+  }, [allEntries]);
   const hunts = (huntsList ?? []).filter(h => !searchQuery || h.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   async function handleCreateHunt() {
@@ -159,6 +165,7 @@ export default function BonushuntsPage() {
                     <div className="flex items-center gap-4 mt-1 text-[11px] text-slate-600">
                       <span>Start: {hunt.currency} {hunt.start_balance}</span>
                       <span>Created: {new Date(hunt.created_at).toLocaleDateString()}</span>
+                      <span className="text-slate-500">🎰 {entryCountPerHunt.get(hunt.id) ?? 0} entries</span>
                     </div>
                   </div>
                   <button onClick={() => handleDeleteHunt(hunt.id)} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none">

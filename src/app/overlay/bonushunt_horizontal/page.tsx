@@ -57,12 +57,7 @@ function BonushuntHorizontalContent() {
   return (
     <div className="inline-block animate-fade-in-up">
       <div
-        className="rounded-xl overflow-hidden"
-        style={{
-          background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.15)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
-        }}
+        className="rounded-xl overflow-hidden overlay-card"
       >
         <div className="flex items-center gap-4 px-4 py-3">
           {/* Icon + Title */}

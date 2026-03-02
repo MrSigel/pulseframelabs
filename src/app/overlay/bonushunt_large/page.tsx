@@ -70,11 +70,8 @@ function BonushuntLargeContent() {
   return (
     <div className="inline-block animate-fade-in-up">
       <div
-        className="rounded-xl overflow-hidden"
+        className="rounded-xl overflow-hidden overlay-card-lg"
         style={{
-          background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.15)",
-          boxShadow: "0 4px 32px rgba(0,0,0,0.6)",
           minWidth: "380px",
         }}
       >
@@ -148,8 +145,7 @@ function BonushuntLargeContent() {
           ].map((stat, i) => (
             <div
               key={i}
-              className="flex flex-col items-center py-2.5 gap-1"
-              style={{ background: "linear-gradient(180deg, rgba(15,21,33,0.8) 0%, rgba(12,16,24,0.9) 100%)" }}
+              className="flex flex-col items-center py-2.5 gap-1 overlay-stat-cell"
             >
               <div style={{ color: stat.color }}>
                 {stat.icon === "grid" && (

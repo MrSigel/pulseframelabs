@@ -160,6 +160,7 @@ export const bonushunts = {
       if (error) throw error;
       return (data ?? []) as BonushuntEntry[];
     },
+    listAll: () => selectByUser<BonushuntEntry>("bonushunt_entries", "created_at", false),
     create: (data: { bonushunt_id: string; game_name: string; provider?: string; buy_in?: number }) =>
       insertRow<BonushuntEntry>("bonushunt_entries", data),
     update: (id: string, updates: Partial<BonushuntEntry>) =>

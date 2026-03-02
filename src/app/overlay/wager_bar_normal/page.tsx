@@ -108,11 +108,8 @@ function WagerBarNormalView({
   return (
     <div className="inline-block animate-fade-in-up">
       <div
-        className="rounded-xl overflow-hidden"
+        className="rounded-xl overflow-hidden overlay-card-vertical"
         style={{
-          background: "linear-gradient(180deg, #0c1018 0%, #111827 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.15)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
           minWidth: "440px",
         }}
       >

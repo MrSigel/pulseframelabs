@@ -40,12 +40,8 @@ function HotwordsOverlayContent() {
   return (
     <div className="inline-block animate-fade-in-up">
       <div
-        className="rounded-lg overflow-hidden"
+        className="rounded-lg overflow-hidden overlay-card"
         style={{
-          background:
-            "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.2)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
           padding: "16px 22px",
           minWidth: "280px",
         }}

@@ -13,8 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { OverlayLink } from "@/components/overlay-link";
-import { Monitor, History, Settings, Gift, MessageSquare, Trash2, Link, X, Save, Smile, Eraser, Loader2 } from "lucide-react";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { Monitor, History, Settings, Gift, MessageSquare, Trash2, Link, X, Save, Smile, Eraser, Loader2, Trophy, BarChart3, Users } from "lucide-react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { slotRequests as srDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
@@ -33,6 +33,13 @@ export default function SlotRequestsPage() {
   const [linkOpen, setLinkOpen] = useState(false);
   const [overlayOpen, setOverlayOpen] = useState(false);
   const [slotRequestsOpen, setSlotRequestsOpen] = useState(false);
+
+  // Raffle animation state
+  const [raffleAnimOpen, setRaffleAnimOpen] = useState(false);
+  const [raffleAnimating, setRaffleAnimating] = useState(false);
+  const [raffleCurrentName, setRaffleCurrentName] = useState("");
+  const [rafflePendingWinner, setRafflePendingWinner] = useState<SlotRequest | null>(null);
+  const raffleTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
@@ -90,22 +97,94 @@ export default function SlotRequestsPage() {
     catch (err) { console.error(err); }
   }
 
-  const handleRaffleGame = useCallback(async () => {
-    if (!dbRequests || dbRequests.length === 0) return;
-    const pending = dbRequests.filter((r) => r.status === "pending" || !r.status);
+  // Participant count
+  const pendingCount = useMemo(
+    () => (dbRequests ?? []).filter((r) => r.status === "pending" || !r.status).length,
+    [dbRequests]
+  );
+
+  // Raffle statistics
+  const winnerCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    (dbRaffleHistory ?? []).forEach((r) => map.set(r.winner, (map.get(r.winner) ?? 0) + 1));
+    return map;
+  }, [dbRaffleHistory]);
+  const topWinners = useMemo(
+    () => Array.from(winnerCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5),
+    [winnerCounts]
+  );
+  const totalRaffles = dbRaffleHistory?.length ?? 0;
+  const uniqueWinners = winnerCounts.size;
+
+  function startRaffleAnimation() {
+    const pending = (dbRequests ?? []).filter((r) => r.status === "pending" || !r.status);
     if (pending.length === 0) return;
     const winner = pending[Math.floor(Math.random() * pending.length)];
+
+    // Clear any running timers
+    raffleTimersRef.current.forEach(clearTimeout);
+    raffleTimersRef.current = [];
+
+    setRafflePendingWinner(null);
+    setRaffleAnimating(true);
+    setRaffleAnimOpen(true);
+
+    const allNames = pending.map((r) => r.viewer_username);
+    let totalDelay = 0;
+    const schedules: { delay: number; name: string; last: boolean }[] = [];
+
+    // Fast phase: 15 frames @ 60ms
+    for (let i = 0; i < 15; i++) {
+      totalDelay += 60;
+      schedules.push({ delay: totalDelay, name: allNames[i % allNames.length], last: false });
+    }
+    // Medium phase: 10 frames @ 150ms
+    for (let i = 0; i < 10; i++) {
+      totalDelay += 150;
+      schedules.push({ delay: totalDelay, name: allNames[(15 + i) % allNames.length], last: false });
+    }
+    // Slow phase: 5 frames @ 350ms
+    for (let i = 0; i < 5; i++) {
+      totalDelay += 350;
+      schedules.push({ delay: totalDelay, name: allNames[(25 + i) % allNames.length], last: false });
+    }
+    // Final: winner
+    totalDelay += 600;
+    schedules.push({ delay: totalDelay, name: winner.viewer_username, last: true });
+
+    schedules.forEach(({ delay, name, last }) => {
+      const t = setTimeout(() => {
+        setRaffleCurrentName(name);
+        if (last) {
+          setRaffleAnimating(false);
+          setRafflePendingWinner(winner);
+        }
+      }, delay);
+      raffleTimersRef.current.push(t);
+    });
+  }
+
+  const handleRaffleGame = useCallback(async () => {
+    startRaffleAnimation();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dbRequests]);
+
+  async function confirmRaffle() {
+    if (!rafflePendingWinner) return;
     try {
-      await srDb.update(winner.id, { status: "raffled" });
+      await srDb.update(rafflePendingWinner.id, { status: "raffled" });
       await srDb.raffleHistory.create({
-        slot_name: winner.slot_name,
-        winner: winner.viewer_username,
+        slot_name: rafflePendingWinner.slot_name,
+        winner: rafflePendingWinner.viewer_username,
       });
       await refetchRequests();
+      setRaffleAnimOpen(false);
+      setRafflePendingWinner(null);
+      setRaffleCurrentName("");
     } catch (err) {
-      console.error("Failed to raffle:", err);
+      console.error("Failed to confirm raffle:", err);
     }
-  }, [dbRequests, refetchRequests]);
+  }
 
   function handleToggleSlotRequests() {
     setSlotRequestsOpen((prev) => !prev);
@@ -141,7 +220,7 @@ export default function SlotRequestsPage() {
               <CardTitle className="text-xs text-slate-500 uppercase tracking-wider">Actions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <Button className="gap-2" onClick={handleRaffleGame} disabled={!canModify}>
                   <Gift className="h-4 w-4" />
                   Raffle a Game
@@ -159,6 +238,11 @@ export default function SlotRequestsPage() {
                   <Trash2 className="h-4 w-4" />
                   Clear All Requests
                 </Button>
+                <div className="flex items-center gap-1.5 ml-auto">
+                  <Users className="h-4 w-4 text-slate-500" />
+                  <span className="text-sm font-semibold text-slate-300">{pendingCount}</span>
+                  <span className="text-sm text-slate-500">participants ready</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -228,8 +312,171 @@ export default function SlotRequestsPage() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Raffle Statistics */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg text-white flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Raffle Statistics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between py-2 border-b border-white/[0.06]">
+                <span className="text-sm text-slate-400">Total Raffles</span>
+                <span className="text-sm font-bold text-white">{totalRaffles}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-white/[0.06]">
+                <span className="text-sm text-slate-400">Unique Winners</span>
+                <span className="text-sm font-bold text-white">{uniqueWinners}</span>
+              </div>
+              {topWinners.length > 0 && (
+                <div>
+                  <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <Trophy className="h-3.5 w-3.5 text-amber-500" />
+                    Top Winners
+                  </p>
+                  <div className="space-y-2">
+                    {topWinners.map(([name, count], idx) => (
+                      <div key={name} className="flex items-center gap-2">
+                        <span
+                          className="text-[10px] font-bold w-4 text-center"
+                          style={{ color: idx === 0 ? "#f59e0b" : idx === 1 ? "#94a3b8" : idx === 2 ? "#b45309" : "#475569" }}
+                        >
+                          {idx + 1}
+                        </span>
+                        <span className="flex-1 text-sm text-slate-300 truncate">{name}</span>
+                        <span className="text-xs font-bold text-emerald-400">{count}×</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {topWinners.length === 0 && (
+                <p className="text-xs text-slate-600 text-center py-2">No raffles yet</p>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
+
+      {/* ====== Raffle Animation Modal ====== */}
+      {raffleAnimOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            style={{ animation: "fadeIn 0.2s ease-out" }}
+            onClick={() => {
+              if (!raffleAnimating) {
+                raffleTimersRef.current.forEach(clearTimeout);
+                setRaffleAnimOpen(false);
+                setRafflePendingWinner(null);
+                setRaffleCurrentName("");
+              }
+            }}
+          />
+          <div
+            className="relative z-10 w-full max-w-md rounded-xl border border-white/[0.08] shadow-2xl"
+            style={{
+              background: "linear-gradient(135deg, #0f1521 0%, #1a2235 50%, #0f1521 100%)",
+              animation: "modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+              boxShadow: "0 0 60px rgba(239, 68, 68, 0.12), 0 25px 50px rgba(0,0,0,0.5)",
+            }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+              <h2 className="text-white font-bold text-lg flex items-center gap-2">
+                <Gift className="h-5 w-5 text-red-400" />
+                {raffleAnimating ? "Drawing..." : "Winner!"}
+              </h2>
+              {!raffleAnimating && (
+                <button
+                  onClick={() => { setRaffleAnimOpen(false); setRafflePendingWinner(null); setRaffleCurrentName(""); }}
+                  className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-8 flex flex-col items-center gap-6">
+              {raffleAnimating ? (
+                <>
+                  <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold">
+                    Drawing from {pendingCount} participants
+                  </p>
+                  <div
+                    className="w-full rounded-xl flex items-center justify-center py-8"
+                    style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)" }}
+                  >
+                    <span
+                      className="text-2xl font-black text-white tracking-wide"
+                      style={{ textShadow: "0 0 20px rgba(239,68,68,0.5)" }}
+                    >
+                      {raffleCurrentName || "..."}
+                    </span>
+                  </div>
+                  <div className="flex gap-1">
+                    {[0, 1, 2, 3, 4].map((i) => (
+                      <div
+                        key={i}
+                        className="h-1.5 w-1.5 rounded-full bg-red-500"
+                        style={{ animation: `pulse 0.6s ease-in-out ${i * 0.12}s infinite` }}
+                      />
+                    ))}
+                  </div>
+                </>
+              ) : rafflePendingWinner ? (
+                <div className="w-full animate-fade-in-up space-y-4">
+                  <p className="text-xs text-slate-500 uppercase tracking-widest font-semibold text-center">
+                    Winner drawn from {pendingCount + 1} participants
+                  </p>
+                  {/* Winner card */}
+                  <div
+                    className="rounded-xl p-5 flex flex-col items-center gap-3"
+                    style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.2)" }}
+                  >
+                    <div
+                      className="h-12 w-12 rounded-full flex items-center justify-center"
+                      style={{ background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)" }}
+                    >
+                      <Trophy className="h-6 w-6 text-emerald-400" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-black text-white">{rafflePendingWinner.viewer_username}</p>
+                      <p className="text-sm text-emerald-400 font-semibold mt-1">{rafflePendingWinner.slot_name}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            {/* Footer */}
+            {!raffleAnimating && rafflePendingWinner && (
+              <div className="px-6 py-4 border-t border-white/[0.06] flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  onClick={() => { setRafflePendingWinner(null); setRaffleCurrentName(""); startRaffleAnimation(); }}
+                  disabled={!canModify}
+                >
+                  Re-Roll
+                </Button>
+                <Button
+                  variant="success"
+                  className="gap-2"
+                  onClick={confirmRaffle}
+                  disabled={!canModify}
+                >
+                  <Save className="h-4 w-4" />
+                  Confirm &amp; Save
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ====== Settings Modal ====== */}
       {settingsOpen && (

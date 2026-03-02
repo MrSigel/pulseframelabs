@@ -118,11 +118,8 @@ function WagerBarSmallView({
   return (
     <div className="inline-block animate-fade-in-up">
       <div
-        className="rounded-lg overflow-hidden"
+        className="rounded-lg overflow-hidden overlay-card-sm"
         style={{
-          background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.2)",
-          boxShadow: "0 2px 16px rgba(0,0,0,0.5)",
           minWidth: "420px",
           padding: "10px 14px",
         }}

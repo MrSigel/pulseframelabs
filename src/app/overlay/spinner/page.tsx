@@ -149,11 +149,10 @@ function SpinnerOverlayContent() {
 
         {/* Outer decorative ring */}
         <div
-          className="absolute inset-0 rounded-full"
+          className="absolute inset-0 rounded-full overlay-spinner-ring"
           style={{
             background: "conic-gradient(from 0deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.06) 100%)",
             border: "2px solid rgba(255,255,255,0.06)",
-            boxShadow: "0 0 50px rgba(0,0,0,0.6), inset 0 0 25px rgba(0,0,0,0.3)",
           }}
         />
 
@@ -182,7 +181,7 @@ function SpinnerOverlayContent() {
 
         {/* Wheel */}
         <div
-          className="absolute rounded-full overflow-hidden"
+          className="absolute rounded-full overflow-hidden overlay-spinner-wheel"
           style={{
             top: 12,
             left: 12,
@@ -191,7 +190,6 @@ function SpinnerOverlayContent() {
             background: `conic-gradient(${conicStops})`,
             transform: `rotate(${rotation}deg)`,
             transition: spinning ? "transform 4.5s cubic-bezier(0.17, 0.67, 0.12, 0.99)" : "none",
-            boxShadow: "0 0 30px rgba(0,0,0,0.5), inset 0 0 35px rgba(0,0,0,0.25)",
             border: "2px solid rgba(255,255,255,0.1)",
           }}
         >
@@ -255,12 +253,7 @@ function SpinnerOverlayContent() {
       {/* Winner display */}
       {winner && (
         <div
-          className="animate-fade-in-up rounded-lg px-6 py-3 text-center"
-          style={{
-            background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)",
-            border: "1px solid rgba(59, 130, 246, 0.2)",
-            boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
-          }}
+          className="animate-fade-in-up rounded-lg px-6 py-3 text-center overlay-card"
         >
           <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">Winner</p>
           <p className="text-white font-bold text-lg">{winner}</p>

@@ -5,10 +5,8 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   X,
-  ArrowDownUp,
   Trophy,
   Play,
-  Zap,
   Flame,
   Monitor,
   Dice5,
@@ -46,10 +44,8 @@ interface NavItem {
 const overlayApps: NavItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Wager Bar", href: "/wager", icon: X },
-  { name: "Deposit/Withdrawals", href: "/deposit-withdrawals", icon: ArrowDownUp },
-  { name: "Personal Bests", href: "/personal-bests", icon: Trophy, comingSoon: true },
+  { name: "Personal Bests", href: "/personal-bests", icon: Trophy },
   { name: "Now Playing", href: "/now-playing", icon: Play, comingSoon: true },
-  { name: "Stream Points", href: "/stream-points", icon: Zap },
   { name: "Hotwords", href: "/hotwords", icon: Flame },
   { name: "Slot Requests", href: "/slot-requests", icon: Monitor },
   { name: "Spinner", href: "/spinner", icon: Dice5 },

@@ -77,11 +77,8 @@ function BalanceNormalView({
   return (
     <div className="inline-block animate-fade-in-up">
       <div
-        className="rounded-lg overflow-hidden space-y-2"
+        className="rounded-lg overflow-hidden space-y-2 overlay-card-sm"
         style={{
-          background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.2)",
-          boxShadow: "0 2px 16px rgba(0,0,0,0.5)",
           padding: "12px 18px",
           minWidth: "160px",
         }}

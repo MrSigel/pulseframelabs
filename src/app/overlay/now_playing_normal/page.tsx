@@ -42,11 +42,8 @@ function NowPlayingNormalContent() {
   return (
     <div className="inline-block animate-fade-in-up">
       <div
-        className="rounded-xl overflow-hidden"
+        className="rounded-xl overflow-hidden overlay-card"
         style={{
-          background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)",
-          border: "1px solid rgba(59, 130, 246, 0.2)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.5)",
           minWidth: "520px",
         }}
       >
@@ -66,8 +63,7 @@ function NowPlayingNormalContent() {
             )}
             {/* Gradient overlay on right edge */}
             <div
-              className="absolute inset-y-0 right-0 w-6"
-              style={{ background: "linear-gradient(to right, transparent, #0c1018)" }}
+              className="absolute inset-y-0 right-0 w-6 overlay-image-fade"
             />
           </div>
 
