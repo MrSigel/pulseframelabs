@@ -8,11 +8,12 @@ import { Label } from "@/components/ui/label";
 import { streamPointsConfig as spDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { Save, Gift, Play, Square, Users } from "lucide-react";
+import { Save, Gift, Play, Square, Users, Search, Inbox, ChevronLeft, ChevronRight, Coins } from "lucide-react";
 import { useTwitchBot } from "@/contexts/TwitchBotContext";
 import { createPointsDropHandler } from "@/lib/twitch/handlers";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
-import type { StreamPointsConfig } from "@/lib/supabase/types";
+import { streamViewers as svDb } from "@/lib/supabase/db";
+import type { StreamPointsConfig, StreamViewer } from "@/lib/supabase/types";
 
 export default function StreamPointsPage() {
   const { canModify } = useFeatureGate();
@@ -305,6 +306,143 @@ export default function StreamPointsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Viewer Points Table */}
+      <ViewerPointsTable />
     </div>
+  );
+}
+
+// ============================================================
+// Viewer Points Table
+// ============================================================
+
+function ViewerPointsTable() {
+  const { data: viewers } = useDbQuery<StreamViewer[]>(() => svDb.list(), []);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [perPage, setPerPage] = useState(10);
+
+  const filtered = (viewers ?? []).filter((v) =>
+    v.username.toLowerCase().includes(search.toLowerCase())
+  );
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const paginated = filtered.slice(page * perPage, (page + 1) * perPage);
+
+  // Reset page when search changes
+  useEffect(() => {
+    setPage(0);
+  }, [search]);
+
+  return (
+    <Card className="mt-6">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg text-white flex items-center gap-2">
+            <Coins className="h-5 w-5 text-primary" />
+            Viewer Points
+          </CardTitle>
+          <span className="text-xs text-muted-foreground">
+            {filtered.length} viewer{filtered.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by username..."
+            className="pl-9"
+          />
+        </div>
+
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+            <Inbox className="h-10 w-10 mb-3 opacity-40" />
+            <p className="text-sm font-medium">
+              {search ? "No viewers match your search" : "No viewers tracked yet"}
+            </p>
+            {!search && (
+              <p className="text-xs mt-1 opacity-60">
+                Viewers will appear here once they earn points in your stream.
+              </p>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Table */}
+            <div className="rounded-lg border border-border overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Username</th>
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">First Seen</th>
+                    <th className="text-right px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Points</th>
+                    <th className="text-left px-4 py-2.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Last Seen</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginated.map((v) => (
+                    <tr key={v.id} className="border-b border-border/50 hover:bg-muted/10 transition-colors">
+                      <td className="px-4 py-2.5 font-medium text-white">{v.username}</td>
+                      <td className="px-4 py-2.5 text-muted-foreground">
+                        {v.created_at ? new Date(v.created_at).toLocaleDateString() : "—"}
+                      </td>
+                      <td className="px-4 py-2.5 text-right font-bold text-primary">
+                        {(v.total_points ?? 0).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-2.5 text-muted-foreground">
+                        {v.last_seen ? new Date(v.last_seen).toLocaleDateString() : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center gap-2">
+                <select
+                  value={perPage}
+                  onChange={(e) => { setPerPage(Number(e.target.value)); setPage(0); }}
+                  className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
+                >
+                  <option value={10}>10 / page</option>
+                  <option value={25}>25 / page</option>
+                  <option value={50}>50 / page</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  Page {page + 1} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  disabled={page === 0}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  disabled={page >= totalPages - 1}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }

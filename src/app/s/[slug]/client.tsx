@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
 import type { StreamerPageSettings, CasinoDeal, StoreItem, StoreSettings } from "@/lib/supabase/types";
+import { PurchaseModal } from "./purchase-modal";
 
 type NavTab = "deals" | "store" | "about";
 
@@ -23,12 +24,14 @@ interface Props {
   deals: CasinoDeal[];
   storeItems: StoreItem[];
   storeSettings: StoreSettings | null;
+  streamerUserId: string;
 }
 
-export function StreamerPageClient({ page, deals, storeItems, storeSettings }: Props) {
+export function StreamerPageClient({ page, deals, storeItems, storeSettings, streamerUserId }: Props) {
   const accent = page.accent_color || "#c9a84c";
   const initial = (page.display_name || page.slug).charAt(0).toUpperCase();
   const [activeTab, setActiveTab] = useState<NavTab>("deals");
+  const [purchaseItem, setPurchaseItem] = useState<StoreItem | null>(null);
 
   const activeSocials = socialLinks.filter(
     (s) => page[s.key as keyof StreamerPageSettings]
@@ -260,6 +263,7 @@ export function StreamerPageClient({ page, deals, storeItems, storeSettings }: P
                             currency={storeSettings?.store_currency || "Points"}
                             accent={accent}
                             index={i}
+                            onBuy={() => setPurchaseItem(item)}
                           />
                         ))}
                     </div>
@@ -289,6 +293,7 @@ export function StreamerPageClient({ page, deals, storeItems, storeSettings }: P
                             currency={storeSettings?.store_currency || "Points"}
                             accent={accent}
                             index={i}
+                            onBuy={() => setPurchaseItem(item)}
                           />
                         ))}
                     </div>
@@ -430,6 +435,17 @@ export function StreamerPageClient({ page, deals, storeItems, storeSettings }: P
           Powered by Pulseframelabs
         </Link>
       </footer>
+
+      {/* Purchase Modal */}
+      {purchaseItem && (
+        <PurchaseModal
+          item={purchaseItem}
+          currency={storeSettings?.store_currency || "Points"}
+          accent={accent}
+          streamerUserId={streamerUserId}
+          onClose={() => setPurchaseItem(null)}
+        />
+      )}
     </div>
   );
 }
@@ -586,7 +602,7 @@ function DealCard({ deal, accent, index }: { deal: CasinoDeal; accent: string; i
 // Badge Card Component (for badge-type store items)
 // ============================================================
 
-function BadgeCard({ item, currency, accent, index }: { item: StoreItem; currency: string; accent: string; index: number }) {
+function BadgeCard({ item, currency, accent, index, onBuy }: { item: StoreItem; currency: string; accent: string; index: number; onBuy: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -637,12 +653,22 @@ function BadgeCard({ item, currency, accent, index }: { item: StoreItem; currenc
         <span className="text-sm font-bold" style={{ color: accent }}>
           {item.price_points} {currency}
         </span>
-        <span
-          className="px-3 py-1 rounded-md text-xs font-bold"
-          style={{ background: `${accent}20`, color: accent }}
-        >
-          Badge
-        </span>
+        {item.quantity_available === 0 ? (
+          <span
+            className="px-3 py-1 rounded-md text-xs font-bold"
+            style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.3)" }}
+          >
+            Sold Out
+          </span>
+        ) : (
+          <button
+            onClick={onBuy}
+            className="px-3 py-1 rounded-md text-xs font-bold transition-opacity hover:opacity-80"
+            style={{ background: accent, color: "#0b0e14", border: "none", cursor: "pointer" }}
+          >
+            Buy
+          </button>
+        )}
       </div>
     </motion.div>
   );
@@ -652,7 +678,7 @@ function BadgeCard({ item, currency, accent, index }: { item: StoreItem; currenc
 // Store Item Card Component
 // ============================================================
 
-function StoreItemCard({ item, currency, accent, index }: { item: StoreItem; currency: string; accent: string; index: number }) {
+function StoreItemCard({ item, currency, accent, index, onBuy }: { item: StoreItem; currency: string; accent: string; index: number; onBuy: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -685,13 +711,31 @@ function StoreItemCard({ item, currency, accent, index }: { item: StoreItem; cur
           <p className="text-xs text-white/40 mt-1 line-clamp-2 flex-1">{item.description}</p>
         )}
         <div className="flex items-center justify-between mt-3 pt-3 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-          <span className="text-sm font-bold" style={{ color: accent }}>
-            {item.price_points} {currency}
-          </span>
-          {item.quantity_available !== -1 && (
-            <span className="text-[10px] text-white/30">
-              {item.quantity_available} left
+          <div>
+            <span className="text-sm font-bold" style={{ color: accent }}>
+              {item.price_points} {currency}
             </span>
+            {item.quantity_available !== -1 && item.quantity_available > 0 && (
+              <span className="text-[10px] text-white/30 ml-2">
+                {item.quantity_available} left
+              </span>
+            )}
+          </div>
+          {item.quantity_available === 0 ? (
+            <span
+              className="px-3 py-1.5 rounded-lg text-xs font-bold"
+              style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.3)" }}
+            >
+              Sold Out
+            </span>
+          ) : (
+            <button
+              onClick={onBuy}
+              className="px-4 py-1.5 rounded-lg text-xs font-bold transition-opacity hover:opacity-90"
+              style={{ background: accent, color: "#0b0e14", border: "none", cursor: "pointer" }}
+            >
+              Buy
+            </button>
           )}
         </div>
       </div>

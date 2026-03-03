@@ -26,6 +26,7 @@ import {
   LayoutDashboard,
   Users,
   BarChart3,
+  Coins,
   type LucideIcon,
 } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -72,6 +73,7 @@ const stream: NavItem[] = [
   { name: "Twitch Bot", href: "/bot", icon: Bot },
   { name: "Streamer Page", href: "/streamer-page", icon: Globe },
   { name: "Store", href: "/store", icon: Store },
+  { name: "Stream Points", href: "/stream-points", icon: Coins },
   { name: "Loyalty", href: "/loyalty", icon: Star },
   { name: "Points Battle", href: "/points-battle", icon: Target },
   { name: "Settings", href: "/settings", icon: Settings },

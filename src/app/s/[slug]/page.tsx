@@ -67,6 +67,7 @@ export default async function StreamerPage({ params }: Props) {
       deals={deals ?? []}
       storeItems={storeItems ?? []}
       storeSettings={storeSettings}
+      streamerUserId={page.user_id}
     />
   );
 }
