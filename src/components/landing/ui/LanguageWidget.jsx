@@ -104,7 +104,7 @@ function FlagES() {
 
 const flagComponents = { en: FlagEN, de: FlagDE, it: FlagIT, fr: FlagFR, tr: FlagTR, pt: FlagPT, es: FlagES };
 
-export default function LanguageWidget() {
+export default function LanguageWidget({ compact = false }) {
   const { lang, setLang } = useLanguage();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -134,9 +134,10 @@ export default function LanguageWidget() {
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
             style={{
               position: 'absolute',
-              bottom: '100%',
+              top: compact ? 'calc(100% + 8px)' : 'auto',
+              bottom: compact ? 'auto' : '100%',
               right: 0,
-              marginBottom: '8px',
+              marginBottom: compact ? 0 : '8px',
               minWidth: '180px',
               padding: '6px',
               borderRadius: '10px',
@@ -217,15 +218,15 @@ export default function LanguageWidget() {
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          padding: '10px 16px',
-          borderRadius: '8px',
+          gap: compact ? '6px' : '8px',
+          padding: compact ? '7px 12px' : '10px 16px',
+          borderRadius: compact ? '6px' : '8px',
           border: '1px solid var(--border-gold)',
           background: 'var(--bg-elevated)',
-          boxShadow: 'var(--shadow-md)',
+          boxShadow: compact ? 'none' : 'var(--shadow-md)',
           cursor: 'pointer',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
+          backdropFilter: compact ? 'none' : 'blur(20px)',
+          WebkitBackdropFilter: compact ? 'none' : 'blur(20px)',
         }}
       >
         <span style={{

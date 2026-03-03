@@ -7,7 +7,6 @@ import Navigation from '@/components/landing/layout/Navigation';
 import NoiseOverlay from '@/components/landing/layout/NoiseOverlay';
 import { useState, useCallback } from 'react';
 import AnimatedBackground3D from '@/components/landing/background/AnimatedBackground3D';
-import WidgetStack from '@/components/landing/ui/WidgetStack';
 import Footer from '@/components/landing/layout/Footer';
 import HeroSection from '@/components/landing/sections/HeroSection';
 import MarqueeSection from '@/components/landing/sections/MarqueeSection';
@@ -33,7 +32,7 @@ export default function LandingPage() {
       <div data-theme={theme.theme}>
         {bgAnimation && <AnimatedBackground3D />}
         <NoiseOverlay />
-        <Navigation theme={theme} />
+        <Navigation theme={theme} onAnimationChange={handleAnimationChange} />
 
         <main>
           <HeroSection />
@@ -64,7 +63,6 @@ export default function LandingPage() {
         </main>
 
         <Footer />
-        <WidgetStack theme={theme} onAnimationChange={handleAnimationChange} />
       </div>
     </LanguageProvider>
   );

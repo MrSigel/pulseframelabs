@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { useLanguage } from '@/context/LanguageContext';
+import LanguageWidget from '@/components/landing/ui/LanguageWidget';
+import ThemeToggleWidget from '@/components/landing/ui/ThemeToggleWidget';
+import AnimationToggle from '@/components/landing/ui/AnimationToggle';
 import ToolModal from '@/components/landing/tools/ToolModal';
 import RandomSlotGenerator from '@/components/landing/tools/RandomSlotGenerator';
 import SlotVolatilityComparer from '@/components/landing/tools/SlotVolatilityComparer';
@@ -47,13 +50,16 @@ const toolIcons = {
   setupGuide: BookIcon,
 };
 
-export default function Navigation({ theme }) {
+const FX_STORAGE_KEY = 'pfl-bg-animation';
+
+export default function Navigation({ theme, onAnimationChange = null }) {
   const { t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [toolsDropdownOpen, setToolsDropdownOpen] = useState(false);
   const [mobileToolsExpanded, setMobileToolsExpanded] = useState(false);
   const [activeToolModal, setActiveToolModal] = useState(null);
+  const [animationEnabled, setAnimationEnabled] = useState(false);
   const toolsDropdownRef = useRef(null);
 
   const navLinksLeft = [
@@ -86,6 +92,25 @@ export default function Navigation({ theme }) {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // FX animation state from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem(FX_STORAGE_KEY);
+    if (stored !== null) {
+      const val = stored === 'true';
+      setAnimationEnabled(val);
+      onAnimationChange?.(val);
+    } else {
+      onAnimationChange?.(false);
+    }
+  }, []);
+
+  function toggleAnimation() {
+    const next = !animationEnabled;
+    setAnimationEnabled(next);
+    localStorage.setItem(FX_STORAGE_KEY, String(next));
+    onAnimationChange?.(next);
+  }
 
   const handleClick = (e, href) => {
     e.preventDefault();
@@ -273,6 +298,13 @@ export default function Navigation({ theme }) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* Nav widgets — desktop */}
+            <div className="hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <LanguageWidget compact />
+              <ThemeToggleWidget preference={theme.preference} onCycle={theme.cycleTheme} compact />
+              <AnimationToggle enabled={animationEnabled} onToggle={toggleAnimation} compact />
+            </div>
+
             <a
               href="/login"
               className="hide-mobile"
@@ -422,11 +454,24 @@ export default function Navigation({ theme }) {
               </AnimatePresence>
             </motion.div>
 
+            {/* Nav widgets — mobile */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.35, duration: 0.5 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}
+            >
+              <LanguageWidget compact />
+              <ThemeToggleWidget preference={theme.preference} onCycle={theme.cycleTheme} compact />
+              <AnimationToggle enabled={animationEnabled} onToggle={toggleAnimation} compact />
+            </motion.div>
+
             <motion.a
               href="/login"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
+              transition={{ delay: 0.45, duration: 0.5 }}
               style={{
                 fontSize: '0.8rem',
                 fontWeight: 600,

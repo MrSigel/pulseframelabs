@@ -18,7 +18,7 @@ const icons = {
   ),
 };
 
-export default function AnimationToggle({ enabled, onToggle }) {
+export default function AnimationToggle({ enabled, onToggle, compact = false }) {
   return (
     <motion.button
       onClick={onToggle}
@@ -29,15 +29,15 @@ export default function AnimationToggle({ enabled, onToggle }) {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '8px',
-        padding: '10px 16px',
-        borderRadius: '8px',
+        gap: compact ? '6px' : '8px',
+        padding: compact ? '7px 12px' : '10px 16px',
+        borderRadius: compact ? '6px' : '8px',
         border: '1px solid var(--border-gold)',
         background: 'var(--bg-elevated)',
-        boxShadow: 'var(--shadow-md)',
+        boxShadow: compact ? 'none' : 'var(--shadow-md)',
         cursor: 'pointer',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+        backdropFilter: compact ? 'none' : 'blur(20px)',
+        WebkitBackdropFilter: compact ? 'none' : 'blur(20px)',
       }}
     >
       <motion.span
