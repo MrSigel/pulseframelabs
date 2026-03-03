@@ -679,7 +679,7 @@ export default function NowPlayingPage() {
             {/* Body */}
             <div className="px-6 py-5 space-y-5">
               {/* Overlay Link */}
-              <OverlayLink url={overlayUrls[overlayTab] || ""} obsSize={{ normal: "560 × 180", small: "200 × 70", playing_on: "200 × 70", playing_on_image: "560 × 180" }[overlayTab]} />
+              <OverlayLink url={overlayUrls[overlayTab] || ""} obsSize={{ normal: "640 × 240", small: "280 × 140", playing_on: "280 × 140", playing_on_image: "640 × 240" }[overlayTab]} />
 
               {/* Overlay Preview */}
               <div>

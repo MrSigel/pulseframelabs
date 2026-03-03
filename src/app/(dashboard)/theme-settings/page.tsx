@@ -187,12 +187,20 @@ export default function ThemeSettingsPage() {
     setSelectedPreset("Your Custom");
   };
 
-  const previewStyle = useMemo(() => ({
-    borderRadius: `${borderRadius}px`,
-    background: "linear-gradient(135deg, #0c1018 0%, #111827 50%, #0c1018 100%)",
-    border: borderEnabled ? `1px solid ${highlightColor}33` : "none",
-    boxShadow: shadowEnabled ? `0 4px 24px rgba(0,0,0,0.5), 0 0 20px ${highlightColor}15` : "none",
-  }), [borderRadius, borderEnabled, shadowEnabled, highlightColor]);
+  const previewStyle = useMemo(() => {
+    const r = parseInt(bgColor.slice(1, 3), 16) || 26;
+    const g = parseInt(bgColor.slice(3, 5), 16) || 31;
+    const b = parseInt(bgColor.slice(5, 7), 16) || 46;
+    const a = bgOpacity / 100;
+    return {
+      borderRadius: `${borderRadius}px`,
+      background: `rgba(${r}, ${g}, ${b}, ${a})`,
+      border: borderEnabled ? `1px solid ${highlightColor}33` : "none",
+      boxShadow: shadowEnabled ? `0 4px 24px rgba(0,0,0,0.5), 0 0 20px ${highlightColor}15` : "none",
+      fontFamily: fontFamily,
+      color: textColor,
+    };
+  }, [borderRadius, borderEnabled, shadowEnabled, highlightColor, bgColor, bgOpacity, fontFamily, textColor]);
 
   return (
     <div>
@@ -387,6 +395,7 @@ export default function ThemeSettingsPage() {
                 style={previewStyle}
                 iconColor={iconColor}
                 highlightColor={highlightColor}
+                textColor={textColor}
               />
             </div>
           </div>
@@ -403,30 +412,45 @@ function PreviewRenderer({
   style,
   iconColor,
   highlightColor,
+  textColor,
 }: {
   overlay: string;
   style: React.CSSProperties;
   iconColor: string;
   highlightColor: string;
+  textColor: string;
 }) {
   const base = { ...style, minWidth: "280px" } as React.CSSProperties;
+
+  // Theme color helpers
+  const hl = highlightColor;
+  const ic = iconColor;
+  const hlR = parseInt(hl.slice(1, 3), 16) || 0;
+  const hlG = parseInt(hl.slice(3, 5), 16) || 0;
+  const hlB = parseInt(hl.slice(5, 7), 16) || 0;
+  const icR = parseInt(ic.slice(1, 3), 16) || 0;
+  const icG = parseInt(ic.slice(3, 5), 16) || 0;
+  const icB = parseInt(ic.slice(5, 7), 16) || 0;
+  const hlA = (a: number) => `rgba(${hlR},${hlG},${hlB},${a})`;
+  const icA = (a: number) => `rgba(${icR},${icG},${icB},${a})`;
+  
 
   /* ── Wager Bar Small ── */
   if (overlay === "wager_bar_small") {
     return (
       <div className="overflow-hidden" style={{ ...base, minWidth: "380px", padding: "10px 14px" }}>
         <div className="flex items-center justify-between mb-2">
-          <span className="font-bold text-xs tracking-wide" style={{ color: "#ef4444" }}>WAGER: $0</span>
+          <span className="font-bold text-xs tracking-wide" style={{ color: hl }}>WAGER: $0</span>
           <div className="flex items-center gap-3 text-[11px]">
             <span style={{ color: "#94a3b8" }}>LEFT: <span className="text-white font-semibold">$0</span></span>
-            <span className="font-semibold px-2 py-0.5 rounded text-[10px]" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444" }}>0.0%</span>
+            <span className="font-semibold px-2 py-0.5 rounded text-[10px]" style={{ background: hlA(0.15), color: hl }}>0.0%</span>
           </div>
         </div>
         <div className="h-1 rounded-full mb-3 overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
-          <div className="h-full rounded-full" style={{ width: "0%", background: "linear-gradient(90deg, #ef4444, #f97316)" }} />
+          <div className="h-full rounded-full" style={{ width: "0%", background: `linear-gradient(90deg, ${hl}, ${ic})` }} />
         </div>
         <div className="flex items-center gap-3">
-          <span className="font-bold text-[11px] tracking-wider px-2 py-0.5 rounded" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>CASINONAME</span>
+          <span className="font-bold text-[11px] tracking-wider px-2 py-0.5 rounded" style={{ background: hlA(0.15), color: hl, border: `1px solid ${hlA(0.2)}` }}>CASINONAME</span>
           <div className="flex items-center gap-1.5">
             <span className="text-[10px]" style={{ color: "#22c55e" }}>&#9654;</span>
             <span className="text-white text-xs font-medium">Sweet Bonanza</span>
@@ -434,7 +458,7 @@ function PreviewRenderer({
           </div>
         </div>
         <div className="flex items-center gap-4 mt-2 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <span className="text-xs font-semibold" style={{ color: "#ef4444" }}>$0</span>
+          <span className="text-xs font-semibold" style={{ color: hl }}>$0</span>
           <div className="flex items-center gap-2 text-[11px]" style={{ color: "#64748b" }}>
             <span className="text-amber-400 font-semibold">0.0X</span>
             <span className="text-slate-700">|</span>
@@ -451,17 +475,17 @@ function PreviewRenderer({
   if (overlay === "wager_bar_normal") {
     return (
       <div className="overflow-hidden rounded-xl" style={{ ...base, minWidth: "400px" }}>
-        <div className="px-5 py-2.5 flex items-center justify-center" style={{ background: "linear-gradient(90deg, rgba(239,68,68,0.08), rgba(239,68,68,0.18), rgba(239,68,68,0.08))", borderBottom: "1px solid rgba(239,68,68,0.12)" }}>
+        <div className="px-5 py-2.5 flex items-center justify-center" style={{ background: `linear-gradient(90deg, ${hlA(0.08)}, ${hlA(0.18)}, ${hlA(0.08)})`, borderBottom: `1px solid ${hlA(0.12)}` }}>
           <span className="font-bold text-sm tracking-[0.15em]" style={{ background: "linear-gradient(90deg, #fca5a5, #ffffff, #fca5a5)", backgroundClip: "text", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundSize: "200% 100%", animation: "shimmer 3s linear infinite" }}>PULSEFRAMELABS.COM</span>
         </div>
         <div className="px-5 py-4 space-y-3">
           <div>
             <div className="flex items-center justify-center gap-3 mb-2.5">
-              <span className="font-bold text-sm px-3 py-1 rounded" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>$0 / $0</span>
-              <span className="font-semibold text-sm px-2.5 py-1 rounded" style={{ background: "rgba(239,68,68,0.12)", color: "#ef4444" }}>0.0%</span>
+              <span className="font-bold text-sm px-3 py-1 rounded" style={{ background: hlA(0.15), color: hl, border: `1px solid ${hlA(0.2)}` }}>$0 / $0</span>
+              <span className="font-semibold text-sm px-2.5 py-1 rounded" style={{ background: hlA(0.12), color: hl }}>0.0%</span>
             </div>
             <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.05)" }}>
-              <div className="h-full rounded-full" style={{ width: "0%", background: "linear-gradient(90deg, #ef4444, #f97316, #eab308)" }} />
+              <div className="h-full rounded-full" style={{ width: "0%", background: `linear-gradient(90deg, ${hl}, ${ic}, ${hl})` }} />
             </div>
           </div>
           <div className="rounded-lg p-3 space-y-1.5" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
@@ -495,7 +519,7 @@ function PreviewRenderer({
           <span className="text-white font-bold text-sm">$0</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center h-6 w-6 rounded-full text-xs font-bold" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}>&minus;</div>
+          <div className="flex items-center justify-center h-6 w-6 rounded-full text-xs font-bold" style={{ background: hlA(0.15), color: hl, border: `1px solid ${hlA(0.25)}` }}>&minus;</div>
           <span className="text-white font-bold text-sm">$0</span>
         </div>
       </div>
@@ -511,7 +535,7 @@ function PreviewRenderer({
           <span className="text-white font-bold text-base">$0</span>
         </div>
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center h-7 w-7 rounded-full text-sm font-bold" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}>&minus;</div>
+          <div className="flex items-center justify-center h-7 w-7 rounded-full text-sm font-bold" style={{ background: hlA(0.15), color: hl, border: `1px solid ${hlA(0.25)}` }}>&minus;</div>
           <span className="text-white font-bold text-base">$0</span>
         </div>
         <div className="flex items-center gap-2.5">
@@ -531,7 +555,7 @@ function PreviewRenderer({
           <span className="text-white font-bold text-lg">$0</span>
         </div>
         <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center h-8 w-8 rounded-full text-base font-bold" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}>&minus;</div>
+          <div className="flex items-center justify-center h-8 w-8 rounded-full text-base font-bold" style={{ background: hlA(0.15), color: hl, border: `1px solid ${hlA(0.25)}` }}>&minus;</div>
           <span className="text-white font-bold text-lg">$0</span>
         </div>
         <div className="flex items-center gap-2.5">
@@ -548,25 +572,25 @@ function PreviewRenderer({
       <div className="overflow-hidden" style={{ ...base, minWidth: "340px" }}>
         <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.2)" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: hlA(0.12), border: `1px solid ${hlA(0.2)}` }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={hl} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             </div>
             <div>
-              <span className="font-bold text-sm block" style={{ background: "linear-gradient(90deg, #ef4444, #f97316, #ef4444)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>%TITLE%</span>
+              <span className="font-bold text-sm block" style={{ background: `linear-gradient(90deg, ${hl}, ${ic}, ${hl})`, backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>%TITLE%</span>
               <span className="text-[10px] font-semibold text-slate-500">HUNT #000</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-md flex items-center justify-center" style={{ background: "rgba(239,68,68,0.1)" }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="#ef4444" stroke="none"><rect x="2" y="6" width="8" height="12" rx="1"/><rect x="14" y="6" width="8" height="12" rx="1"/><circle cx="6" cy="10" r="1" fill="#0c1018"/><circle cx="18" cy="10" r="1" fill="#0c1018"/></svg>
+            <div className="h-6 w-6 rounded-md flex items-center justify-center" style={{ background: hlA(0.1) }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill={hl} stroke="none"><rect x="2" y="6" width="8" height="12" rx="1"/><rect x="14" y="6" width="8" height="12" rx="1"/><circle cx="6" cy="10" r="1" fill="#0c1018"/><circle cx="18" cy="10" r="1" fill="#0c1018"/></svg>
             </div>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.15)" }}>0/0</span>
+            <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: hlA(0.1), color: hl, border: `1px solid ${hlA(0.15)}` }}>0/0</span>
           </div>
         </div>
         <div className="grid grid-cols-4 gap-px" style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
           {[{ icon: "grid", v: "$0K" }, { icon: "play", v: "$0" }, { icon: "chart", v: "0X+" }, { icon: "x", v: "0X" }].map((s, i) => (
             <div key={i} className="flex flex-col items-center py-2.5 gap-1" style={{ background: "linear-gradient(180deg, rgba(15,21,33,0.8) 0%, rgba(12,16,24,0.9) 100%)" }}>
-              <div style={{ color: "#ef4444" }}>
+              <div style={{ color: hl }}>
                 {s.icon === "grid" && <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>}
                 {s.icon === "play" && <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>}
                 {s.icon === "chart" && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>}
@@ -578,11 +602,11 @@ function PreviewRenderer({
         </div>
         <div className="px-4 py-3 space-y-1.5">
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.04)" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="none"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7L2 9.4h7.6z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill={ic} stroke="none"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7L2 9.4h7.6z"/></svg>
             <span className="text-slate-400 text-xs font-semibold">0.</span>
           </div>
           <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.04)" }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="none"><path d="M12 2C8 6 4 9.5 4 13a8 8 0 0016 0c0-3.5-4-7-8-11z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill={hl} stroke="none"><path d="M12 2C8 6 4 9.5 4 13a8 8 0 0016 0c0-3.5-4-7-8-11z"/></svg>
             <span className="text-slate-400 text-xs font-semibold">0.</span>
           </div>
         </div>
@@ -594,12 +618,12 @@ function PreviewRenderer({
   if (overlay === "bonushunt_small") {
     return (
       <div className="overflow-hidden flex items-center" style={{ ...base, minWidth: "auto" }}>
-        <div className="h-[52px] w-[52px] shrink-0 flex items-center justify-center" style={{ background: "rgba(239,68,68,0.08)", borderRight: "1px solid rgba(255,255,255,0.04)" }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <div className="h-[52px] w-[52px] shrink-0 flex items-center justify-center" style={{ background: hlA(0.08), borderRight: "1px solid rgba(255,255,255,0.04)" }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={hl} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
         </div>
         <div className="px-3 py-2">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-xs" style={{ background: "linear-gradient(90deg, #ef4444, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>%TITLE%</span>
+            <span className="font-bold text-xs" style={{ background: `linear-gradient(90deg, ${hl}, ${ic})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>%TITLE%</span>
             <span className="text-[10px] font-semibold text-slate-600">HUNT #000</span>
           </div>
           <p className="text-[10px] font-semibold mt-0.5" style={{ color: "#64748b" }}>Slots: 0/0</p>
@@ -614,11 +638,11 @@ function PreviewRenderer({
       <div className="overflow-hidden" style={{ ...base, minWidth: "auto" }}>
         <div className="flex items-center gap-4 px-4 py-3">
           <div className="flex items-center gap-2.5 shrink-0">
-            <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.2)" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <div className="h-7 w-7 rounded-lg flex items-center justify-center" style={{ background: hlA(0.12), border: `1px solid ${hlA(0.2)}` }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={hl} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
             </div>
             <div>
-              <span className="font-bold text-xs block" style={{ background: "linear-gradient(90deg, #ef4444, #f97316, #ef4444)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>%TITLE%</span>
+              <span className="font-bold text-xs block" style={{ background: `linear-gradient(90deg, ${hl}, ${ic}, ${hl})`, backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>%TITLE%</span>
               <span className="text-[9px] font-semibold text-slate-500">HUNT #000</span>
             </div>
           </div>
@@ -632,7 +656,7 @@ function PreviewRenderer({
             ))}
           </div>
           <div className="h-8 w-px" style={{ background: "rgba(255,255,255,0.06)" }} />
-          <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.15)" }}>0/0</span>
+          <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ background: hlA(0.1), color: hl, border: `1px solid ${hlA(0.15)}` }}>0/0</span>
         </div>
       </div>
     );
@@ -643,12 +667,12 @@ function PreviewRenderer({
     return (
       <div className="overflow-hidden" style={{ ...base, minWidth: "300px" }}>
         <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <span className="font-bold text-sm" style={{ background: "linear-gradient(90deg, #ef4444, #f97316, #ef4444)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>%TITLE%</span>
+          <span className="font-bold text-sm" style={{ background: `linear-gradient(90deg, ${hl}, ${ic}, ${hl})`, backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>%TITLE%</span>
           <span className="text-[10px] font-semibold text-slate-500">TOP / WORSE</span>
         </div>
         <div className="px-4 py-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
           <div className="flex items-center gap-2 mb-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="none"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7L2 9.4h7.6z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill={ic} stroke="none"><path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7L2 9.4h7.6z"/></svg>
             <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400/80">Top Wins</span>
           </div>
           <div className="space-y-1">
@@ -662,7 +686,7 @@ function PreviewRenderer({
         </div>
         <div className="px-4 py-2.5">
           <div className="flex items-center gap-2 mb-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="none"><path d="M12 2C8 6 4 9.5 4 13a8 8 0 0016 0c0-3.5-4-7-8-11z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill={hl} stroke="none"><path d="M12 2C8 6 4 9.5 4 13a8 8 0 0016 0c0-3.5-4-7-8-11z"/></svg>
             <span className="text-[10px] font-bold uppercase tracking-wider text-red-400/80">Worst</span>
           </div>
           <div className="space-y-1">
@@ -689,7 +713,7 @@ function PreviewRenderer({
             </div>
             <span className="text-[11px] font-bold uppercase tracking-wider text-violet-400/80">Guess Balance</span>
           </div>
-          <span className="font-bold text-xs" style={{ background: "linear-gradient(90deg, #ef4444, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>%TITLE%</span>
+          <span className="font-bold text-xs" style={{ background: `linear-gradient(90deg, ${hl}, ${ic})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>%TITLE%</span>
         </div>
         <div className="px-4 py-6 text-center">
           <p className="text-[9px] uppercase tracking-widest text-slate-600 mb-1">Current Balance</p>
@@ -714,7 +738,7 @@ function PreviewRenderer({
           <div className="flex-1 flex items-stretch divide-x divide-white/[0.06]">
             <div className="flex-1 px-3.5 py-3.5 flex flex-col justify-center">
               <div className="flex items-center gap-1.5 mb-1">
-                <span className="text-[9px]" style={{ color: "#ef4444" }}>&#9654;</span>
+                <span className="text-[9px]" style={{ color: hl }}>&#9654;</span>
                 <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: "#94a3b8" }}>CURRENT GAME</span>
               </div>
               <p className="text-white font-bold text-xs leading-tight">Sweet Bonanza</p>
@@ -722,8 +746,8 @@ function PreviewRenderer({
             </div>
             <div className="flex-1 px-3.5 py-3.5 flex flex-col justify-center">
               <div className="flex items-center gap-1.5 mb-1.5">
-                <div className="h-3.5 w-3.5 rounded-full flex items-center justify-center text-[7px] font-bold" style={{ background: "rgba(59,130,246,0.2)", color: "#3b82f6" }}>i</div>
-                <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: "#3b82f6" }}>INFO</span>
+                <div className="h-3.5 w-3.5 rounded-full flex items-center justify-center text-[7px] font-bold" style={{ background: icA(0.2), color: ic }}>i</div>
+                <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: ic }}>INFO</span>
               </div>
               <div className="space-y-0.5 text-[10px]">
                 <div className="flex justify-between"><span style={{ color: "#64748b" }}>POTENTIAL</span><span className="text-white font-bold">21100X</span></div>
@@ -733,8 +757,8 @@ function PreviewRenderer({
             </div>
             <div className="flex-1 px-3.5 py-3.5 flex flex-col justify-center">
               <div className="flex items-center gap-1.5 mb-1.5">
-                <div className="h-3.5 w-3.5 rounded-full flex items-center justify-center text-[7px]" style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444" }}>&#9679;</div>
-                <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: "#ef4444" }}>PERSONAL RECORD</span>
+                <div className="h-3.5 w-3.5 rounded-full flex items-center justify-center text-[7px]" style={{ background: hlA(0.2), color: hl }}>&#9679;</div>
+                <span className="text-[9px] font-bold tracking-widest uppercase" style={{ color: hl }}>PERSONAL RECORD</span>
               </div>
               <div className="space-y-0.5 text-[10px]">
                 <div className="flex justify-between"><span style={{ color: "#64748b" }}>WIN</span><span className="text-white font-bold">0$</span></div>
@@ -759,7 +783,7 @@ function PreviewRenderer({
         </div>
         <div className="px-3 py-2">
           <div className="flex items-center gap-1.5">
-            <span className="text-[9px]" style={{ color: "#ef4444" }}>&#9654;</span>
+            <span className="text-[9px]" style={{ color: hl }}>&#9654;</span>
             <span className="text-white font-bold text-xs">Sweet Bonanza</span>
           </div>
           <p className="text-[10px] font-semibold mt-0.5" style={{ color: "#64748b" }}>PRAGMATIC PLAY</p>
@@ -773,7 +797,7 @@ function PreviewRenderer({
     return (
       <div className="overflow-hidden" style={{ ...base, minWidth: "260px" }}>
         <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={ic} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
           <span className="text-[10px] font-bold text-white uppercase tracking-wider">Chat</span>
         </div>
         <div className="px-3 py-3 space-y-2">
@@ -789,7 +813,7 @@ function PreviewRenderer({
     return (
       <div className="overflow-hidden" style={{ ...base, minWidth: "320px" }}>
         <div className="flex items-center gap-2.5 px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={ic} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
           <span className="text-xs font-bold text-white uppercase tracking-wider">Live Chat</span>
           <div className="ml-auto flex items-center gap-1.5">
             <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
@@ -816,16 +840,16 @@ function PreviewRenderer({
   /* ── Hotwords ── */
   if (overlay === "hotwords") {
     const colors = [
-      { bg: "rgba(239,68,68,0.15)", border: "rgba(239,68,68,0.25)", text: "#ef4444" },
+      { bg: hlA(0.15), border: hlA(0.25), text: hl },
       { bg: "rgba(16,185,129,0.15)", border: "rgba(16,185,129,0.25)", text: "#10b981" },
-      { bg: "rgba(59,130,246,0.15)", border: "rgba(59,130,246,0.25)", text: "#3b82f6" },
-      { bg: "rgba(245,158,11,0.15)", border: "rgba(245,158,11,0.25)", text: "#f59e0b" },
+      { bg: icA(0.15), border: icA(0.25), text: ic },
+      { bg: icA(0.15), border: icA(0.25), text: ic },
       { bg: "rgba(139,92,246,0.15)", border: "rgba(139,92,246,0.25)", text: "#8b5cf6" },
     ];
     return (
       <div className="overflow-hidden" style={{ ...base, padding: "16px 22px" }}>
         <div className="mb-3 pb-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <span className="font-bold text-sm tracking-widest" style={{ background: "linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>HOT WORDS</span>
+          <span className="font-bold text-sm tracking-widest" style={{ background: `linear-gradient(90deg, ${ic}, ${hl}, ${ic})`, backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>HOT WORDS</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {["GG", "HYPE", "LET'S GO", "WIN", "CLUTCH"].map((w, i) => {
@@ -843,17 +867,17 @@ function PreviewRenderer({
       <div className="overflow-hidden" style={{ ...base, minWidth: "320px" }}>
         <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-md flex items-center justify-center" style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.2)" }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+            <div className="h-6 w-6 rounded-md flex items-center justify-center" style={{ background: hlA(0.15), border: `1px solid ${hlA(0.2)}` }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={hl} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
             </div>
-            <span className="font-bold text-sm tracking-wide" style={{ background: "linear-gradient(90deg, #ef4444, #f97316, #ef4444)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>!SR SLOT</span>
+            <span className="font-bold text-sm tracking-wide" style={{ background: `linear-gradient(90deg, ${hl}, ${ic}, ${hl})`, backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>!SR SLOT</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-semibold" style={{ color: "#64748b" }}>Participants</span>
-            <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.15)" }}>0</span>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: hlA(0.1), color: hl, border: `1px solid ${hlA(0.15)}` }}>0</span>
           </div>
         </div>
-        <div className="px-4 py-3 min-h-[100px]" style={{ borderTop: "1px solid rgba(239,68,68,0.08)" }}>
+        <div className="px-4 py-3 min-h-[100px]" style={{ borderTop: `1px solid ${hlA(0.08)}` }}>
           <div className="flex items-center justify-center h-[80px]">
             <span className="text-xs text-slate-600">Waiting for requests...</span>
           </div>
@@ -867,7 +891,7 @@ function PreviewRenderer({
     return (
       <div className="overflow-hidden" style={{ ...base, minWidth: "320px" }}>
         <div className="px-5 pt-4 pb-2 text-center">
-          <span className="font-black text-base tracking-wider" style={{ background: "linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>SLOT BATTLE</span>
+          <span className="font-black text-base tracking-wider" style={{ background: `linear-gradient(90deg, ${ic}, ${hl}, ${ic})`, backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>SLOT BATTLE</span>
           <div className="flex items-center justify-between mt-1.5">
             <span className="text-[10px] font-bold text-slate-400">BONUS <span className="text-white">0/0</span></span>
             <span className="text-[10px] font-bold text-slate-400">START <span className="text-white">0$</span></span>
@@ -875,9 +899,9 @@ function PreviewRenderer({
         </div>
         <div className="px-4 py-3">
           <div className="flex items-center gap-2">
-            <div className="flex-1 rounded-lg px-3 py-2.5 flex items-center gap-2" style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.12), rgba(239,68,68,0.04))", border: "1px solid rgba(239,68,68,0.2)" }}>
-              <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.25)" }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            <div className="flex-1 rounded-lg px-3 py-2.5 flex items-center gap-2" style={{ background: `linear-gradient(135deg, ${hlA(0.12)}, ${hlA(0.04)})`, border: `1px solid ${hlA(0.2)}` }}>
+              <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0" style={{ background: hlA(0.15), border: `1px solid ${hlA(0.25)}` }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={hl} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
               </div>
               <div><span className="text-white font-bold text-xs block">Slot</span><span className="text-[9px] text-slate-500">Sub</span><span className="text-[9px] text-slate-500 block">Provider</span></div>
             </div>
@@ -912,22 +936,22 @@ function PreviewRenderer({
       <div className="overflow-hidden" style={{ ...base, minWidth: "310px" }}>
         <div className="px-5 pt-5 pb-3 text-center">
           <div className="flex items-center justify-center gap-2.5 mb-1">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-            <span className="font-black text-base tracking-wide" style={{ background: "linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>SLOT BATTLE</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ic} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            <span className="font-black text-base tracking-wide" style={{ background: `linear-gradient(90deg, ${ic}, ${hl}, ${ic})`, backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>SLOT BATTLE</span>
           </div>
           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">TOURNAMENT FINISHED</span>
         </div>
         <div className="px-5 pb-4">
-          <div className="relative rounded-lg overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0.05) 100%)", border: "1px solid rgba(239,68,68,0.25)", boxShadow: "0 0 20px rgba(239,68,68,0.1)" }}>
+          <div className="relative rounded-lg overflow-hidden" style={{ background: `linear-gradient(135deg, ${hlA(0.15)} 0%, ${hlA(0.05)} 100%)`, border: `1px solid ${hlA(0.25)}`, boxShadow: "0 0 20px rgba(239,68,68,0.1)" }}>
             <div className="flex items-center gap-3 px-4 py-3">
-              <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, #78350f, #92400e)", border: "2px solid rgba(245,158,11,0.4)", boxShadow: "0 0 12px rgba(245,158,11,0.2)" }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b" stroke="none"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+              <div className="h-10 w-10 rounded-full flex items-center justify-center shrink-0" style={{ background: "linear-gradient(135deg, #78350f, #92400e)", border: `2px solid ${icA(0.4)}`, boxShadow: "0 0 12px rgba(245,158,11,0.2)" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill={ic} stroke="none"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
               </div>
               <div className="flex-1">
                 <span className="text-white font-bold text-sm block">WINNER</span>
                 <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">HIGHEST X-FACTOR</span>
               </div>
-              <div className="px-2.5 py-1 rounded-md text-xs font-black" style={{ background: "rgba(239,68,68,0.15)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>0X</div>
+              <div className="px-2.5 py-1 rounded-md text-xs font-black" style={{ background: hlA(0.15), color: hl, border: `1px solid ${hlA(0.2)}` }}>0X</div>
             </div>
           </div>
         </div>
@@ -944,8 +968,8 @@ function PreviewRenderer({
       <div className="overflow-hidden" style={{ ...base, minWidth: "420px" }}>
         <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-2">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-            <span className="font-bold text-sm" style={{ background: "linear-gradient(90deg, #f59e0b, #ef4444)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>TOURNAMENT</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={ic} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            <span className="font-bold text-sm" style={{ background: `linear-gradient(90deg, ${ic}, ${hl})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>TOURNAMENT</span>
           </div>
           <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">8 Players &middot; 3 Rounds</span>
         </div>
@@ -972,8 +996,8 @@ function PreviewRenderer({
       <div className="overflow-hidden" style={{ ...base, minWidth: "360px" }}>
         <div className="px-5 pt-4 pb-3 text-center">
           <div className="flex items-center justify-center gap-2 mb-1">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-            <span className="font-black text-base tracking-wider" style={{ background: "linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b)", backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>DUEL</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={ic} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            <span className="font-black text-base tracking-wider" style={{ background: `linear-gradient(90deg, ${ic}, ${hl}, ${ic})`, backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", animation: "shimmer 3s ease-in-out infinite" }}>DUEL</span>
           </div>
           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">2 Players</span>
         </div>

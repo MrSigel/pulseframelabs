@@ -287,7 +287,7 @@ export default function TournamentsPage() {
 
             {/* Body */}
             <div className="px-6 py-5 space-y-5">
-              <OverlayLink url={overlayUrls[activeTab] || ""} obsSize={activeTab === "normal" ? "380 × 200" : "600 × 300"} />
+              <OverlayLink url={overlayUrls[activeTab] || ""} obsSize={activeTab === "normal" ? "460 × 300" : "800 × 500"} />
 
               <div>
                 <Label className="text-sm font-semibold text-slate-400 mb-2 block">Preview</Label>

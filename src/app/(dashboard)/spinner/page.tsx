@@ -494,7 +494,7 @@ export default function SpinnerPage() {
 
             {/* Body */}
             <div className="px-6 py-5 space-y-5">
-              <OverlayLink url={overlayUrl} obsSize="400 × 500" />
+              <OverlayLink url={overlayUrl} obsSize="500 × 600" />
 
               <div>
                 <Label className="text-sm font-semibold text-slate-400 mb-2 block">Preview</Label>

@@ -135,7 +135,7 @@ export default function ChatPage() {
           </div>
 
           {/* Overlay Link - changes per tab */}
-          <OverlayLink url={activeTab === "small" ? overlayUrls.small : overlayUrls.normal} obsSize={activeTab === "small" ? "300 × 200" : "420 × 250"} />
+          <OverlayLink url={activeTab === "small" ? overlayUrls.small : overlayUrls.normal} obsSize={activeTab === "small" ? "380 × 280" : "480 × 340"} />
 
           {/* Preview */}
           <div className="mt-5">

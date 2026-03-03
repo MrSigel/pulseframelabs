@@ -228,7 +228,7 @@ export default function HotwordsPage() {
               {/* Overlay Link */}
               <div>
                 <Label className="text-sm font-semibold text-slate-400 mb-2 block">Overlay URL</Label>
-                <OverlayLink url={overlayUrl} obsSize="320 × 120" />
+                <OverlayLink url={overlayUrl} obsSize="400 × 200" />
               </div>
 
               {/* Overlay Preview */}
