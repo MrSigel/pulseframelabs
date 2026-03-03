@@ -53,9 +53,9 @@ function BonushuntSmallContent() {
       >
         <div
           className="h-[52px] w-[52px] shrink-0 flex items-center justify-center"
-          style={{ background: "rgba(239, 68, 68, 0.08)", borderRight: "1px solid rgba(255,255,255,0.04)" }}
+          style={{ background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 8%, transparent)", borderRight: "1px solid rgba(255,255,255,0.04)" }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: "var(--overlay-highlight, #ef4444)" }}>
             <circle cx="12" cy="12" r="10" />
             <line x1="2" y1="12" x2="22" y2="12" />
             <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
@@ -66,7 +66,7 @@ function BonushuntSmallContent() {
             <span
               className="font-bold text-xs"
               style={{
-                background: "linear-gradient(90deg, #ef4444, #f97316)",
+                background: "linear-gradient(90deg, var(--overlay-highlight, #ef4444), var(--overlay-icon-color, #f97316))",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}

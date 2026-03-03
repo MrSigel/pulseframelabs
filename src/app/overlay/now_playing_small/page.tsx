@@ -56,7 +56,7 @@ function NowPlayingSmallContent() {
         {/* Game Info */}
         <div className="px-3 py-2">
           <div className="flex items-center gap-1.5">
-            <span className="text-[9px]" style={{ color: "#ef4444" }}>&#9654;</span>
+            <span className="text-[9px]" style={{ color: "var(--overlay-highlight, #ef4444)" }}>&#9654;</span>
             <span className="text-white font-bold text-xs">{game}</span>
           </div>
           <p className="text-[10px] font-semibold mt-0.5" style={{ color: "#64748b" }}>{provider.toUpperCase()}</p>

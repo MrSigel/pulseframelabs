@@ -134,7 +134,7 @@ function WagerBarSmallView({
         <div className="flex items-center justify-between mb-2">
           <span
             className="font-bold text-xs tracking-wide"
-            style={{ color: "#ef4444" }}
+            style={{ color: "var(--overlay-highlight, #ef4444)" }}
           >
             WAGER: {currency}{wager.toLocaleString()}
           </span>
@@ -145,8 +145,8 @@ function WagerBarSmallView({
             <span
               className="font-semibold px-2 py-0.5 rounded text-[10px]"
               style={{
-                background: pct > 50 ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)",
-                color: pct > 50 ? "#10b981" : "#ef4444",
+                background: pct > 50 ? "rgba(16, 185, 129, 0.15)" : "color-mix(in srgb, var(--overlay-highlight, #ef4444) 15%, transparent)",
+                color: pct > 50 ? "#10b981" : "var(--overlay-highlight, #ef4444)",
               }}
             >
               {pct.toFixed(1)}%
@@ -163,7 +163,7 @@ function WagerBarSmallView({
             className="h-full rounded-full animate-progress-shimmer"
             style={{
               width: `${pct}%`,
-              background: "linear-gradient(90deg, #ef4444, #f97316, #ef4444, #f97316)",
+              background: "linear-gradient(90deg, var(--overlay-highlight, #ef4444), var(--overlay-icon-color, #f97316), var(--overlay-highlight, #ef4444), var(--overlay-icon-color, #f97316))",
               transition: "width 1s ease-in-out",
             }}
           />
@@ -174,9 +174,9 @@ function WagerBarSmallView({
           <span
             className="font-bold text-[11px] tracking-wider px-2 py-0.5 rounded"
             style={{
-              background: "rgba(239, 68, 68, 0.15)",
-              color: "#ef4444",
-              border: "1px solid rgba(239, 68, 68, 0.2)",
+              background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 15%, transparent)",
+              color: "var(--overlay-highlight, #ef4444)",
+              border: "1px solid color-mix(in srgb, var(--overlay-highlight, #ef4444) 20%, transparent)",
             }}
           >
             {casino.toUpperCase()}
@@ -199,7 +199,7 @@ function WagerBarSmallView({
 
         {/* Stats row */}
         <div className="flex items-center gap-4 mt-2 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <span className="text-xs font-semibold" style={{ color: "#ef4444" }}>
+          <span className="text-xs font-semibold" style={{ color: "var(--overlay-highlight, #ef4444)" }}>
             {currency}{bonus.toLocaleString()}
           </span>
           <div className="flex items-center gap-2 text-[11px]" style={{ color: "#64748b" }}>

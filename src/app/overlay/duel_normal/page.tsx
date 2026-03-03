@@ -63,7 +63,7 @@ function DuelContent() {
         {/* Header */}
         <div className="px-5 pt-4 pb-3 text-center">
           <div className="flex items-center justify-center gap-2 mb-1">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: "var(--overlay-highlight, #f59e0b)" }}>
               <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
               <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
               <path d="M4 22h16" />
@@ -74,7 +74,7 @@ function DuelContent() {
             <span
               className="font-black text-base tracking-wider"
               style={{
-                background: "linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b)",
+                background: "linear-gradient(90deg, var(--overlay-highlight, #f59e0b), var(--overlay-icon-color, #ef4444), var(--overlay-highlight, #f59e0b))",
                 backgroundSize: "200% 100%",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",

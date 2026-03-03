@@ -55,7 +55,7 @@ function BonushuntTopWorseContent() {
           <span
             className="font-bold text-sm"
             style={{
-              background: "linear-gradient(90deg, #ef4444, #f97316, #ef4444)",
+              background: "linear-gradient(90deg, var(--overlay-highlight, #ef4444), var(--overlay-icon-color, #f97316), var(--overlay-highlight, #ef4444))",
               backgroundSize: "200% 100%",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -94,7 +94,7 @@ function BonushuntTopWorseContent() {
         {/* Worse Section */}
         <div className="px-4 py-2.5">
           <div className="flex items-center gap-2 mb-2">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="none">
+            <svg width="14" height="14" viewBox="0 0 24 24" stroke="none" style={{ fill: "var(--overlay-highlight, #ef4444)" }}>
               <path d="M12 2C8 6 4 9.5 4 13a8 8 0 0016 0c0-3.5-4-7-8-11z" />
             </svg>
             <span className="text-[10px] font-bold uppercase tracking-wider text-red-400/80">Worst</span>

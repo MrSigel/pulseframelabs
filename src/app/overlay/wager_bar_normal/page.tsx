@@ -123,14 +123,14 @@ function WagerBarNormalView({
         <div
           className="px-5 py-2.5 flex items-center justify-center"
           style={{
-            background: "linear-gradient(90deg, rgba(239,68,68,0.08), rgba(239,68,68,0.18), rgba(239,68,68,0.08))",
-            borderBottom: "1px solid rgba(239, 68, 68, 0.12)",
+            background: "linear-gradient(90deg, color-mix(in srgb, var(--overlay-highlight, #ef4444) 8%, transparent), color-mix(in srgb, var(--overlay-highlight, #ef4444) 18%, transparent), color-mix(in srgb, var(--overlay-highlight, #ef4444) 8%, transparent))",
+            borderBottom: "1px solid color-mix(in srgb, var(--overlay-highlight, #ef4444) 12%, transparent)",
           }}
         >
           <span
             className="font-bold text-sm tracking-[0.15em]"
             style={{
-              background: "linear-gradient(90deg, #fca5a5, #ffffff, #fca5a5)",
+              background: "linear-gradient(90deg, var(--overlay-highlight, #fca5a5), #ffffff, var(--overlay-highlight, #fca5a5))",
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -149,9 +149,9 @@ function WagerBarNormalView({
               <span
                 className="font-bold text-sm px-3 py-1 rounded"
                 style={{
-                  background: "rgba(239, 68, 68, 0.15)",
-                  color: "#ef4444",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
+                  background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 15%, transparent)",
+                  color: "var(--overlay-highlight, #ef4444)",
+                  border: "1px solid color-mix(in srgb, var(--overlay-highlight, #ef4444) 20%, transparent)",
                 }}
               >
                 {currency}{wagered.toLocaleString()} / {currency}{wager.toLocaleString()}
@@ -159,8 +159,8 @@ function WagerBarNormalView({
               <span
                 className="font-semibold text-sm px-2.5 py-1 rounded"
                 style={{
-                  background: pct > 50 ? "rgba(16, 185, 129, 0.12)" : "rgba(239, 68, 68, 0.12)",
-                  color: pct > 50 ? "#10b981" : "#ef4444",
+                  background: pct > 50 ? "rgba(16, 185, 129, 0.12)" : "color-mix(in srgb, var(--overlay-highlight, #ef4444) 12%, transparent)",
+                  color: pct > 50 ? "#10b981" : "var(--overlay-highlight, #ef4444)",
                 }}
               >
                 {pct.toFixed(1)}%
@@ -176,7 +176,7 @@ function WagerBarNormalView({
                 className="h-full rounded-full relative"
                 style={{
                   width: `${pct}%`,
-                  background: "linear-gradient(90deg, #ef4444, #f97316, #eab308)",
+                  background: "linear-gradient(90deg, var(--overlay-highlight, #ef4444), var(--overlay-icon-color, #f97316), var(--overlay-highlight, #eab308))",
                   transition: "width 1.5s ease-in-out",
                 }}
               >

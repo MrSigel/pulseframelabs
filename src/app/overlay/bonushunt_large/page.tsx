@@ -85,9 +85,9 @@ function BonushuntLargeContent() {
           <div className="flex items-center gap-2.5">
             <div
               className="h-7 w-7 rounded-lg flex items-center justify-center"
-              style={{ background: "rgba(239, 68, 68, 0.12)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+              style={{ background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--overlay-highlight, #ef4444) 20%, transparent)" }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: "var(--overlay-highlight, #ef4444)" }}>
                 <circle cx="12" cy="12" r="10" />
                 <line x1="2" y1="12" x2="22" y2="12" />
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
@@ -97,7 +97,7 @@ function BonushuntLargeContent() {
               <span
                 className="font-bold text-sm block"
                 style={{
-                  background: "linear-gradient(90deg, #ef4444, #f97316, #ef4444)",
+                  background: "linear-gradient(90deg, var(--overlay-highlight, #ef4444), var(--overlay-icon-color, #f97316), var(--overlay-highlight, #ef4444))",
                   backgroundSize: "200% 100%",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
@@ -112,9 +112,9 @@ function BonushuntLargeContent() {
           <div className="flex items-center gap-2">
             <div
               className="h-6 w-6 rounded-md flex items-center justify-center"
-              style={{ background: "rgba(239, 68, 68, 0.1)" }}
+              style={{ background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 10%, transparent)" }}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="#ef4444" stroke="none">
+              <svg width="12" height="12" viewBox="0 0 24 24" stroke="none" style={{ fill: "var(--overlay-highlight, #ef4444)" }}>
                 <rect x="2" y="6" width="8" height="12" rx="1" />
                 <rect x="14" y="6" width="8" height="12" rx="1" />
                 <circle cx="6" cy="10" r="1" fill="#0c1018" />
@@ -124,9 +124,9 @@ function BonushuntLargeContent() {
             <span
               className="text-xs font-bold px-2.5 py-1 rounded-full"
               style={{
-                background: "rgba(239, 68, 68, 0.1)",
-                color: "#ef4444",
-                border: "1px solid rgba(239, 68, 68, 0.15)",
+                background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 10%, transparent)",
+                color: "var(--overlay-highlight, #ef4444)",
+                border: "1px solid color-mix(in srgb, var(--overlay-highlight, #ef4444) 15%, transparent)",
               }}
             >
               {slots}/{total}
@@ -140,10 +140,10 @@ function BonushuntLargeContent() {
           style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
         >
           {[
-            { icon: "grid", value: buyin, color: "#ef4444" },
-            { icon: "play", value: start, color: "#ef4444" },
-            { icon: "chart", value: bestX, color: "#ef4444" },
-            { icon: "x", value: avgX, color: "#ef4444" },
+            { icon: "grid", value: buyin, color: "var(--overlay-highlight, #ef4444)" },
+            { icon: "play", value: start, color: "var(--overlay-highlight, #ef4444)" },
+            { icon: "chart", value: bestX, color: "var(--overlay-highlight, #ef4444)" },
+            { icon: "x", value: avgX, color: "var(--overlay-highlight, #ef4444)" },
           ].map((stat, i) => (
             <div
               key={i}
@@ -183,7 +183,7 @@ function BonushuntLargeContent() {
             className="flex items-center gap-2 px-3 py-2 rounded-lg"
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.04)" }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="#ef4444" stroke="none">
+            <svg width="14" height="14" viewBox="0 0 24 24" stroke="none" style={{ fill: "var(--overlay-highlight, #ef4444)" }}>
               <path d="M12 2C8 6 4 9.5 4 13a8 8 0 0016 0c0-3.5-4-7-8-11z" />
             </svg>
             <span className="text-slate-400 text-xs font-semibold">{worstLabel}</span>

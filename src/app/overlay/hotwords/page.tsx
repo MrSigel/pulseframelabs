@@ -53,7 +53,7 @@ function HotwordsOverlayContent() {
           <span
             className="font-bold text-sm tracking-widest"
             style={{
-              background: "linear-gradient(90deg, #3b82f6, #8b5cf6, #3b82f6)",
+              background: "linear-gradient(90deg, var(--overlay-highlight, #3b82f6), var(--overlay-icon-color, #8b5cf6), var(--overlay-highlight, #3b82f6))",
               backgroundSize: "200% 100%",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",

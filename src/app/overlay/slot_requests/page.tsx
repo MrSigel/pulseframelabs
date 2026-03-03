@@ -55,9 +55,9 @@ function SlotRequestsOverlayContent() {
           <div className="flex items-center gap-2">
             <div
               className="h-6 w-6 rounded-md flex items-center justify-center"
-              style={{ background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+              style={{ background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 15%, transparent)", border: "1px solid color-mix(in srgb, var(--overlay-highlight, #ef4444) 20%, transparent)" }}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: "var(--overlay-highlight, #ef4444)" }}>
                 <polyline points="16 3 21 3 21 8" />
                 <line x1="4" y1="20" x2="21" y2="3" />
                 <polyline points="21 16 21 21 16 21" />
@@ -68,7 +68,7 @@ function SlotRequestsOverlayContent() {
             <span
               className="font-bold text-sm tracking-wide"
               style={{
-                background: "linear-gradient(90deg, #ef4444, #f97316, #ef4444)",
+                background: "linear-gradient(90deg, var(--overlay-highlight, #ef4444), var(--overlay-icon-color, #f97316), var(--overlay-highlight, #ef4444))",
                 backgroundSize: "200% 100%",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -83,9 +83,9 @@ function SlotRequestsOverlayContent() {
             <span
               className="text-xs font-bold px-2 py-0.5 rounded-full"
               style={{
-                background: participants > 0 ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.1)",
-                color: participants > 0 ? "#10b981" : "#ef4444",
-                border: `1px solid ${participants > 0 ? "rgba(16, 185, 129, 0.25)" : "rgba(239, 68, 68, 0.15)"}`,
+                background: participants > 0 ? "rgba(16, 185, 129, 0.15)" : "color-mix(in srgb, var(--overlay-highlight, #ef4444) 10%, transparent)",
+                color: participants > 0 ? "#10b981" : "var(--overlay-highlight, #ef4444)",
+                border: `1px solid ${participants > 0 ? "rgba(16, 185, 129, 0.25)" : "color-mix(in srgb, var(--overlay-highlight, #ef4444) 15%, transparent)"}`,
               }}
             >
               {participants}
@@ -96,7 +96,7 @@ function SlotRequestsOverlayContent() {
         {/* Participant list area */}
         <div
           className="px-4 py-3 min-h-[120px]"
-          style={{ borderTop: "1px solid rgba(239, 68, 68, 0.08)" }}
+          style={{ borderTop: "1px solid color-mix(in srgb, var(--overlay-highlight, #ef4444) 8%, transparent)" }}
         >
           {participants === 0 ? (
             <div className="flex items-center justify-center h-[100px]">
@@ -116,7 +116,7 @@ function SlotRequestsOverlayContent() {
                   <div className="flex items-center gap-2">
                     <div
                       className="h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold"
-                      style={{ background: "rgba(239,68,68,0.12)", color: "#ef4444" }}
+                      style={{ background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 12%, transparent)", color: "var(--overlay-highlight, #ef4444)" }}
                     >
                       {i + 1}
                     </div>

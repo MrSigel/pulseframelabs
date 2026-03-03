@@ -61,9 +61,9 @@ function BonushuntGuessContent() {
           <div className="flex items-center gap-2">
             <div
               className="h-6 w-6 rounded-md flex items-center justify-center"
-              style={{ background: "rgba(139, 92, 246, 0.12)", border: "1px solid rgba(139, 92, 246, 0.2)" }}
+              style={{ background: "color-mix(in srgb, var(--overlay-icon-color, #8b5cf6) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--overlay-icon-color, #8b5cf6) 20%, transparent)" }}
             >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2.5" strokeLinecap="round">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round" style={{ stroke: "var(--overlay-icon-color, #8b5cf6)" }}>
                 <circle cx="12" cy="12" r="10" />
                 <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
                 <line x1="12" y1="17" x2="12.01" y2="17" />
@@ -74,7 +74,7 @@ function BonushuntGuessContent() {
           <span
             className="font-bold text-xs"
             style={{
-              background: "linear-gradient(90deg, #ef4444, #f97316)",
+              background: "linear-gradient(90deg, var(--overlay-highlight, #ef4444), var(--overlay-icon-color, #f97316))",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
@@ -89,7 +89,7 @@ function BonushuntGuessContent() {
           <p
             className="text-2xl font-bold animate-pulse-value"
             style={{
-              background: "linear-gradient(135deg, #10b981, #06b6d4)",
+              background: "linear-gradient(135deg, var(--overlay-icon-color, #10b981), var(--overlay-highlight, #06b6d4))",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}

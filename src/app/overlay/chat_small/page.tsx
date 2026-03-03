@@ -44,7 +44,7 @@ function ChatSmallContent() {
         }}
       >
         <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: "var(--overlay-highlight, #3b82f6)" }}>
             <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
           </svg>
           <span className="text-[10px] font-bold text-white uppercase tracking-wider">Chat</span>

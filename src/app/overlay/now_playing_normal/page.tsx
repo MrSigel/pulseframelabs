@@ -74,7 +74,7 @@ function NowPlayingNormalContent() {
             {/* Current Game */}
             <div className="flex-1 px-4 py-4 flex flex-col justify-center">
               <div className="flex items-center gap-1.5 mb-1">
-                <span className="text-[10px]" style={{ color: "#ef4444" }}>&#9654;</span>
+                <span className="text-[10px]" style={{ color: "var(--overlay-highlight, #ef4444)" }}>&#9654;</span>
                 <span
                   className="text-[10px] font-bold tracking-widest uppercase"
                   style={{ color: "#94a3b8" }}
@@ -91,11 +91,11 @@ function NowPlayingNormalContent() {
               <div className="flex items-center gap-1.5 mb-1.5">
                 <div
                   className="h-3.5 w-3.5 rounded-full flex items-center justify-center text-[8px] font-bold"
-                  style={{ background: "rgba(59, 130, 246, 0.2)", color: "#3b82f6" }}
+                  style={{ background: "color-mix(in srgb, var(--overlay-icon-color, #3b82f6) 20%, transparent)", color: "var(--overlay-icon-color, #3b82f6)" }}
                 >
                   i
                 </div>
-                <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#3b82f6" }}>
+                <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "var(--overlay-icon-color, #3b82f6)" }}>
                   INFO
                 </span>
               </div>
@@ -120,11 +120,11 @@ function NowPlayingNormalContent() {
               <div className="flex items-center gap-1.5 mb-1.5">
                 <div
                   className="h-3.5 w-3.5 rounded-full flex items-center justify-center text-[8px]"
-                  style={{ background: "rgba(239, 68, 68, 0.2)", color: "#ef4444" }}
+                  style={{ background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 20%, transparent)", color: "var(--overlay-highlight, #ef4444)" }}
                 >
                   &#9679;
                 </div>
-                <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "#ef4444" }}>
+                <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: "var(--overlay-highlight, #ef4444)" }}>
                   PERSONAL RECORD
                 </span>
               </div>

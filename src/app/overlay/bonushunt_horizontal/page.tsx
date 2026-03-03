@@ -66,9 +66,9 @@ function BonushuntHorizontalContent() {
           <div className="flex items-center gap-2.5 shrink-0">
             <div
               className="h-7 w-7 rounded-lg flex items-center justify-center"
-              style={{ background: "rgba(239, 68, 68, 0.12)", border: "1px solid rgba(239, 68, 68, 0.2)" }}
+              style={{ background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--overlay-highlight, #ef4444) 20%, transparent)" }}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: "var(--overlay-highlight, #ef4444)" }}>
                 <circle cx="12" cy="12" r="10" />
                 <line x1="2" y1="12" x2="22" y2="12" />
                 <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
@@ -78,7 +78,7 @@ function BonushuntHorizontalContent() {
               <span
                 className="font-bold text-xs block"
                 style={{
-                  background: "linear-gradient(90deg, #ef4444, #f97316, #ef4444)",
+                  background: "linear-gradient(90deg, var(--overlay-highlight, #ef4444), var(--overlay-icon-color, #f97316), var(--overlay-highlight, #ef4444))",
                   backgroundSize: "200% 100%",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
@@ -116,9 +116,9 @@ function BonushuntHorizontalContent() {
           <span
             className="text-xs font-bold px-2.5 py-1 rounded-full"
             style={{
-              background: "rgba(239, 68, 68, 0.1)",
-              color: "#ef4444",
-              border: "1px solid rgba(239, 68, 68, 0.15)",
+              background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 10%, transparent)",
+              color: "var(--overlay-highlight, #ef4444)",
+              border: "1px solid color-mix(in srgb, var(--overlay-highlight, #ef4444) 15%, transparent)",
             }}
           >
             {slots}/{total}
