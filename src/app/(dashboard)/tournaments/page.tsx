@@ -24,6 +24,7 @@ import { useAuthUid } from "@/hooks/useAuthUid";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
 import TournamentBracket from "@/components/tournament-bracket";
 import type { Tournament, TournamentParticipant, BracketData, BracketPlayer, BracketRound, BracketMatchup } from "@/lib/supabase/types";
+import { twitchBot } from "@/lib/twitch/bot";
 
 /* ====== Helper Functions ====== */
 
@@ -218,6 +219,15 @@ export default function TournamentsPage() {
     try {
       await tournamentsDb.update(id, { status: newStatus });
       await refetch();
+
+      // Auto-announce in Twitch chat when join phase opens
+      if (newStatus === "join_open") {
+        const tournament = tournamentsList?.find((t) => t.id === id);
+        const name = tournament?.name || "Turnier";
+        twitchBot.say(
+          `🏆 Das Turnier "${name}" ist jetzt offen! Schreibe !join Spielname um teilzunehmen! 🎮`
+        );
+      }
     } catch (err) {
       console.error("Failed to update status:", err);
     }

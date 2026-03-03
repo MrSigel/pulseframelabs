@@ -33,6 +33,7 @@ export default function BonushuntDetailPage() {
   const [gameName, setGameName] = useState("");
   const [buyIn, setBuyIn] = useState("");
   const [adding, setAdding] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   // Inline edit state: entryId → input value
   const [editingWin, setEditingWin] = useState<Record<string, string>>({});
@@ -98,6 +99,8 @@ export default function BonushuntDetailPage() {
       await bonushuntsDb.entries.update(entry.id, { win_amount: winAmount, multiplier });
       setEditingWin((prev) => { const next = { ...prev }; delete next[entry.id]; return next; });
       await refetch();
+      setToast(`Gewinn gespeichert: ${winAmount.toLocaleString()} (${multiplier.toFixed(2)}x)`);
+      setTimeout(() => setToast(null), 3000);
     } catch (err) {
       console.error("Failed to save win:", err);
     }
@@ -142,7 +145,7 @@ export default function BonushuntDetailPage() {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
         {[
           { label: "Spiele", value: `${totals.playedCount} / ${totals.totalCount}` },
-          { label: "Total Buy-In", value: `${currencySymbol}${totals.totalBuyIn.toLocaleString()}` },
+          { label: "Total Einsatz", value: `${currencySymbol}${totals.totalBuyIn.toLocaleString()}` },
           { label: "Total Gewinn", value: `${currencySymbol}${totals.totalWin.toLocaleString()}`, green: totals.totalWin >= totals.totalBuyIn },
           { label: "Benötigter X", value: `${totals.requiredX.toFixed(2)}x`, green: totals.requiredX <= 100 },
           { label: "Erreichter X", value: `${totals.achievedX.toFixed(2)}x`, green: totals.achievedX >= 1 },
@@ -235,30 +238,32 @@ export default function BonushuntDetailPage() {
                             />
                             <button
                               onClick={() => handleSaveWin(entry)}
-                              className="h-6 w-6 flex items-center justify-center rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors"
-                              title="Speichern"
+                              className="h-7 px-2 flex items-center gap-1 rounded-lg bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/40 hover:scale-[1.02] transition-all text-[10px] font-bold shadow-[0_0_8px_rgba(16,185,129,0.15)]"
+                              title="Gewinn speichern"
                             >
                               <Check className="h-3.5 w-3.5" />
+                              OK
                             </button>
                           </>
                         ) : entry.win_amount === 0 ? (
                           <button
-                            className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md bg-amber-500/15 text-amber-400 border border-amber-500/20 hover:bg-amber-500/25 transition-colors disabled:opacity-30"
+                            className="flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/35 hover:border-amber-500/50 hover:scale-[1.02] transition-all shadow-[0_0_8px_rgba(245,158,11,0.15)] disabled:opacity-30"
                             onClick={() => setEditingWin((prev) => ({ ...prev, [entry.id]: "" }))}
                             disabled={!canModify}
                           >
-                            <Pencil className="h-3 w-3" />
-                            Eintragen
+                            <Pencil className="h-3.5 w-3.5" />
+                            Gewinn eintragen
                           </button>
                         ) : (
                           <button
-                            className="text-xs font-mono text-right hover:text-primary transition-colors"
+                            className="group flex items-center gap-1 text-xs font-mono text-right hover:opacity-80 transition-all"
                             style={{ color: entry.multiplier >= 2 ? "#34d399" : "#f87171" }}
                             onClick={() => setEditingWin((prev) => ({ ...prev, [entry.id]: String(entry.win_amount) }))}
                             title="Klicken zum Bearbeiten"
                             disabled={!canModify}
                           >
                             {currencySymbol}{entry.win_amount.toLocaleString()}
+                            <Pencil className="h-2.5 w-2.5 opacity-0 group-hover:opacity-60 transition-opacity" />
                           </button>
                         )}
                       </div>
@@ -322,7 +327,7 @@ export default function BonushuntDetailPage() {
                 />
               </div>
               <div>
-                <Label className="text-sm font-semibold text-white mb-1.5 block">Einsatz (Buy-In)</Label>
+                <Label className="text-sm font-semibold text-white mb-1.5 block">Einsatz</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">{currencySymbol}</span>
                   <Input
@@ -369,6 +374,14 @@ export default function BonushuntDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Toast notification */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-sm font-semibold shadow-lg backdrop-blur-sm animate-in fade-in slide-in-from-bottom-2">
+          <Check className="h-4 w-4" />
+          {toast}
+        </div>
+      )}
     </div>
   );
 }

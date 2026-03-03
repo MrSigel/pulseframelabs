@@ -24,7 +24,7 @@ function formatTime(iso: string) {
   });
 }
 
-export default function LiveChatWidget() {
+export default function LiveChatWidget({ userId }: { userId: string }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<"intro" | "chat">("intro");
   const [name, setName] = useState("");
@@ -58,17 +58,19 @@ export default function LiveChatWidget() {
     if (open) setPulse(false);
   }, [open]);
 
-  // Initialize session + restore state from localStorage
+  // Session = user-specific key (userId), ensures isolation per user
   useEffect(() => {
-    let storedSession = localStorage.getItem(SESSION_KEY);
-    if (!storedSession) {
-      storedSession = crypto.randomUUID();
-      localStorage.setItem(SESSION_KEY, storedSession);
-    }
-    setSessionId(storedSession);
+    const userSessionKey = `${SESSION_KEY}-${userId}`;
+    const userStateKey = `${STATE_KEY}-${userId}`;
+
+    // Clean up old global session (from before auth-guard)
+    localStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(STATE_KEY);
+
+    setSessionId(userId);
 
     try {
-      const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
+      const saved = JSON.parse(localStorage.getItem(userStateKey) || "{}");
       if (saved.step === "chat") {
         setStep("chat");
         setOpen(true);
@@ -81,13 +83,14 @@ export default function LiveChatWidget() {
     }
 
     setInitialized(true);
-  }, []);
+  }, [userId]);
 
-  // Persist chat state to localStorage
+  // Persist chat state to localStorage (user-specific)
   useEffect(() => {
     if (!initialized) return;
-    localStorage.setItem(STATE_KEY, JSON.stringify({ step, name, email }));
-  }, [step, name, email, initialized]);
+    const userStateKey = `${STATE_KEY}-${userId}`;
+    localStorage.setItem(userStateKey, JSON.stringify({ step, name, email }));
+  }, [step, name, email, initialized, userId]);
 
   // Load full chat history from DB on restore
   useEffect(() => {
