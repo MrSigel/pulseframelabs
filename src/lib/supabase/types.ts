@@ -167,7 +167,7 @@ export interface Tournament {
   description: string;
   participant_count: number;
   bracket_data: Json;
-  status: 'pending' | 'join_open' | 'ongoing' | 'finished';
+  status: 'pending' | 'join_open' | 'draw' | 'ongoing' | 'finished';
   created_at: string;
   updated_at: string;
 }
@@ -180,6 +180,28 @@ export interface TournamentParticipant {
   game_name: string;
   badge_image_url: string | null;
   joined_at: string;
+}
+
+export interface BracketPlayer {
+  name: string;
+  game: string;
+  win_amount?: number;
+}
+
+export interface BracketMatchup {
+  player1: BracketPlayer;
+  player2: BracketPlayer;
+  winner?: string;
+}
+
+export interface BracketRound {
+  name: string;
+  matchups: BracketMatchup[];
+}
+
+export interface BracketData {
+  rounds: BracketRound[];
+  winner?: string;
 }
 
 export interface SpinnerPrize {

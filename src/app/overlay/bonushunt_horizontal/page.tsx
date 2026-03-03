@@ -37,11 +37,10 @@ function BonushuntHorizontalContent() {
   const sym = hunt?.currency ? currencySymbol(hunt.currency) : globalCurrency;
   const slotsCount = entries.length;
   const totalBuyIn = entries.reduce((s, e) => s + e.buy_in, 0);
-  const nonZeroMults = entries.filter((e) => e.multiplier > 0);
-  const bestMultiplier = nonZeroMults.length ? Math.max(...nonZeroMults.map((e) => e.multiplier)) : 0;
-  const avgMultiplier = nonZeroMults.length
-    ? nonZeroMults.reduce((s, e) => s + e.multiplier, 0) / nonZeroMults.length
-    : 0;
+  const totalWins = entries.reduce((s, e) => s + e.win_amount, 0);
+  const startBalance = hunt?.start_balance ?? 0;
+  const requiredX = totalBuyIn > 0 ? startBalance / totalBuyIn : 0;
+  const achievedX = totalBuyIn > 0 ? totalWins / totalBuyIn : 0;
 
   const fmtAmount = (n: number) =>
     n >= 1000 ? `${sym}${(n / 1000).toFixed(1)}K` : `${sym}${n.toFixed(0)}`;
@@ -53,8 +52,8 @@ function BonushuntHorizontalContent() {
   const total = uid ? String(entries.length) : (params.get("total") || "0");
   const buyin = uid ? fmtAmount(totalBuyIn) : (params.get("buyin") || "$0K");
   const start = uid && hunt ? `${sym}${hunt.start_balance.toLocaleString()}` : (params.get("start") || "$0");
-  const bestX = uid ? `${bestMultiplier.toFixed(1)}X+` : (params.get("bestx") || "0X+");
-  const avgX = uid ? `${avgMultiplier.toFixed(1)}X` : (params.get("avgx") || "0X");
+  const reqX = uid ? `${requiredX.toFixed(1)}X` : (params.get("reqx") || "0X");
+  const achX = uid ? `${achievedX.toFixed(1)}X` : (params.get("achx") || "0X");
 
   return (
     <div className="inline-block animate-fade-in-up" style={cssVars}>
@@ -99,8 +98,8 @@ function BonushuntHorizontalContent() {
             {[
               { label: "Buy-in", value: buyin },
               { label: "Start", value: start },
-              { label: "Best", value: bestX },
-              { label: "Avg", value: avgX },
+              { label: "Ben. X", value: reqX },
+              { label: "Err. X", value: achX },
             ].map((s, i) => (
               <div key={i} className="text-center">
                 <span className="text-[8px] uppercase tracking-wider text-slate-600 block">{s.label}</span>

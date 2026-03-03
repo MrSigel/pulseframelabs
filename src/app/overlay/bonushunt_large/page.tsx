@@ -38,11 +38,9 @@ function BonushuntLargeContent() {
   const slotsCount = entries.length;
   const totalBuyIn = entries.reduce((s, e) => s + e.buy_in, 0);
   const totalWins = entries.reduce((s, e) => s + e.win_amount, 0);
-  const nonZeroMults = entries.filter((e) => e.multiplier > 0);
-  const bestMultiplier = nonZeroMults.length ? Math.max(...nonZeroMults.map((e) => e.multiplier)) : 0;
-  const avgMultiplier = nonZeroMults.length
-    ? nonZeroMults.reduce((s, e) => s + e.multiplier, 0) / nonZeroMults.length
-    : 0;
+  const startBalance = hunt?.start_balance ?? 0;
+  const requiredX = totalBuyIn > 0 ? startBalance / totalBuyIn : 0;
+  const achievedX = totalBuyIn > 0 ? totalWins / totalBuyIn : 0;
 
   /* ---- Top / Worst entries for leaderboard ---- */
   const sortedByMult = [...entries].sort((a, b) => b.multiplier - a.multiplier);
@@ -59,8 +57,8 @@ function BonushuntLargeContent() {
   const total = uid ? String(totalWins) : (params.get("total") || "0");
   const buyin = uid ? fmtAmount(totalBuyIn) : (params.get("buyin") || "$0K");
   const start = uid && hunt ? `${sym}${hunt.start_balance.toLocaleString()}` : (params.get("start") || "$0");
-  const bestX = uid ? `${bestMultiplier.toFixed(1)}X+` : (params.get("bestx") || "0X+");
-  const avgX = uid ? `${avgMultiplier.toFixed(1)}X` : (params.get("avgx") || "0X");
+  const reqX = uid ? `${requiredX.toFixed(1)}X` : (params.get("reqx") || "0X");
+  const achX = uid ? `${achievedX.toFixed(1)}X` : (params.get("achx") || "0X");
 
   const bestLabel = bestEntry
     ? `${bestEntry.game_name} — ${bestEntry.multiplier.toFixed(1)}X`
@@ -142,8 +140,8 @@ function BonushuntLargeContent() {
           {[
             { icon: "grid", value: buyin, color: "var(--overlay-highlight, #ef4444)" },
             { icon: "play", value: start, color: "var(--overlay-highlight, #ef4444)" },
-            { icon: "chart", value: bestX, color: "var(--overlay-highlight, #ef4444)" },
-            { icon: "x", value: avgX, color: "var(--overlay-highlight, #ef4444)" },
+            { icon: "chart", value: reqX, color: "var(--overlay-highlight, #ef4444)" },
+            { icon: "x", value: achX, color: "var(--overlay-highlight, #ef4444)" },
           ].map((stat, i) => (
             <div
               key={i}

@@ -169,14 +169,33 @@ export default function SlotRequestsPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dbRequests]);
 
-  async function confirmRaffle() {
+  async function saveRaffleWinner() {
+    if (!rafflePendingWinner) return;
+    await srDb.update(rafflePendingWinner.id, { status: "raffled" });
+    await srDb.raffleHistory.create({
+      slot_name: rafflePendingWinner.slot_name,
+      winner: rafflePendingWinner.viewer_username,
+    });
+  }
+
+  async function confirmAndClear() {
     if (!rafflePendingWinner) return;
     try {
-      await srDb.update(rafflePendingWinner.id, { status: "raffled" });
-      await srDb.raffleHistory.create({
-        slot_name: rafflePendingWinner.slot_name,
-        winner: rafflePendingWinner.viewer_username,
-      });
+      await saveRaffleWinner();
+      await srDb.clearPending();
+      await refetchRequests();
+      setRaffleAnimOpen(false);
+      setRafflePendingWinner(null);
+      setRaffleCurrentName("");
+    } catch (err) {
+      console.error("Failed to confirm raffle:", err);
+    }
+  }
+
+  async function confirmAndKeep() {
+    if (!rafflePendingWinner) return;
+    try {
+      await saveRaffleWinner();
       await refetchRequests();
       setRaffleAnimOpen(false);
       setRafflePendingWinner(null);
@@ -454,7 +473,7 @@ export default function SlotRequestsPage() {
 
             {/* Footer */}
             {!raffleAnimating && rafflePendingWinner && (
-              <div className="px-6 py-4 border-t border-white/[0.06] flex gap-3 justify-end">
+              <div className="px-6 py-4 border-t border-white/[0.06] flex gap-3 justify-end flex-wrap">
                 <Button
                   variant="outline"
                   className="gap-2"
@@ -464,13 +483,22 @@ export default function SlotRequestsPage() {
                   Re-Roll
                 </Button>
                 <Button
+                  variant="destructive"
+                  className="gap-2"
+                  onClick={confirmAndClear}
+                  disabled={!canModify}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Bestätigen &amp; Liste leeren
+                </Button>
+                <Button
                   variant="success"
                   className="gap-2"
-                  onClick={confirmRaffle}
+                  onClick={confirmAndKeep}
                   disabled={!canModify}
                 >
                   <Save className="h-4 w-4" />
-                  Confirm &amp; Save
+                  Bestätigen &amp; Behalten
                 </Button>
               </div>
             )}

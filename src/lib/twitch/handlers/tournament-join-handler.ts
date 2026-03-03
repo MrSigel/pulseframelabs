@@ -22,12 +22,23 @@ export function createTournamentJoinHandler(): MessageHandler {
         const tournament = await tournaments.getJoinOpen(context.userId);
         if (!tournament) return; // No join_open tournament — silently ignore
 
+        // Check if this viewer already joined (re-join updates game)
+        const existing = await tournaments.participants.listByStreamer(tournament.id, context.userId);
+        const alreadyJoined = existing.find(
+          (p) => p.viewer_username.toLowerCase() === username.toLowerCase()
+        );
+
         await tournaments.participants.add(tournament.id, username, context.userId, gameName);
 
-        const gameInfo = gameName ? ` (${gameName})` : "";
-        context.say(`🏆 @${username} wurde zum Turnier "${tournament.name}" angemeldet${gameInfo}! ✅`);
+        if (alreadyJoined) {
+          const gameInfo = gameName ? ` auf ${gameName}` : "";
+          context.say(`🏆 @${username} — Spiel aktualisiert${gameInfo}! 🔄`);
+        } else {
+          const gameInfo = gameName ? ` (${gameName})` : "";
+          context.say(`🏆 @${username} wurde zum Turnier "${tournament.name}" angemeldet${gameInfo}! ✅`);
+        }
       } catch {
-        // Ignore duplicate join errors silently
+        // Ignore errors silently
       }
     },
   };

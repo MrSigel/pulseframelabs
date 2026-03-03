@@ -17,6 +17,12 @@ interface TournamentRow {
   status: string;
 }
 
+interface BracketPlayer {
+  name: string;
+  game: string;
+  win_amount?: number;
+}
+
 interface BracketData {
   rounds?: BracketRound[];
   winner?: string;
@@ -28,8 +34,9 @@ interface BracketRound {
 }
 
 interface BracketMatchup {
-  player1: string;
-  player2: string;
+  player1: BracketPlayer;
+  player2: BracketPlayer;
+  winner?: string;
 }
 
 interface ParticipantRow {
@@ -55,22 +62,36 @@ function getLayout(p: number) {
   return { matchH: 40, matchW: 130, vGap: 6, hGap: 28, fs: 9 };
 }
 
+/** Normalize player data — handles both old string format and new object format */
+function normalizePlayer(p: unknown): BracketPlayer {
+  if (typeof p === "string") return { name: p, game: "" };
+  if (p && typeof p === "object" && "name" in p) return p as BracketPlayer;
+  return { name: "TBD", game: "" };
+}
+
 /* ─── Player Slot Component ─── */
 
 function PlayerSlot({
-  name,
+  player,
   participant,
   fontSize,
   isTop,
+  isWinner,
+  isLoser,
 }: {
-  name: string;
+  player: BracketPlayer;
   participant?: ParticipantRow;
   fontSize: number;
   isTop: boolean;
+  isWinner: boolean;
+  isLoser: boolean;
 }) {
+  const name = player.name;
   const isTBD = !name || name === "TBD";
+  const isBYE = name === "BYE";
   const badge = participant?.badge_image_url;
-  const game = participant?.game_name;
+  const game = player.game || participant?.game_name;
+  const winAmount = player.win_amount;
 
   return (
     <div
@@ -78,6 +99,8 @@ function PlayerSlot({
       style={{
         height: "50%",
         borderBottom: isTop ? "1px solid rgba(255,255,255,0.04)" : undefined,
+        background: isWinner ? "rgba(16,185,129,0.08)" : "transparent",
+        opacity: isLoser ? 0.4 : 1,
       }}
     >
       {/* Badge background */}
@@ -89,25 +112,42 @@ function PlayerSlot({
           style={{ opacity: 0.25, filter: "blur(0.5px)" }}
         />
       )}
-      <div className="relative z-10 flex flex-col justify-center min-w-0 w-full">
-        <span
-          className="font-semibold truncate leading-tight"
-          style={{
-            fontSize,
-            color: isTBD ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.9)",
-          }}
-        >
-          {name || "---"}
-        </span>
-        {game && !isTBD && (
+      <div className="relative z-10 flex items-center justify-between min-w-0 w-full gap-1">
+        <div className="flex flex-col justify-center min-w-0 flex-1">
+          <div className="flex items-center gap-1">
+            {isWinner && <span style={{ fontSize: Math.max(fontSize - 2, 7), color: "#10b981" }}>✓</span>}
+            <span
+              className="font-semibold truncate leading-tight"
+              style={{
+                fontSize,
+                color: isTBD || isBYE ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.9)",
+                fontStyle: isBYE ? "italic" : undefined,
+              }}
+            >
+              {name || "---"}
+            </span>
+          </div>
+          {game && !isTBD && !isBYE && (
+            <span
+              className="truncate leading-tight"
+              style={{
+                fontSize: Math.max(fontSize - 2, 7),
+                color: "rgba(255,255,255,0.4)",
+              }}
+            >
+              {game}
+            </span>
+          )}
+        </div>
+        {winAmount != null && !isTBD && !isBYE && (
           <span
-            className="truncate leading-tight"
+            className="shrink-0 font-bold"
             style={{
-              fontSize: Math.max(fontSize - 2, 7),
-              color: "rgba(255,255,255,0.4)",
+              fontSize: Math.max(fontSize - 1, 8),
+              color: isWinner ? "#10b981" : "rgba(255,255,255,0.35)",
             }}
           >
-            {game}
+            ${winAmount}
           </span>
         )}
       </div>
@@ -162,22 +202,26 @@ function TournamentBracketContent() {
   const totalRounds = Math.log2(participants);
   const { matchH, matchW, vGap, hGap, fs } = getLayout(participants);
 
-  // Build round data (DB or placeholders)
+  // Build round data (DB or placeholders) — normalize player format
   const roundsData = useMemo(() => {
     const rounds: BracketRound[] = [];
     for (let r = 0; r < totalRounds; r++) {
       const expected = participants / Math.pow(2, r + 1);
       if (bracketData?.rounds?.[r]) {
         const db = bracketData.rounds[r];
-        const matchups = [...db.matchups];
-        while (matchups.length < expected) matchups.push({ player1: "TBD", player2: "TBD" });
+        const matchups = db.matchups.map((m) => ({
+          player1: normalizePlayer(m.player1),
+          player2: normalizePlayer(m.player2),
+          winner: (m as BracketMatchup).winner,
+        }));
+        while (matchups.length < expected) matchups.push({ player1: { name: "TBD", game: "" }, player2: { name: "TBD", game: "" }, winner: undefined });
         rounds.push({ name: db.name || getRoundName(r, totalRounds), matchups: matchups.slice(0, expected) });
       } else {
         rounds.push({
           name: getRoundName(r, totalRounds),
           matchups: Array.from({ length: expected }, () => ({
-            player1: "TBD",
-            player2: "TBD",
+            player1: { name: "TBD", game: "" } as BracketPlayer,
+            player2: { name: "TBD", game: "" } as BracketPlayer,
           })),
         });
       }
@@ -299,8 +343,9 @@ function TournamentBracketContent() {
         {/* Match cards */}
         {positions.map((round, rIdx) =>
           round.map((pos, mIdx) => {
-            const m = roundsData[rIdx]?.matchups[mIdx] ?? { player1: "TBD", player2: "TBD" };
+            const m = roundsData[rIdx]?.matchups[mIdx] ?? { player1: { name: "TBD", game: "" }, player2: { name: "TBD", game: "" } };
             const isFinal = rIdx === totalRounds - 1;
+            const hasWinner = !!m.winner;
             return (
               <div
                 key={`m-${rIdx}-${mIdx}`}
@@ -312,25 +357,33 @@ function TournamentBracketContent() {
                   style={{
                     background: isFinal
                       ? `color-mix(in srgb, var(--overlay-highlight, #f59e0b) 6%, transparent)`
-                      : "var(--overlay-bg-dark, rgba(12,14,18,0.75))",
+                      : hasWinner
+                        ? "color-mix(in srgb, rgba(16,185,129,0.04), var(--overlay-bg-dark, rgba(12,14,18,0.75)))"
+                        : "var(--overlay-bg-dark, rgba(12,14,18,0.75))",
                     border: isFinal
                       ? `1px solid color-mix(in srgb, var(--overlay-highlight, #f59e0b) 15%, transparent)`
-                      : "1px solid var(--overlay-border, rgba(255,255,255,0.07))",
+                      : hasWinner
+                        ? "1px solid rgba(16,185,129,0.12)"
+                        : "1px solid var(--overlay-border, rgba(255,255,255,0.07))",
                     boxShadow: "var(--overlay-shadow-sm, 0 2px 8px rgba(0,0,0,0.25))",
                     borderRadius: "var(--overlay-border-radius, 6px)",
                   }}
                 >
                   <PlayerSlot
-                    name={m.player1}
-                    participant={participantMap.get(m.player1)}
+                    player={m.player1}
+                    participant={participantMap.get(m.player1.name)}
                     fontSize={fs}
                     isTop={true}
+                    isWinner={m.winner === m.player1.name}
+                    isLoser={!!m.winner && m.winner !== m.player1.name && m.player1.name !== "TBD" && m.player1.name !== "BYE"}
                   />
                   <PlayerSlot
-                    name={m.player2}
-                    participant={participantMap.get(m.player2)}
+                    player={m.player2}
+                    participant={participantMap.get(m.player2.name)}
                     fontSize={fs}
                     isTop={false}
+                    isWinner={m.winner === m.player2.name}
+                    isLoser={!!m.winner && m.winner !== m.player2.name && m.player2.name !== "TBD" && m.player2.name !== "BYE"}
                   />
                 </div>
               </div>

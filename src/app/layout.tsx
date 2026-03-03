@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Playfair_Display, Inter, JetBrains_Mono } from "next/font/google";
 import { ConsoleBranding } from "@/components/console-branding";
+import LiveChatLoader from "@/components/LiveChatLoader";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -58,6 +59,7 @@ export default function RootLayout({
       >
         <ConsoleBranding />
         {children}
+        <LiveChatLoader />
       </body>
     </html>
   );

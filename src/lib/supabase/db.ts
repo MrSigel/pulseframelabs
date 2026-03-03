@@ -11,7 +11,7 @@ import type {
   SlotBattle, SlotBattleEntry, SlotRequest, SlotRequestSettings,
   SlideshowItem, SpinnerPrize, SpinnerHistoryEntry, StoreItem,
   StoreRedemption, StoreSettings, StreamerPageSettings, StreamPointsConfig,
-  StreamViewer, ThemeSettings, Tournament, TournamentParticipant, TwitchConnection, UserProfile,
+  StreamViewer, ThemeSettings, Tournament, TournamentParticipant, BracketData, TwitchConnection, UserProfile,
   UserSubscription, WagerSession, Wallet, WalletTransaction,
 } from "./types";
 
@@ -308,6 +308,17 @@ export const tournaments = {
       if (error) throw error;
       return (data ?? []) as TournamentParticipant[];
     },
+    listByStreamer: async (tournamentId: string, streamerId: string): Promise<TournamentParticipant[]> => {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from("tournament_participants")
+        .select("*")
+        .eq("user_id", streamerId)
+        .eq("tournament_id", tournamentId)
+        .order("joined_at");
+      if (error) throw error;
+      return (data ?? []) as TournamentParticipant[];
+    },
     add: async (tournamentId: string, viewerUsername: string, streamerId: string, gameName: string = ''): Promise<void> => {
       const supabase = getSupabase();
 
@@ -357,7 +368,7 @@ export const tournaments = {
             game_name: gameName,
             badge_image_url: badgeImageUrl,
           },
-          { onConflict: "tournament_id,viewer_username", ignoreDuplicates: true }
+          { onConflict: "tournament_id,viewer_username", ignoreDuplicates: false }
         );
       if (error) throw error;
     },
@@ -371,6 +382,14 @@ export const tournaments = {
         .eq("tournament_id", tournamentId);
       if (error) throw error;
     },
+  },
+  updateBracket: async (id: string, bracketData: BracketData): Promise<void> => {
+    const supabase = getSupabase();
+    const { error } = await supabase
+      .from("tournaments")
+      .update({ bracket_data: bracketData as unknown as Record<string, unknown>, updated_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) throw error;
   },
 };
 
@@ -519,6 +538,16 @@ export const slotRequests = {
   update: (id: string, updates: Partial<SlotRequest>) => updateRow<SlotRequest>("slot_requests", id, updates),
   remove: (id: string) => deleteRow("slot_requests", id),
   clearAll: () => deleteAllByUser("slot_requests"),
+  clearPending: async () => {
+    const supabase = getSupabase();
+    const userId = await getUserId();
+    const { error } = await supabase
+      .from("slot_requests")
+      .delete()
+      .eq("user_id", userId)
+      .eq("status", "pending");
+    if (error) throw error;
+  },
   raffleHistory: {
     list: () => selectByUser<RaffleHistoryEntry>("raffle_history", "raffled_at", false),
     create: (data: { slot_name: string; winner: string }) =>

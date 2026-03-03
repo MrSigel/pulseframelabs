@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, Plus, Trash2, Loader2, Trophy, TrendingUp, TrendingDown } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, Loader2, Trophy, TrendingUp, TrendingDown, Pencil, Check } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -31,7 +31,6 @@ export default function BonushuntDetailPage() {
 
   // Add form state
   const [gameName, setGameName] = useState("");
-  const [provider, setProvider] = useState("");
   const [buyIn, setBuyIn] = useState("");
   const [adding, setAdding] = useState(false);
 
@@ -57,9 +56,11 @@ export default function BonushuntDetailPage() {
     const played = sortedEntries.filter((e) => e.win_amount > 0);
     const totalBuyIn = sortedEntries.reduce((s, e) => s + e.buy_in, 0);
     const totalWin = sortedEntries.reduce((s, e) => s + e.win_amount, 0);
-    const totalMult = totalBuyIn > 0 ? totalWin / totalBuyIn : 0;
-    return { totalBuyIn, totalWin, totalMult, playedCount: played.length, totalCount: sortedEntries.length };
-  }, [sortedEntries]);
+    const startBalance = hunt?.start_balance ?? 0;
+    const requiredX = totalBuyIn > 0 ? startBalance / totalBuyIn : 0;
+    const achievedX = totalBuyIn > 0 ? totalWin / totalBuyIn : 0;
+    return { totalBuyIn, totalWin, requiredX, achievedX, playedCount: played.length, totalCount: sortedEntries.length };
+  }, [sortedEntries, hunt]);
 
   const currencySymbol = useMemo(() => {
     const symbols: Record<string, string> = { USD: "$", EUR: "€", GBP: "£", CAD: "C$", AUD: "A$", JPY: "¥", BRL: "R$", SEK: "kr", NOK: "kr", PLN: "zł" };
@@ -73,14 +74,12 @@ export default function BonushuntDetailPage() {
       await bonushuntsDb.entries.create({
         bonushunt_id: id,
         game_name: gameName.trim(),
-        provider: provider.trim(),
         buy_in: parseFloat(buyIn) || 0,
         win_amount: 0,
         multiplier: 0,
         position: (entries?.length ?? 0) + 1,
       });
       setGameName("");
-      setProvider("");
       setBuyIn("");
       await refetch();
     } catch (err) {
@@ -140,12 +139,13 @@ export default function BonushuntDetailPage() {
       />
 
       {/* Stats bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
         {[
           { label: "Spiele", value: `${totals.playedCount} / ${totals.totalCount}` },
           { label: "Total Buy-In", value: `${currencySymbol}${totals.totalBuyIn.toLocaleString()}` },
           { label: "Total Gewinn", value: `${currencySymbol}${totals.totalWin.toLocaleString()}`, green: totals.totalWin >= totals.totalBuyIn },
-          { label: "Gesamt x", value: `${totals.totalMult.toFixed(2)}x`, green: totals.totalMult >= 1 },
+          { label: "Benötigter X", value: `${totals.requiredX.toFixed(2)}x`, green: totals.requiredX <= 100 },
+          { label: "Erreichter X", value: `${totals.achievedX.toFixed(2)}x`, green: totals.achievedX >= 1 },
         ].map((s) => (
           <div
             key={s.label}
@@ -183,7 +183,7 @@ export default function BonushuntDetailPage() {
               ) : (
                 <>
                   {/* Table header */}
-                  <div className="grid grid-cols-[28px_1fr_80px_80px_64px_32px] gap-2 px-4 py-2 text-[10px] text-slate-600 font-semibold uppercase tracking-wider border-b border-white/[0.06]">
+                  <div className="grid grid-cols-[28px_1fr_80px_110px_64px_32px] gap-2 px-4 py-2 text-[10px] text-slate-600 font-semibold uppercase tracking-wider border-b border-white/[0.06]">
                     <span>#</span>
                     <span>Spiel</span>
                     <span className="text-right">Einsatz</span>
@@ -195,7 +195,7 @@ export default function BonushuntDetailPage() {
                   {sortedEntries.map((entry, idx) => (
                     <div
                       key={entry.id}
-                      className={`grid grid-cols-[28px_1fr_80px_80px_64px_32px] gap-2 px-4 py-2.5 mx-2 mb-1 rounded-lg items-center ${rowStyle(entry)}`}
+                      className={`grid grid-cols-[28px_1fr_80px_110px_64px_32px] gap-2 px-4 py-2.5 mx-2 mb-1 rounded-lg items-center ${rowStyle(entry)}`}
                     >
                       {/* # */}
                       <span className="text-xs text-slate-600 font-semibold">{idx + 1}</span>
@@ -211,7 +211,6 @@ export default function BonushuntDetailPage() {
                             <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 uppercase tracking-wider shrink-0">Nächstes</span>
                           )}
                         </div>
-                        {entry.provider && <p className="text-[10px] text-slate-600">{entry.provider}</p>}
                       </div>
 
                       {/* Buy-in */}
@@ -219,30 +218,47 @@ export default function BonushuntDetailPage() {
                         {currencySymbol}{entry.buy_in.toLocaleString()}
                       </span>
 
-                      {/* Win — inline edit */}
-                      <div className="text-right">
+                      {/* Win — inline edit with visible buttons */}
+                      <div className="flex items-center justify-end gap-1">
                         {editingWin[entry.id] !== undefined ? (
-                          <input
-                            autoFocus
-                            type="number"
-                            className="w-full text-xs text-right bg-white/[0.08] border border-primary/40 rounded px-1 py-0.5 text-white outline-none"
-                            value={editingWin[entry.id]}
-                            onChange={(e) => setEditingWin((prev) => ({ ...prev, [entry.id]: e.target.value }))}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") handleSaveWin(entry);
-                              if (e.key === "Escape") setEditingWin((prev) => { const n = { ...prev }; delete n[entry.id]; return n; });
-                            }}
-                            onBlur={() => handleSaveWin(entry)}
-                          />
+                          <>
+                            <input
+                              autoFocus
+                              type="number"
+                              className="w-16 text-xs text-right bg-white/[0.08] border border-primary/40 rounded px-1 py-0.5 text-white outline-none"
+                              value={editingWin[entry.id]}
+                              onChange={(e) => setEditingWin((prev) => ({ ...prev, [entry.id]: e.target.value }))}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") handleSaveWin(entry);
+                                if (e.key === "Escape") setEditingWin((prev) => { const n = { ...prev }; delete n[entry.id]; return n; });
+                              }}
+                            />
+                            <button
+                              onClick={() => handleSaveWin(entry)}
+                              className="h-6 w-6 flex items-center justify-center rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors"
+                              title="Speichern"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        ) : entry.win_amount === 0 ? (
+                          <button
+                            className="flex items-center gap-1 text-[10px] font-semibold px-2 py-1 rounded-md bg-amber-500/15 text-amber-400 border border-amber-500/20 hover:bg-amber-500/25 transition-colors disabled:opacity-30"
+                            onClick={() => setEditingWin((prev) => ({ ...prev, [entry.id]: "" }))}
+                            disabled={!canModify}
+                          >
+                            <Pencil className="h-3 w-3" />
+                            Eintragen
+                          </button>
                         ) : (
                           <button
-                            className="text-xs font-mono w-full text-right hover:text-primary transition-colors"
-                            style={{ color: entry.win_amount === 0 ? "#475569" : entry.multiplier >= 2 ? "#34d399" : "#f87171" }}
+                            className="text-xs font-mono text-right hover:text-primary transition-colors"
+                            style={{ color: entry.multiplier >= 2 ? "#34d399" : "#f87171" }}
                             onClick={() => setEditingWin((prev) => ({ ...prev, [entry.id]: String(entry.win_amount) }))}
                             title="Klicken zum Bearbeiten"
                             disabled={!canModify}
                           >
-                            {entry.win_amount === 0 ? "—" : `${currencySymbol}${entry.win_amount.toLocaleString()}`}
+                            {currencySymbol}{entry.win_amount.toLocaleString()}
                           </button>
                         )}
                       </div>
@@ -266,7 +282,7 @@ export default function BonushuntDetailPage() {
                   ))}
 
                   {/* Footer totals */}
-                  <div className="grid grid-cols-[28px_1fr_80px_80px_64px_32px] gap-2 px-4 py-3 mt-1 border-t border-white/[0.06] mx-2">
+                  <div className="grid grid-cols-[28px_1fr_80px_110px_64px_32px] gap-2 px-4 py-3 mt-1 border-t border-white/[0.06] mx-2">
                     <span />
                     <span className="text-xs font-semibold text-slate-500 uppercase">Gesamt</span>
                     <span className="text-xs font-bold text-white text-right font-mono">
@@ -275,8 +291,8 @@ export default function BonushuntDetailPage() {
                     <span className={`text-xs font-bold text-right font-mono ${totals.totalWin >= totals.totalBuyIn ? "text-emerald-400" : "text-red-400"}`}>
                       {totals.totalWin > 0 ? `${currencySymbol}${totals.totalWin.toLocaleString()}` : "—"}
                     </span>
-                    <span className={`text-xs font-bold text-right font-mono ${totals.totalMult >= 1 ? "text-emerald-400" : totals.totalMult > 0 ? "text-red-400" : "text-slate-600"}`}>
-                      {totals.totalMult > 0 ? `${totals.totalMult.toFixed(2)}x` : "—"}
+                    <span className={`text-xs font-bold text-right font-mono ${totals.achievedX >= 1 ? "text-emerald-400" : totals.achievedX > 0 ? "text-red-400" : "text-slate-600"}`}>
+                      {totals.achievedX > 0 ? `${totals.achievedX.toFixed(2)}x` : "—"}
                     </span>
                     <span />
                   </div>
@@ -306,15 +322,6 @@ export default function BonushuntDetailPage() {
                 />
               </div>
               <div>
-                <Label className="text-sm font-semibold text-white mb-1.5 block">Provider</Label>
-                <Input
-                  placeholder="z.B. Pragmatic Play"
-                  value={provider}
-                  onChange={(e) => setProvider(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }}
-                />
-              </div>
-              <div>
                 <Label className="text-sm font-semibold text-white mb-1.5 block">Einsatz (Buy-In)</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">{currencySymbol}</span>
@@ -339,7 +346,7 @@ export default function BonushuntDetailPage() {
               </Button>
 
               <p className="text-[11px] text-slate-600 text-center">
-                Gewinn eintragen: einfach auf den &quot;—&quot; Wert in der Tabelle klicken.
+                Gewinn wird über den &quot;Eintragen&quot; Button in der Tabelle eingegeben.
               </p>
             </CardContent>
           </Card>

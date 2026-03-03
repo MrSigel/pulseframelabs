@@ -11,6 +11,7 @@ interface TournamentRow {
   name: string;
   description: string | null;
   participant_count: number;
+  bracket_data: { winner?: string } | null;
   status: string;
 }
 
@@ -45,8 +46,16 @@ function TournamentNormalContent() {
 
   // DB values or URL param fallback
   const title = uid && dbTournament ? dbTournament.name : (params.get("title") || "TOURNAMENT");
-  const status = uid && dbTournament ? dbTournament.status.toUpperCase() : (params.get("status") || "TOURNAMENT");
-  const winner = params.get("winner") || "";
+  const rawStatus = uid && dbTournament ? dbTournament.status : (params.get("status") || "tournament");
+  const statusLabels: Record<string, string> = {
+    pending: "PENDING",
+    join_open: "JOIN OPEN",
+    draw: "AUSLOSUNG",
+    ongoing: "ONGOING",
+    finished: "FINISHED",
+  };
+  const status = statusLabels[rawStatus] || rawStatus.toUpperCase();
+  const winner = (uid && dbTournament?.bracket_data?.winner) || params.get("winner") || "";
   const subtitle = params.get("subtitle") || "";
   const multiplier = params.get("multiplier") || "";
 

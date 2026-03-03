@@ -265,6 +265,7 @@ export const translations = {
     },
     footer: {
       startFree: 'Start Free',
+      contact: 'Contact',
       rights: '© 2026 Pulseframelabs. All rights reserved.',
     },
     tools: {
@@ -597,6 +598,7 @@ export const translations = {
     },
     footer: {
       startFree: 'Kostenlos starten',
+      contact: 'Kontakt',
       rights: '© 2026 Pulseframelabs. Alle Rechte vorbehalten.',
     },
     tools: {
@@ -929,6 +931,7 @@ export const translations = {
     },
     footer: {
       startFree: 'Inizia Gratis',
+      contact: 'Contatto',
       rights: '© 2026 Pulseframelabs. Tutti i diritti riservati.',
     },
     tools: {
@@ -1261,6 +1264,7 @@ export const translations = {
     },
     footer: {
       startFree: 'Commencer Gratuit',
+      contact: 'Contact',
       rights: '© 2026 Pulseframelabs. Tous droits réservés.',
     },
     tools: {
@@ -1593,6 +1597,7 @@ export const translations = {
     },
     footer: {
       startFree: 'Ücretsiz Başla',
+      contact: 'İletişim',
       rights: '© 2026 Pulseframelabs. Tüm hakları saklıdır.',
     },
     tools: {
@@ -1925,6 +1930,7 @@ export const translations = {
     },
     footer: {
       startFree: 'Começar Grátis',
+      contact: 'Contato',
       rights: '© 2026 Pulseframelabs. Todos os direitos reservados.',
     },
     tools: {
@@ -2257,6 +2263,7 @@ export const translations = {
     },
     footer: {
       startFree: 'Empezar Gratis',
+      contact: 'Contacto',
       rights: '© 2026 Pulseframelabs. Todos los derechos reservados.',
     },
     tools: {

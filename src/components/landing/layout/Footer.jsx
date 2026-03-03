@@ -15,6 +15,7 @@ export default function Footer() {
     { label: t.nav.widgets, href: '#widgets' },
     { label: t.nav.features, href: '#features' },
     { label: t.nav.pricing, href: '#pricing' },
+    { label: t.footer.contact, href: '/contact', isPage: true },
   ];
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function Footer() {
             <a
               key={link.href}
               href={link.href}
-              onClick={(e) => handleClick(e, link.href)}
+              onClick={link.isPage ? undefined : (e) => handleClick(e, link.href)}
               style={{
                 fontSize: '0.8rem',
                 fontWeight: 500,
