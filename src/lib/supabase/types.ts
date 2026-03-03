@@ -623,6 +623,26 @@ export interface StreamerPageSettings {
   updated_at: string;
 }
 
+export interface CasinoDeal {
+  id: string;
+  user_id: string;
+  casino_name: string;
+  casino_logo_url: string | null;
+  bonus_text: string;
+  bonus_percentage: number | null;
+  max_bonus_amount: string | null;
+  wagering: string | null;
+  bonus_code: string | null;
+  affiliate_url: string;
+  rating: number;
+  is_new: boolean;
+  enabled: boolean;
+  sort_order: number;
+  details: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
 // ============================================================
 // Database interface for Supabase client typing
 // ============================================================

@@ -1,6 +1,6 @@
 import { createClient } from "./client";
 import type {
-  BotCustomCommand, Bonushunt, BonushuntEntry, BalanceProfile, Casino, ChatMessage,
+  BotCustomCommand, Bonushunt, BonushuntEntry, BalanceProfile, Casino, CasinoDeal, ChatMessage,
   DashboardStat, DuelSession, DuelPlayer, Game, GiveawayHistoryEntry,
   GiveawaySession, GiveawayParticipant,
   HotwordSettings, HotwordEntry, LoyaltyPreset, Moderator,
@@ -835,5 +835,28 @@ export const streamerPage = {
       .maybeSingle();
     if (error) throw error;
     return data as StreamerPageSettings | null;
+  },
+};
+
+// ============================================================
+// Casino Deals
+// ============================================================
+export const casinoDeals = {
+  list: () => selectByUser<CasinoDeal>("casino_deals", "sort_order"),
+  create: (data: Omit<CasinoDeal, "id" | "user_id" | "created_at" | "updated_at">) =>
+    insertRow<CasinoDeal>("casino_deals", data as Record<string, unknown>),
+  update: (id: string, data: Partial<CasinoDeal>) =>
+    updateRow<CasinoDeal>("casino_deals", id, data as Record<string, unknown>),
+  remove: (id: string) => deleteRow("casino_deals", id),
+  getByUserId: async (userId: string): Promise<CasinoDeal[]> => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("casino_deals")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("enabled", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as CasinoDeal[];
   },
 };

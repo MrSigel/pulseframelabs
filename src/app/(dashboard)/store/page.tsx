@@ -35,9 +35,9 @@ import {
 } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
-import { store as storeDb } from "@/lib/supabase/db";
+import { store as storeDb, streamerPage } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
-import type { StoreItem, StoreSettings, StoreRedemption } from "@/lib/supabase/types";
+import type { StoreItem, StoreSettings, StoreRedemption, StreamerPageSettings } from "@/lib/supabase/types";
 
 export default function StorePage() {
   const { canModify } = useFeatureGate();
@@ -77,6 +77,10 @@ export default function StorePage() {
     () => storeDb.redemptions.list(),
     [],
   );
+  const { data: pageSettings } = useDbQuery<StreamerPageSettings | null>(
+    () => streamerPage.get(),
+    [],
+  );
 
   useEffect(() => {
     if (dbSettings) {
@@ -87,9 +91,9 @@ export default function StorePage() {
   }, [dbSettings]);
 
   const storeUrl = useMemo(() => {
-    if (typeof window === "undefined") return "";
-    return `${window.location.origin}/streamer-name`;
-  }, []);
+    if (typeof window === "undefined" || !pageSettings?.slug) return "";
+    return `${window.location.origin}/s/${pageSettings.slug}`;
+  }, [pageSettings]);
 
   const resetAddItem = () => {
     setItemName("");

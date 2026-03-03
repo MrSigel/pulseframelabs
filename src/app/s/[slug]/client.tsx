@@ -2,7 +2,10 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import type { StreamerPageSettings } from "@/lib/supabase/types";
+import { useState } from "react";
+import type { StreamerPageSettings, CasinoDeal, StoreItem, StoreSettings } from "@/lib/supabase/types";
+
+type NavTab = "deals" | "store" | "about";
 
 const socialLinks = [
   { key: "twitch_url", label: "Twitch", icon: TwitchIcon, color: "#9146ff", hoverBg: "rgba(145,70,255,0.15)" },
@@ -15,203 +18,589 @@ const socialLinks = [
   { key: "website_url", label: "Website", icon: WebsiteIcon, color: "#c9a84c", hoverBg: "rgba(201,168,76,0.15)" },
 ] as const;
 
-export function StreamerPageClient({ page }: { page: StreamerPageSettings }) {
+interface Props {
+  page: StreamerPageSettings;
+  deals: CasinoDeal[];
+  storeItems: StoreItem[];
+  storeSettings: StoreSettings | null;
+}
+
+export function StreamerPageClient({ page, deals, storeItems, storeSettings }: Props) {
   const accent = page.accent_color || "#c9a84c";
   const initial = (page.display_name || page.slug).charAt(0).toUpperCase();
+  const [activeTab, setActiveTab] = useState<NavTab>("deals");
 
   const activeSocials = socialLinks.filter(
     (s) => page[s.key as keyof StreamerPageSettings]
   );
 
+  const tabs: { key: NavTab; label: string; show: boolean }[] = [
+    { key: "deals", label: "Casino Deals", show: true },
+    { key: "store", label: storeSettings?.store_name || "Store", show: storeItems.length > 0 },
+    { key: "about", label: "About", show: true },
+  ];
+
+  const visibleTabs = tabs.filter((t) => t.show);
+
   return (
-    <div className="min-h-screen bg-[#09090b] text-white overflow-hidden relative">
-      {/* Animated gradient background */}
-      <div className="fixed inset-0 z-0">
+    <div className="min-h-screen bg-[#0b0e14] text-white">
+      {/* Navigation */}
+      <nav
+        className="sticky top-0 z-50 border-b"
+        style={{
+          background: "rgba(11, 14, 20, 0.85)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
+          borderColor: "rgba(255,255,255,0.06)",
+        }}
+      >
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex items-center h-14">
+          {/* Streamer Name / Logo */}
+          <div className="flex items-center gap-2.5 mr-8 shrink-0">
+            {page.avatar_url ? (
+              <img
+                src={page.avatar_url}
+                alt={page.display_name}
+                className="h-7 w-7 rounded-full object-cover border"
+                style={{ borderColor: `${accent}66` }}
+              />
+            ) : (
+              <div
+                className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{
+                  background: `linear-gradient(135deg, ${accent}, ${accent}88)`,
+                  color: "#0b0e14",
+                }}
+              >
+                {initial}
+              </div>
+            )}
+            <span className="text-sm font-bold text-white tracking-tight">
+              {page.display_name}
+            </span>
+          </div>
+
+          {/* Nav Tabs */}
+          <div className="flex items-center gap-1">
+            {visibleTabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className="relative px-3 py-1.5 text-sm font-medium rounded-md transition-colors"
+                style={{
+                  color: activeTab === tab.key ? "white" : "rgba(255,255,255,0.45)",
+                  background: activeTab === tab.key ? "rgba(255,255,255,0.06)" : "transparent",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Social icons in nav */}
+          <div className="ml-auto flex items-center gap-1.5">
+            {activeSocials.slice(0, 5).map((social) => {
+              const url = page[social.key as keyof StreamerPageSettings] as string;
+              const Icon = social.icon;
+              return (
+                <a
+                  key={social.key}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="h-7 w-7 rounded-md flex items-center justify-center transition-colors"
+                  style={{ color: "rgba(255,255,255,0.35)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = social.color; e.currentTarget.style.background = `${social.color}15`; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = "rgba(255,255,255,0.35)"; e.currentTarget.style.background = "transparent"; }}
+                  title={social.label}
+                >
+                  <div className="scale-75"><Icon /></div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
         <div
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse 80% 50% at 50% -20%, ${accent}22, transparent),
-                         radial-gradient(ellipse 60% 40% at 80% 80%, ${accent}11, transparent),
-                         radial-gradient(ellipse 50% 30% at 20% 60%, ${accent}0d, transparent)`,
+            background: `linear-gradient(135deg, ${accent}18 0%, transparent 40%, ${accent}08 100%)`,
           }}
         />
-        {/* Grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage: `linear-gradient(${accent}33 1px, transparent 1px), linear-gradient(90deg, ${accent}33 1px, transparent 1px)`,
             backgroundSize: "60px 60px",
           }}
         />
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 flex flex-col items-center min-h-screen">
-        {/* Banner */}
-        <div className="w-full h-48 sm:h-64 relative overflow-hidden">
-          {page.banner_url ? (
-            <img
-              src={page.banner_url}
-              alt="Banner"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div
-              className="w-full h-full"
-              style={{
-                background: `linear-gradient(135deg, ${accent}40 0%, ${accent}10 40%, transparent 100%)`,
-              }}
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-[#09090b]/50 to-transparent" />
-        </div>
-
-        {/* Profile Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="w-full max-w-lg px-6 -mt-20"
-        >
-          {/* Avatar */}
-          <div className="flex flex-col items-center">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="relative"
-            >
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex items-center gap-5"
+          >
+            {/* Avatar */}
+            <div className="relative shrink-0">
               <div
-                className="absolute -inset-1 rounded-full opacity-60 blur-sm"
+                className="absolute -inset-0.5 rounded-full opacity-50 blur-sm"
                 style={{ background: `linear-gradient(135deg, ${accent}, ${accent}66)` }}
               />
               {page.avatar_url ? (
                 <img
                   src={page.avatar_url}
                   alt={page.display_name}
-                  className="relative h-24 w-24 rounded-full border-2 object-cover"
+                  className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full border-2 object-cover"
                   style={{ borderColor: accent }}
                 />
               ) : (
                 <div
-                  className="relative h-24 w-24 rounded-full border-2 flex items-center justify-center text-3xl font-bold"
+                  className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-full border-2 flex items-center justify-center text-2xl sm:text-3xl font-bold"
                   style={{
                     borderColor: accent,
                     background: `linear-gradient(135deg, ${accent}, ${accent}88)`,
-                    color: "#09090b",
+                    color: "#0b0e14",
                   }}
                 >
                   {initial}
                 </div>
               )}
-            </motion.div>
-
-            {/* Name */}
-            <motion.h1
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="mt-5 text-2xl sm:text-3xl font-bold tracking-tight"
-            >
-              {page.display_name}
-            </motion.h1>
-
-            {/* Bio */}
-            {page.bio && (
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="mt-3 text-center text-sm sm:text-base text-white/60 max-w-md leading-relaxed"
-              >
-                {page.bio}
-              </motion.p>
-            )}
-          </div>
-
-          {/* Social Links */}
-          {activeSocials.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="mt-8 space-y-3"
-            >
-              {activeSocials.map((social, i) => {
-                const url = page[social.key as keyof StreamerPageSettings] as string;
-                const Icon = social.icon;
-                return (
-                  <motion.a
-                    key={social.key}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.4, delay: 0.5 + i * 0.08 }}
-                    whileHover={{ scale: 1.02, x: 4 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="flex items-center gap-4 w-full rounded-xl px-5 py-4 border transition-all duration-200"
-                    style={{
-                      borderColor: `${social.color}22`,
-                      background: `${social.color}08`,
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = social.hoverBg;
-                      e.currentTarget.style.borderColor = `${social.color}44`;
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = `${social.color}08`;
-                      e.currentTarget.style.borderColor = `${social.color}22`;
-                    }}
-                  >
-                    <div
-                      className="flex items-center justify-center h-10 w-10 rounded-lg"
-                      style={{ background: `${social.color}15`, color: social.color }}
-                    >
-                      <Icon />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-semibold text-white">{social.label}</div>
-                      <div className="text-xs text-white/40 truncate">{url.replace(/^https?:\/\//, "")}</div>
-                    </div>
-                    <svg className="h-4 w-4 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </motion.a>
-                );
-              })}
-            </motion.div>
-          )}
-        </motion.div>
-
-        {/* Footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 1 }}
-          className="mt-auto py-8 text-center"
-        >
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs text-white/25 hover:text-white/50 transition-colors"
-          >
-            <svg width="14" height="14" viewBox="0 0 32 32" fill="none">
-              <polyline
-                points="3,16 9,16 11,10 13,22 15,6 17,26 19,14 21,18 23,16 29,16"
-                stroke="currentColor" strokeWidth="2.5" fill="none"
-                strokeLinecap="round" strokeLinejoin="round"
-              />
-            </svg>
-            Powered by Pulseframelabs
-          </Link>
-        </motion.div>
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+                {page.display_name}
+              </h1>
+              {page.bio && (
+                <p className="text-sm text-white/50 mt-1 max-w-lg leading-relaxed line-clamp-2">
+                  {page.bio}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        </div>
+        {/* Gradient fade to content */}
+        <div
+          className="h-8"
+          style={{ background: "linear-gradient(to bottom, transparent, #0b0e14)" }}
+        />
       </div>
+
+      {/* Main Content */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
+        {/* Deals Tab */}
+        {activeTab === "deals" && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {deals.length === 0 ? (
+              <div className="text-center py-20 text-white/30">
+                <p className="text-lg font-medium">No deals available yet</p>
+                <p className="text-sm mt-1">Check back soon for exclusive casino bonuses!</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-bold text-white">
+                    Casino Bonus Deals
+                  </h2>
+                  <span className="text-xs text-white/30">{deals.length} Deal{deals.length !== 1 ? "s" : ""}</span>
+                </div>
+                {deals.map((deal, i) => (
+                  <DealCard key={deal.id} deal={deal} accent={accent} index={i} />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Store Tab */}
+        {activeTab === "store" && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-white">
+                {storeSettings?.store_name || "Store"}
+              </h2>
+              {storeSettings?.store_description && (
+                <p className="text-sm text-white/40 mt-1">{storeSettings.store_description}</p>
+              )}
+            </div>
+            {storeItems.length === 0 ? (
+              <div className="text-center py-20 text-white/30">
+                <p className="text-lg font-medium">No items in the store</p>
+                <p className="text-sm mt-1">Check back later!</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {storeItems.map((item, i) => (
+                  <StoreItemCard
+                    key={item.id}
+                    item={item}
+                    currency={storeSettings?.store_currency || "Points"}
+                    accent={accent}
+                    index={i}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* About Tab */}
+        {activeTab === "about" && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="max-w-lg mx-auto"
+          >
+            {/* Profile Card */}
+            <div
+              className="rounded-xl overflow-hidden border"
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                borderColor: "rgba(255,255,255,0.06)",
+              }}
+            >
+              {/* Banner */}
+              <div className="h-32 sm:h-40 relative">
+                {page.banner_url ? (
+                  <img src={page.banner_url} alt="Banner" className="w-full h-full object-cover" />
+                ) : (
+                  <div
+                    className="w-full h-full"
+                    style={{ background: `linear-gradient(135deg, ${accent}30 0%, ${accent}08 60%, transparent 100%)` }}
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0b0e14] via-transparent to-transparent" />
+              </div>
+
+              {/* Avatar + Info */}
+              <div className="px-6 pb-6 -mt-10 relative">
+                <div className="relative inline-block">
+                  <div
+                    className="absolute -inset-0.5 rounded-full opacity-50 blur-sm"
+                    style={{ background: `linear-gradient(135deg, ${accent}, ${accent}66)` }}
+                  />
+                  {page.avatar_url ? (
+                    <img
+                      src={page.avatar_url}
+                      alt={page.display_name}
+                      className="relative h-16 w-16 rounded-full border-2 object-cover"
+                      style={{ borderColor: accent }}
+                    />
+                  ) : (
+                    <div
+                      className="relative h-16 w-16 rounded-full border-2 flex items-center justify-center text-xl font-bold"
+                      style={{
+                        borderColor: accent,
+                        background: `linear-gradient(135deg, ${accent}, ${accent}88)`,
+                        color: "#0b0e14",
+                      }}
+                    >
+                      {initial}
+                    </div>
+                  )}
+                </div>
+
+                <h2 className="text-xl font-bold text-white mt-3">{page.display_name}</h2>
+                {page.bio && (
+                  <p className="text-sm text-white/50 mt-2 leading-relaxed">{page.bio}</p>
+                )}
+
+                {/* Social Links */}
+                {activeSocials.length > 0 && (
+                  <div className="mt-5 space-y-2">
+                    {activeSocials.map((social) => {
+                      const url = page[social.key as keyof StreamerPageSettings] as string;
+                      const Icon = social.icon;
+                      return (
+                        <a
+                          key={social.key}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 w-full rounded-lg px-4 py-3 border transition-all duration-200"
+                          style={{
+                            borderColor: `${social.color}20`,
+                            background: `${social.color}06`,
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = social.hoverBg;
+                            e.currentTarget.style.borderColor = `${social.color}40`;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = `${social.color}06`;
+                            e.currentTarget.style.borderColor = `${social.color}20`;
+                          }}
+                        >
+                          <div
+                            className="flex items-center justify-center h-8 w-8 rounded-md"
+                            style={{ background: `${social.color}12`, color: social.color }}
+                          >
+                            <Icon />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-semibold text-white">{social.label}</div>
+                            <div className="text-xs text-white/30 truncate">{url.replace(/^https?:\/\//, "")}</div>
+                          </div>
+                          <svg className="h-4 w-4 text-white/15 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                          </svg>
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer
+        className="border-t py-6 text-center"
+        style={{ borderColor: "rgba(255,255,255,0.04)" }}
+      >
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-xs text-white/20 hover:text-white/40 transition-colors"
+        >
+          <svg width="14" height="14" viewBox="0 0 32 32" fill="none">
+            <polyline
+              points="3,16 9,16 11,10 13,22 15,6 17,26 19,14 21,18 23,16 29,16"
+              stroke="currentColor" strokeWidth="2.5" fill="none"
+              strokeLinecap="round" strokeLinejoin="round"
+            />
+          </svg>
+          Powered by Pulseframelabs
+        </Link>
+      </footer>
     </div>
   );
 }
 
-// Social icons as components
+// ============================================================
+// Deal Card Component
+// ============================================================
+
+function DealCard({ deal, accent, index }: { deal: CasinoDeal; accent: string; index: number }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      className="rounded-xl border overflow-hidden"
+      style={{
+        background: "rgba(255,255,255,0.02)",
+        borderColor: "rgba(255,255,255,0.06)",
+      }}
+    >
+      <div className="flex items-center gap-4 px-4 sm:px-5 py-4">
+        {/* Logo */}
+        {deal.casino_logo_url ? (
+          <img
+            src={deal.casino_logo_url}
+            alt={deal.casino_name}
+            className="h-12 w-12 rounded-lg object-contain bg-white/5 shrink-0"
+          />
+        ) : (
+          <div
+            className="h-12 w-12 rounded-lg flex items-center justify-center text-lg font-bold shrink-0"
+            style={{ background: `${accent}15`, color: accent }}
+          >
+            {deal.casino_name.charAt(0)}
+          </div>
+        )}
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-white truncate">{deal.casino_name}</span>
+            {deal.is_new && (
+              <span
+                className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded shrink-0"
+                style={{ background: `${accent}20`, color: accent, border: `1px solid ${accent}40` }}
+              >
+                NEW
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-3 mt-1 text-xs text-white/40">
+            {deal.bonus_percentage && (
+              <span className="font-semibold" style={{ color: accent }}>{deal.bonus_percentage}%</span>
+            )}
+            {deal.max_bonus_amount && <span>Max {deal.max_bonus_amount}</span>}
+            {deal.wagering && <span>Wager {deal.wagering}</span>}
+          </div>
+        </div>
+
+        {/* Rating */}
+        {deal.rating > 0 && (
+          <div className="flex items-center gap-1 shrink-0 mr-2">
+            <StarIcon />
+            <span className="text-xs font-semibold text-amber-400">{deal.rating}</span>
+          </div>
+        )}
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors"
+            style={{
+              borderColor: "rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.03)",
+              color: "rgba(255,255,255,0.6)",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.06)"; e.currentTarget.style.color = "white"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.03)"; e.currentTarget.style.color = "rgba(255,255,255,0.6)"; }}
+          >
+            {expanded ? "Less" : "Details"}
+          </button>
+          <a
+            href={deal.affiliate_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-1.5 rounded-lg text-xs font-bold transition-opacity hover:opacity-90"
+            style={{ background: accent, color: "#0b0e14" }}
+          >
+            Play
+          </a>
+        </div>
+      </div>
+
+      {/* Expanded Details */}
+      {expanded && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          transition={{ duration: 0.2 }}
+          className="border-t px-4 sm:px-5 py-4"
+          style={{ borderColor: "rgba(255,255,255,0.04)" }}
+        >
+          {deal.bonus_text && (
+            <p className="text-sm text-white/60 mb-3">{deal.bonus_text}</p>
+          )}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+            {deal.bonus_percentage && (
+              <div className="rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.03)" }}>
+                <div className="text-white/30 mb-0.5">Bonus</div>
+                <div className="font-semibold text-white">{deal.bonus_percentage}%</div>
+              </div>
+            )}
+            {deal.max_bonus_amount && (
+              <div className="rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.03)" }}>
+                <div className="text-white/30 mb-0.5">Max Bonus</div>
+                <div className="font-semibold text-white">{deal.max_bonus_amount}</div>
+              </div>
+            )}
+            {deal.wagering && (
+              <div className="rounded-lg px-3 py-2" style={{ background: "rgba(255,255,255,0.03)" }}>
+                <div className="text-white/30 mb-0.5">Wagering</div>
+                <div className="font-semibold text-white">{deal.wagering}</div>
+              </div>
+            )}
+            {deal.bonus_code && (
+              <div className="rounded-lg px-3 py-2 col-span-2 sm:col-span-1" style={{ background: "rgba(255,255,255,0.03)" }}>
+                <div className="text-white/30 mb-0.5">Bonus Code</div>
+                <div className="font-mono font-semibold" style={{ color: accent }}>{deal.bonus_code}</div>
+              </div>
+            )}
+          </div>
+          <a
+            href={deal.affiliate_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-bold transition-opacity hover:opacity-90"
+            style={{ background: accent, color: "#0b0e14" }}
+          >
+            Claim Bonus
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </a>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
+// ============================================================
+// Store Item Card Component
+// ============================================================
+
+function StoreItemCard({ item, currency, accent, index }: { item: StoreItem; currency: string; accent: string; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      className="rounded-xl border overflow-hidden flex flex-col"
+      style={{
+        background: "rgba(255,255,255,0.02)",
+        borderColor: "rgba(255,255,255,0.06)",
+      }}
+    >
+      {/* Image */}
+      {item.image_url ? (
+        <img src={item.image_url} alt={item.name} className="w-full h-36 object-cover" />
+      ) : (
+        <div
+          className="w-full h-36 flex items-center justify-center"
+          style={{ background: `${accent}08` }}
+        >
+          <span className="text-3xl font-bold" style={{ color: `${accent}30` }}>
+            {item.name.charAt(0)}
+          </span>
+        </div>
+      )}
+
+      {/* Info */}
+      <div className="p-4 flex-1 flex flex-col">
+        <h3 className="text-sm font-bold text-white">{item.name}</h3>
+        {item.description && (
+          <p className="text-xs text-white/40 mt-1 line-clamp-2 flex-1">{item.description}</p>
+        )}
+        <div className="flex items-center justify-between mt-3 pt-3 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+          <span className="text-sm font-bold" style={{ color: accent }}>
+            {item.price_points} {currency}
+          </span>
+          {item.quantity_available !== -1 && (
+            <span className="text-[10px] text-white/30">
+              {item.quantity_available} left
+            </span>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ============================================================
+// Icon Components
+// ============================================================
+
+function StarIcon() {
+  return (
+    <svg className="h-3.5 w-3.5 text-amber-400 fill-amber-400" viewBox="0 0 24 24">
+      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+    </svg>
+  );
+}
+
 function TwitchIcon() {
   return (
     <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">

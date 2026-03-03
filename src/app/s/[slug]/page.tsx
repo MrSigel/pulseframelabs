@@ -28,6 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function StreamerPage({ params }: Props) {
   const { slug } = await params;
   const supabase = await createClient();
+
   const { data: page } = await supabase
     .from("streamer_page_settings")
     .select("*")
@@ -37,5 +38,35 @@ export default async function StreamerPage({ params }: Props) {
 
   if (!page) notFound();
 
-  return <StreamerPageClient page={page} />;
+  // Fetch casino deals for this streamer
+  const { data: deals } = await supabase
+    .from("casino_deals")
+    .select("*")
+    .eq("user_id", page.user_id)
+    .eq("enabled", true)
+    .order("sort_order", { ascending: true });
+
+  // Fetch store items for this streamer
+  const { data: storeItems } = await supabase
+    .from("store_items")
+    .select("*")
+    .eq("user_id", page.user_id)
+    .eq("visible", true)
+    .order("created_at", { ascending: false });
+
+  // Fetch store settings
+  const { data: storeSettings } = await supabase
+    .from("store_settings")
+    .select("*")
+    .eq("user_id", page.user_id)
+    .maybeSingle();
+
+  return (
+    <StreamerPageClient
+      page={page}
+      deals={deals ?? []}
+      storeItems={storeItems ?? []}
+      storeSettings={storeSettings}
+    />
+  );
 }

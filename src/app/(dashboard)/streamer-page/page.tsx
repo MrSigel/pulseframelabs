@@ -9,12 +9,14 @@ import { Switch } from "@/components/ui/switch";
 import {
   Save, Loader2, ExternalLink, Copy, Eye, EyeOff,
   Globe, Twitch, Youtube, Twitter, MessageCircle,
+  CheckCircle2, AlertCircle, Plus, X, Star, Pencil,
+  Inbox, GripVertical, Tag,
 } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
-import { streamerPage } from "@/lib/supabase/db";
+import { streamerPage, casinoDeals as dealsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
-import type { StreamerPageSettings } from "@/lib/supabase/types";
+import type { StreamerPageSettings, CasinoDeal } from "@/lib/supabase/types";
 
 export default function StreamerPageSettingsPage() {
   const { canModify } = useFeatureGate();
@@ -22,6 +24,19 @@ export default function StreamerPageSettingsPage() {
     () => streamerPage.get(),
     [],
   );
+  const { data: deals, refetch: refetchDeals } = useDbQuery<CasinoDeal[]>(
+    () => dealsDb.list(),
+    [],
+  );
+
+  const [addDealOpen, setAddDealOpen] = useState(false);
+  const [editingDeal, setEditingDeal] = useState<CasinoDeal | null>(null);
+  const [dealForm, setDealForm] = useState({
+    casino_name: "", casino_logo_url: "", bonus_text: "",
+    bonus_percentage: "", max_bonus_amount: "", wagering: "",
+    bonus_code: "", affiliate_url: "", rating: "4.5", is_new: false,
+  });
+  const [dealSaving, setDealSaving] = useState(false);
 
   const [slug, setSlug] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -40,6 +55,9 @@ export default function StreamerPageSettingsPage() {
   const [accentColor, setAccentColor] = useState("#c9a84c");
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
+  const [saveError, setSaveError] = useState("");
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
   useEffect(() => {
     if (settings) {
@@ -58,8 +76,23 @@ export default function StreamerPageSettingsPage() {
       setWebsiteUrl(settings.website_url || "");
       setIsPublic(settings.is_public ?? true);
       setAccentColor(settings.accent_color || "#c9a84c");
+      if (settings.slug) setSlugManuallyEdited(true);
     }
   }, [settings]);
+
+  function handleDisplayNameChange(value: string) {
+    setDisplayName(value);
+    if (!slugManuallyEdited) {
+      const autoSlug = value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-_]/g, "").replace(/-+/g, "-").replace(/^-|-$/g, "");
+      setSlug(autoSlug);
+    }
+  }
+
+  function handleSlugChange(value: string) {
+    const sanitized = value.toLowerCase().replace(/[^a-z0-9-_]/g, "");
+    setSlug(sanitized);
+    setSlugManuallyEdited(true);
+  }
 
   const baseUrl = useMemo(() => {
     if (typeof window !== "undefined") return window.location.origin;
@@ -69,8 +102,14 @@ export default function StreamerPageSettingsPage() {
   const pageUrl = slug ? `${baseUrl}/s/${slug}` : "";
 
   async function handleSave() {
-    if (!slug.trim()) return;
+    if (!slug.trim()) {
+      setSaveStatus("error");
+      setSaveError("URL Slug is required");
+      setTimeout(() => setSaveStatus("idle"), 3000);
+      return;
+    }
     setSaving(true);
+    setSaveStatus("idle");
     try {
       await streamerPage.update({
         slug: slug.toLowerCase().replace(/[^a-z0-9-_]/g, ""),
@@ -90,8 +129,14 @@ export default function StreamerPageSettingsPage() {
         accent_color: accentColor,
       });
       await refetch();
-    } catch (err) {
+      setSaveStatus("success");
+      setTimeout(() => setSaveStatus("idle"), 3000);
+    } catch (err: unknown) {
       console.error("Failed to save streamer page:", err);
+      const msg = err instanceof Error ? err.message : "Failed to save";
+      setSaveStatus("error");
+      setSaveError(msg.includes("unique") ? "This URL slug is already taken" : msg);
+      setTimeout(() => setSaveStatus("idle"), 5000);
     } finally {
       setSaving(false);
     }
@@ -102,6 +147,84 @@ export default function StreamerPageSettingsPage() {
       navigator.clipboard.writeText(pageUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  }
+
+  function resetDealForm() {
+    setDealForm({
+      casino_name: "", casino_logo_url: "", bonus_text: "",
+      bonus_percentage: "", max_bonus_amount: "", wagering: "",
+      bonus_code: "", affiliate_url: "", rating: "4.5", is_new: false,
+    });
+    setEditingDeal(null);
+  }
+
+  function openEditDeal(deal: CasinoDeal) {
+    setDealForm({
+      casino_name: deal.casino_name,
+      casino_logo_url: deal.casino_logo_url || "",
+      bonus_text: deal.bonus_text,
+      bonus_percentage: deal.bonus_percentage?.toString() || "",
+      max_bonus_amount: deal.max_bonus_amount || "",
+      wagering: deal.wagering || "",
+      bonus_code: deal.bonus_code || "",
+      affiliate_url: deal.affiliate_url,
+      rating: deal.rating?.toString() || "4.5",
+      is_new: deal.is_new,
+    });
+    setEditingDeal(deal);
+    setAddDealOpen(true);
+  }
+
+  async function handleSaveDeal() {
+    if (!dealForm.casino_name.trim() || !dealForm.affiliate_url.trim()) return;
+    setDealSaving(true);
+    try {
+      const payload = {
+        casino_name: dealForm.casino_name.trim(),
+        casino_logo_url: dealForm.casino_logo_url.trim() || null,
+        bonus_text: dealForm.bonus_text.trim(),
+        bonus_percentage: dealForm.bonus_percentage ? parseInt(dealForm.bonus_percentage) : null,
+        max_bonus_amount: dealForm.max_bonus_amount.trim() || null,
+        wagering: dealForm.wagering.trim() || null,
+        bonus_code: dealForm.bonus_code.trim() || null,
+        affiliate_url: dealForm.affiliate_url.trim(),
+        rating: parseFloat(dealForm.rating) || 0,
+        is_new: dealForm.is_new,
+        enabled: true,
+        sort_order: editingDeal ? editingDeal.sort_order : (deals?.length || 0),
+        details: {},
+      };
+      if (editingDeal) {
+        await dealsDb.update(editingDeal.id, payload);
+      } else {
+        await dealsDb.create(payload);
+      }
+      await refetchDeals();
+      setAddDealOpen(false);
+      resetDealForm();
+    } catch (err) {
+      console.error("Failed to save deal:", err);
+    } finally {
+      setDealSaving(false);
+    }
+  }
+
+  async function handleDeleteDeal(id: string) {
+    try {
+      await dealsDb.remove(id);
+      await refetchDeals();
+    } catch (err) {
+      console.error("Failed to delete deal:", err);
+    }
+  }
+
+  async function handleToggleDeal(deal: CasinoDeal) {
+    try {
+      await dealsDb.update(deal.id, { enabled: !deal.enabled });
+      await refetchDeals();
+    } catch (err) {
+      console.error("Failed to toggle deal:", err);
     }
   }
 
@@ -119,7 +242,17 @@ export default function StreamerPageSettingsPage() {
                 </Button>
               </a>
             )}
-            <Button className="gap-2" onClick={handleSave} disabled={saving || !slug.trim() || !canModify}>
+            {saveStatus === "success" && (
+              <span className="flex items-center gap-1.5 text-sm text-emerald-400 font-medium">
+                <CheckCircle2 className="h-4 w-4" /> Saved!
+              </span>
+            )}
+            {saveStatus === "error" && (
+              <span className="flex items-center gap-1.5 text-sm text-red-400 font-medium">
+                <AlertCircle className="h-4 w-4" /> {saveError}
+              </span>
+            )}
+            <Button className="gap-2" onClick={handleSave} disabled={saving || !canModify}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               {saving ? "Saving..." : "Save Changes"}
             </Button>
@@ -147,7 +280,7 @@ export default function StreamerPageSettingsPage() {
                   </div>
                   <Input
                     value={slug}
-                    onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ""))}
+                    onChange={(e) => handleSlugChange(e.target.value)}
                     placeholder="your-name"
                     className="flex-1"
                   />
@@ -190,7 +323,7 @@ export default function StreamerPageSettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-white">Display Name</Label>
-                <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your display name" />
+                <Input value={displayName} onChange={(e) => handleDisplayNameChange(e.target.value)} placeholder="Your display name" />
               </div>
               <div className="space-y-2">
                 <Label className="text-white">Bio</Label>
@@ -280,6 +413,93 @@ export default function StreamerPageSettingsPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Casino Deals */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg text-white flex items-center gap-2">
+                <Tag className="h-5 w-5 text-primary" />
+                Casino Deals
+              </CardTitle>
+              <Button
+                size="sm"
+                className="gap-1.5"
+                onClick={() => { resetDealForm(); setAddDealOpen(true); }}
+                disabled={!canModify}
+              >
+                <Plus className="h-3.5 w-3.5" /> Add Deal
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <p className="text-xs text-muted-foreground mb-4">
+                Manage casino deals displayed on your landing page. Viewers see these as bonus offers.
+              </p>
+
+              {!deals || deals.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                  <Inbox className="h-8 w-8 mb-2 text-muted-foreground/60" />
+                  <p className="text-sm">No deals yet. Add your first casino deal.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {deals.map((deal) => (
+                    <div
+                      key={deal.id}
+                      className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors ${
+                        deal.enabled
+                          ? "border-border bg-background/40"
+                          : "border-border/50 bg-background/20 opacity-60"
+                      }`}
+                    >
+                      <GripVertical className="h-4 w-4 text-muted-foreground/40 shrink-0 cursor-grab" />
+                      {deal.casino_logo_url ? (
+                        <img src={deal.casino_logo_url} alt={deal.casino_name} className="h-8 w-8 rounded object-contain bg-white/5" />
+                      ) : (
+                        <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                          {deal.casino_name.charAt(0)}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-foreground truncate">{deal.casino_name}</span>
+                          {deal.is_new && (
+                            <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">NEW</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                          {deal.bonus_percentage && <span>{deal.bonus_percentage}%</span>}
+                          {deal.max_bonus_amount && <span>Max {deal.max_bonus_amount}</span>}
+                          {deal.wagering && <span>Wager {deal.wagering}</span>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <div className="flex items-center gap-0.5 text-xs text-amber-400 mr-1">
+                          <Star className="h-3 w-3 fill-amber-400" />
+                          {deal.rating}
+                        </div>
+                        <Switch
+                          checked={deal.enabled}
+                          onCheckedChange={() => handleToggleDeal(deal)}
+                        />
+                        <button
+                          onClick={() => openEditDeal(deal)}
+                          className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-white/[0.06] transition-all"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteDeal(deal.id)}
+                          className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-all"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Preview Sidebar */}
@@ -348,6 +568,136 @@ export default function StreamerPageSettingsPage() {
           </Card>
         </div>
       </div>
+
+      {/* Add/Edit Deal Modal */}
+      {addDealOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            style={{ animation: "fadeIn 0.2s ease-out" }}
+            onClick={() => { setAddDealOpen(false); resetDealForm(); }}
+          />
+          <div
+            className="relative z-10 w-full max-w-lg rounded-xl border border-white/[0.08] shadow-2xl max-h-[90vh] flex flex-col"
+            style={{
+              background: "linear-gradient(135deg, #0f1521 0%, #1a2235 50%, #0f1521 100%)",
+              animation: "modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+              boxShadow: "0 0 60px rgba(59, 130, 246, 0.08), 0 25px 50px rgba(0,0,0,0.5)",
+            }}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+              <h2 className="text-white font-bold text-lg">
+                {editingDeal ? "Edit Deal" : "Add Casino Deal"}
+              </h2>
+              <button
+                onClick={() => { setAddDealOpen(false); resetDealForm(); }}
+                className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-4 overflow-y-auto flex-1">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <Label className="text-sm font-semibold text-white mb-2 block">Casino Name *</Label>
+                  <Input
+                    value={dealForm.casino_name}
+                    onChange={(e) => setDealForm({ ...dealForm, casino_name: e.target.value })}
+                    placeholder="e.g. Stake Casino"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-sm font-semibold text-white mb-2 block">Casino Logo URL</Label>
+                  <Input
+                    value={dealForm.casino_logo_url}
+                    onChange={(e) => setDealForm({ ...dealForm, casino_logo_url: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-white mb-2 block">Bonus %</Label>
+                  <Input
+                    value={dealForm.bonus_percentage}
+                    onChange={(e) => setDealForm({ ...dealForm, bonus_percentage: e.target.value })}
+                    placeholder="e.g. 200"
+                    type="number"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-white mb-2 block">Max Bonus Amount</Label>
+                  <Input
+                    value={dealForm.max_bonus_amount}
+                    onChange={(e) => setDealForm({ ...dealForm, max_bonus_amount: e.target.value })}
+                    placeholder="e.g. 500 EUR"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-sm font-semibold text-white mb-2 block">Bonus Description</Label>
+                  <Input
+                    value={dealForm.bonus_text}
+                    onChange={(e) => setDealForm({ ...dealForm, bonus_text: e.target.value })}
+                    placeholder="e.g. 200% up to 500 EUR Welcome Bonus"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-white mb-2 block">Wagering</Label>
+                  <Input
+                    value={dealForm.wagering}
+                    onChange={(e) => setDealForm({ ...dealForm, wagering: e.target.value })}
+                    placeholder="e.g. 40x"
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-white mb-2 block">Bonus Code</Label>
+                  <Input
+                    value={dealForm.bonus_code}
+                    onChange={(e) => setDealForm({ ...dealForm, bonus_code: e.target.value })}
+                    placeholder="e.g. STREAMER100"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-sm font-semibold text-white mb-2 block">Affiliate URL *</Label>
+                  <Input
+                    value={dealForm.affiliate_url}
+                    onChange={(e) => setDealForm({ ...dealForm, affiliate_url: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-semibold text-white mb-2 block">Rating (0-5)</Label>
+                  <Input
+                    value={dealForm.rating}
+                    onChange={(e) => setDealForm({ ...dealForm, rating: e.target.value })}
+                    type="number"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                  />
+                </div>
+                <div className="flex items-end pb-1">
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={dealForm.is_new}
+                      onCheckedChange={(v) => setDealForm({ ...dealForm, is_new: v })}
+                    />
+                    <Label className="text-sm text-white">Mark as NEW</Label>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                className="w-full gap-2 py-5 text-sm font-semibold mt-2"
+                onClick={handleSaveDeal}
+                disabled={dealSaving || !dealForm.casino_name.trim() || !dealForm.affiliate_url.trim() || !canModify}
+              >
+                {dealSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                {dealSaving ? "Saving..." : editingDeal ? "Update Deal" : "Add Deal"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
