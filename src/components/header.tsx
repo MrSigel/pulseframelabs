@@ -2,10 +2,12 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, LogOut, Moon, Sun, MonitorSmartphone, User as UserIcon, Shield, ExternalLink, Bot } from "lucide-react";
+import { ChevronDown, LogOut, Moon, Sun, MonitorSmartphone, User as UserIcon, Shield, ExternalLink, Bot, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { useThemeContext } from "@/components/providers";
+import { useLanguage } from "@/context/LanguageContext";
+import { languages } from "@/i18n/translations";
 import { useTwitchBot } from "@/contexts/TwitchBotContext";
 import { useSubscription } from "@/contexts/SubscriptionContext";
 import type { User } from "@supabase/supabase-js";
@@ -18,6 +20,10 @@ const themeIcons = {
 } as const;
 
 const themeLabels = { dark: "Dark", light: "Light", system: "Auto" } as const;
+
+const flagEmojis: Record<string, string> = {
+  en: "🇬🇧", de: "🇩🇪", it: "🇮🇹", fr: "🇫🇷", tr: "🇹🇷", pt: "🇵🇹", es: "🇪🇸",
+};
 
 function Avatar({ src, initial, size = "sm" }: { src?: string | null; initial: string; size?: "sm" | "md" }) {
   const px = size === "sm" ? "h-8 w-8" : "h-10 w-10";
@@ -40,13 +46,16 @@ function Avatar({ src, initial, size = "sm" }: { src?: string | null; initial: s
   );
 }
 
-export function Header() {
+export function Header({ animEnabled = false, onToggleAnimation }: { animEnabled?: boolean; onToggleAnimation?: () => void }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showLangDropdown, setShowLangDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const { preference, cycleTheme } = useThemeContext();
+  const { lang, setLang } = useLanguage();
 
   useEffect(() => {
     const supabase = createClient();
@@ -97,18 +106,21 @@ export function Header() {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
-  // Close dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setShowDropdown(false);
       }
+      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
+        setShowLangDropdown(false);
+      }
     }
-    if (showDropdown) {
+    if (showDropdown || showLangDropdown) {
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [showDropdown]);
+  }, [showDropdown, showLangDropdown]);
 
   async function handleLogout() {
     const supabase = createClient();
@@ -166,6 +178,73 @@ export function Header() {
             }`}
           />
         </div>
+
+        {/* Language Selector */}
+        <div className="relative" ref={langDropdownRef}>
+          <motion.button
+            onClick={() => setShowLangDropdown(!showLangDropdown)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title="Language"
+            className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary transition-colors hover:bg-primary/5"
+          >
+            <span className="text-sm leading-none">{flagEmojis[lang] || "🌐"}</span>
+            <span className="hidden sm:inline">{lang.toUpperCase()}</span>
+            <motion.div
+              animate={{ rotate: showLangDropdown ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown className="h-2.5 w-2.5 text-muted-foreground" />
+            </motion.div>
+          </motion.button>
+
+          <AnimatePresence>
+            {showLangDropdown && (
+              <motion.div
+                initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+                className="absolute top-full right-0 mt-2 w-48 rounded-xl border border-border bg-popover/95 shadow-2xl shadow-black/20 z-50 backdrop-blur-2xl overflow-hidden py-1.5"
+              >
+                {languages.map((l) => {
+                  const isActive = l.code === lang;
+                  return (
+                    <button
+                      key={l.code}
+                      onClick={() => { setLang(l.code); setShowLangDropdown(false); }}
+                      className={`flex items-center gap-2.5 w-full px-4 py-2 text-sm transition-all duration-150 ${
+                        isActive
+                          ? "text-primary bg-primary/10"
+                          : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
+                      }`}
+                    >
+                      <span className="text-sm leading-none">{flagEmojis[l.code] || "🌐"}</span>
+                      <span className={isActive ? "font-semibold" : "font-normal"}>{l.label}</span>
+                      <span className="ml-auto text-[10px] text-muted-foreground uppercase tracking-wider">{l.code}</span>
+                    </button>
+                  );
+                })}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* FX Toggle */}
+        {onToggleAnimation && (
+          <motion.button
+            onClick={onToggleAnimation}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            title={animEnabled ? "Disable background animation" : "Enable background animation"}
+            className={`flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] transition-colors hover:bg-primary/5 ${
+              animEnabled ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">FX</span>
+          </motion.button>
+        )}
 
         {/* Theme Toggle */}
         <motion.button
