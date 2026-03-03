@@ -5,10 +5,14 @@ const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 /**
  * Extract session_id from a Telegram message formatted by /api/chat/send.
- * Looks for: Session:* `<uuid>` or Session: `<uuid>`
+ * Telegram strips Markdown syntax from reply_to_message.text, so the text
+ * contains "Session: <uuid>" without asterisks or backticks.
+ * We match the UUID pattern directly after "Session".
  */
 function extractSessionId(text: string): string | null {
-  const match = text.match(/Session:\*?\s*`([^`]+)`/);
+  const match = text.match(
+    /Session[:\s*`]*([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i
+  );
   return match?.[1] || null;
 }
 

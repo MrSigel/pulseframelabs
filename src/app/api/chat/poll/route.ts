@@ -11,15 +11,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
     }
 
+    // "all=true" returns both visitor + support messages (for history reload)
+    const all = searchParams.get("all");
+
     const admin = createAdminClient();
 
     let query = admin
       .from("live_chat_messages")
       .select("id, sender, message, created_at")
       .eq("session_id", sessionId)
-      .eq("sender", "support")
       .order("created_at", { ascending: true })
       .limit(50);
+
+    if (!all) {
+      query = query.eq("sender", "support");
+    }
 
     if (after) {
       query = query.gt("created_at", after);

@@ -12,9 +12,17 @@ interface ChatMessage {
 }
 
 const SESSION_KEY = "pulseframe-chat-session";
+const STATE_KEY = "pulseframe-chat-state";
 
 const now = () =>
   new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export default function LiveChatWidget() {
   const [open, setOpen] = useState(false);
@@ -26,10 +34,12 @@ export default function LiveChatWidget() {
   const [sending, setSending] = useState(false);
   const [pulse, setPulse] = useState(true);
   const [sessionId, setSessionId] = useState("");
+  const [initialized, setInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const idRef = useRef(0);
   const lastPollRef = useRef<string | null>(null);
+  const historyLoadedRef = useRef(false);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -48,17 +58,70 @@ export default function LiveChatWidget() {
     if (open) setPulse(false);
   }, [open]);
 
-  // Initialize session_id from localStorage
+  // Initialize session + restore state from localStorage
   useEffect(() => {
-    let stored = localStorage.getItem(SESSION_KEY);
-    if (!stored) {
-      stored = crypto.randomUUID();
-      localStorage.setItem(SESSION_KEY, stored);
+    let storedSession = localStorage.getItem(SESSION_KEY);
+    if (!storedSession) {
+      storedSession = crypto.randomUUID();
+      localStorage.setItem(SESSION_KEY, storedSession);
     }
-    setSessionId(stored);
+    setSessionId(storedSession);
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(STATE_KEY) || "{}");
+      if (saved.step === "chat") {
+        setStep("chat");
+        setOpen(true);
+        setPulse(false);
+        if (saved.name) setName(saved.name);
+        if (saved.email) setEmail(saved.email);
+      }
+    } catch {
+      // Ignore corrupt state
+    }
+
+    setInitialized(true);
   }, []);
 
-  // Poll for support replies
+  // Persist chat state to localStorage
+  useEffect(() => {
+    if (!initialized) return;
+    localStorage.setItem(STATE_KEY, JSON.stringify({ step, name, email }));
+  }, [step, name, email, initialized]);
+
+  // Load full chat history from DB on restore
+  useEffect(() => {
+    if (!sessionId || step !== "chat" || historyLoadedRef.current) return;
+    historyLoadedRef.current = true;
+
+    const loadHistory = async () => {
+      try {
+        const res = await fetch(
+          `/api/chat/poll?sessionId=${encodeURIComponent(sessionId)}&all=true`
+        );
+        if (!res.ok) return;
+
+        const { messages: msgs } = await res.json();
+        if (msgs && msgs.length > 0) {
+          const loaded: ChatMessage[] = msgs.map((msg: { id: string; sender: string; message: string; created_at: string }) => ({
+            id: ++idRef.current,
+            dbId: msg.id,
+            from: msg.sender === "visitor" ? ("user" as const) : ("system" as const),
+            text: msg.message,
+            time: formatTime(msg.created_at),
+          }));
+          setMessages(loaded);
+          lastPollRef.current = msgs[msgs.length - 1].created_at;
+        }
+      } catch {
+        // Silently ignore history load errors
+      }
+    };
+
+    loadHistory();
+  }, [sessionId, step]);
+
+  // Poll for NEW support replies (only sender=support, after last timestamp)
   useEffect(() => {
     if (!open || step !== "chat" || !sessionId) return;
 
@@ -84,10 +147,7 @@ export default function LiveChatWidget() {
                   dbId: msg.id,
                   from: "system" as const,
                   text: msg.message,
-                  time: new Date(msg.created_at).toLocaleTimeString("de-DE", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  }),
+                  time: formatTime(msg.created_at),
                 },
               ];
             });
@@ -134,12 +194,7 @@ export default function LiveChatWidget() {
         body: JSON.stringify({ name, email, message: trimmed, sessionId }),
       });
 
-      if (res.ok) {
-        addMessage(
-          "system",
-          "Message sent! \u2705 We'll reply shortly."
-        );
-      } else {
+      if (!res.ok) {
         addMessage(
           "system",
           "Sorry, there was an issue sending your message. Please try again or email us at contact@pulseframelabs.com"
