@@ -5,10 +5,13 @@ import { MessageCircle, X, Send, CheckCircle, Loader2 } from "lucide-react";
 
 interface ChatMessage {
   id: number;
+  dbId?: string;
   from: "user" | "system";
   text: string;
   time: string;
 }
+
+const SESSION_KEY = "pulseframe-chat-session";
 
 const now = () =>
   new Date().toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
@@ -22,9 +25,11 @@ export default function LiveChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [sending, setSending] = useState(false);
   const [pulse, setPulse] = useState(true);
+  const [sessionId, setSessionId] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const idRef = useRef(0);
+  const lastPollRef = useRef<string | null>(null);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -42,6 +47,62 @@ export default function LiveChatWidget() {
   useEffect(() => {
     if (open) setPulse(false);
   }, [open]);
+
+  // Initialize session_id from localStorage
+  useEffect(() => {
+    let stored = localStorage.getItem(SESSION_KEY);
+    if (!stored) {
+      stored = crypto.randomUUID();
+      localStorage.setItem(SESSION_KEY, stored);
+    }
+    setSessionId(stored);
+  }, []);
+
+  // Poll for support replies
+  useEffect(() => {
+    if (!open || step !== "chat" || !sessionId) return;
+
+    let active = true;
+
+    const poll = async () => {
+      try {
+        const params = new URLSearchParams({ sessionId });
+        if (lastPollRef.current) params.set("after", lastPollRef.current);
+
+        const res = await fetch(`/api/chat/poll?${params}`);
+        if (!res.ok || !active) return;
+
+        const { messages: msgs } = await res.json();
+        if (msgs && msgs.length > 0) {
+          for (const msg of msgs) {
+            setMessages((prev) => {
+              if (prev.some((m) => m.dbId === msg.id)) return prev;
+              return [
+                ...prev,
+                {
+                  id: ++idRef.current,
+                  dbId: msg.id,
+                  from: "system" as const,
+                  text: msg.message,
+                  time: new Date(msg.created_at).toLocaleTimeString("de-DE", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                },
+              ];
+            });
+          }
+          lastPollRef.current = msgs[msgs.length - 1].created_at;
+        }
+      } catch {
+        // Silently ignore poll errors
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, 4000);
+    return () => { active = false; clearInterval(interval); };
+  }, [open, step, sessionId]);
 
   const addMessage = useCallback((from: "user" | "system", text: string) => {
     setMessages((prev) => [
@@ -70,13 +131,13 @@ export default function LiveChatWidget() {
       const res = await fetch("/api/chat/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message: trimmed }),
+        body: JSON.stringify({ name, email, message: trimmed, sessionId }),
       });
 
       if (res.ok) {
         addMessage(
           "system",
-          "Message received! ✅ Our team will get back to you as soon as possible. You can send more details if needed."
+          "Message sent! \u2705 We'll reply shortly."
         );
       } else {
         addMessage(

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
@@ -9,22 +10,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Chat not configured" }, { status: 503 });
     }
 
-    const { name, email, message } = await req.json();
+    const { name, email, message, sessionId } = await req.json();
 
     if (!message?.trim()) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
+    if (!sessionId) {
+      return NextResponse.json({ error: "Session ID is required" }, { status: 400 });
+    }
+
+    // Save visitor message to database
+    try {
+      const admin = createAdminClient();
+      await admin.from("live_chat_messages").insert({
+        session_id: sessionId,
+        sender: "visitor",
+        message: message.trim(),
+        visitor_name: name || null,
+        visitor_email: email || null,
+      });
+    } catch {
+      // Continue even if DB save fails
+    }
+
+    // Format message for Telegram — include session_id for reply tracking
     const text = [
-      "📩 *New Support Message*",
+      "\u{1f4e9} *New Support Message*",
       "",
-      `👤 *Name:* ${name || "Anonymous"}`,
-      email ? `📧 *Email:* ${email}` : "",
+      `\u{1f4cb} *Session:* \`${sessionId}\``,
+      `\u{1f464} *Name:* ${name || "Anonymous"}`,
+      email ? `\u{1f4e7} *Email:* ${email}` : "",
       "",
-      `💬 *Message:*`,
+      `\u{1f4ac} *Message:*`,
       message.trim(),
       "",
-      `🕐 *Time:* ${new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" })}`,
+      `\u{1f550} *Time:* ${new Date().toLocaleString("de-DE", { timeZone: "Europe/Berlin" })}`,
     ]
       .filter(Boolean)
       .join("\n");
@@ -47,7 +68,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to send message" }, { status: 502 });
     }
 
-    return NextResponse.json({ success: true });
+    // Store telegram_message_id for reference
+    try {
+      const telegramResponse = await res.json();
+      const telegramMessageId = telegramResponse?.result?.message_id;
+      if (telegramMessageId) {
+        const admin = createAdminClient();
+        await admin
+          .from("live_chat_messages")
+          .update({ telegram_message_id: telegramMessageId })
+          .eq("session_id", sessionId)
+          .eq("sender", "visitor")
+          .is("telegram_message_id", null)
+          .order("created_at", { ascending: false })
+          .limit(1);
+      }
+    } catch {
+      // Non-critical — ignore
+    }
+
+    return NextResponse.json({ success: true, sessionId });
   } catch (err) {
     console.error("Chat send error:", err);
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
