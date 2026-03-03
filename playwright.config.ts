@@ -8,7 +8,7 @@ export default defineConfig({
   retries: 0,
   reporter: [["html", { open: "never" }], ["list"]],
   use: {
-    baseURL: process.env.BASE_URL || "https://pulseframelabs.onrender.com",
+    baseURL: process.env.BASE_URL || "https://pulseframelabs.com",
     headless: false,
     viewport: { width: 1440, height: 900 },
     actionTimeout: 10_000,

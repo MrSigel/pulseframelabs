@@ -20,7 +20,7 @@ export function ConsoleBranding() {
       `color: #888; font-size: 11px; font-style: italic; padding: 2px 0;`
     );
     console.log(
-      `%c  https://pulseframelabs.onrender.com  `,
+      `%c  https://pulseframelabs.com  `,
       `color: #666; font-size: 10px; padding: 2px 0;`
     );
   }, []);

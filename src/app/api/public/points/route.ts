@@ -24,8 +24,8 @@ export async function GET(request: NextRequest) {
     const supabase = createAdminClient();
 
     const { data, error } = await supabase
-      .from("stream_points")
-      .select("points, username")
+      .from("stream_viewers")
+      .select("total_points, username")
       .eq("user_id", uid)
       .ilike("username", username)
       .maybeSingle();
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { points: data.points ?? 0, username: data.username, found: true },
+      { points: data.total_points ?? 0, username: data.username, found: true },
       { headers: corsHeaders() }
     );
   } catch {

@@ -805,6 +805,7 @@ test.describe("B. PAID ACCOUNT — Full Access", () => {
 
 // All 22 overlays in the codebase
 const ALL_OVERLAYS = [
+  "/overlay/auto_widget",
   "/overlay/balance_large",
   "/overlay/balance_normal",
   "/overlay/balance_small",
@@ -829,7 +830,7 @@ const ALL_OVERLAYS = [
 ];
 
 test.describe("C. ALL OVERLAYS — Render & Transparency", () => {
-  test("C1. All 21 overlay pages load with transparent bg and no errors", async ({ page }) => {
+  test("C1. All 22 overlay pages load with transparent bg and no errors", async ({ page }) => {
     const errors = trackConsoleErrors(page);
 
     for (const overlay of ALL_OVERLAYS) {
@@ -861,7 +862,7 @@ test.describe("C. ALL OVERLAYS — Render & Transparency", () => {
     }
 
     expect(errors.length).toBe(0);
-    report("No console errors across all 21 overlays", "PASS");
+    report("No console errors across all 22 overlays", "PASS");
   });
 });
 

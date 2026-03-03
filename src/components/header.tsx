@@ -249,7 +249,7 @@ export function Header() {
                     Theme Settings
                   </button>
                   <a
-                    href="https://pulseframelabs.onrender.com"
+                    href="https://pulseframelabs.com"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-primary/5 transition-all duration-150"

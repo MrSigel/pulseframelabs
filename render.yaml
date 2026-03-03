@@ -17,7 +17,7 @@ services:
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         sync: false
       - key: NEXT_PUBLIC_SITE_URL
-        value: https://pulseframelabs.onrender.com
+        value: https://pulseframelabs.com
       # Wallet & Credit System
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
