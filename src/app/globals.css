@@ -246,6 +246,34 @@
   border-color: var(--border);
 }
 
+/* ══════════════════════════════════════════════
+   LIGHT MODE — Hardcoded Modal/Popup Overrides
+   Dashboard pages use inline dark backgrounds
+   on custom modals. These rules override them.
+   ══════════════════════════════════════════════ */
+
+/* Modal container backgrounds (#0f1521 pattern) */
+[data-theme="light"] [style*="#0f1521"][class*="rounded-xl"] {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f6f1 50%, #ffffff 100%) !important;
+  box-shadow: 0 0 40px rgba(139, 109, 31, 0.06), 0 25px 50px rgba(0,0,0,0.10) !important;
+}
+
+/* Modal container backgrounds (#1a2235 pattern — alternate) */
+[data-theme="light"] [style*="#1a2235"][class*="rounded-xl"] {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f6f1 50%, #ffffff 100%) !important;
+  box-shadow: 0 0 40px rgba(139, 109, 31, 0.06), 0 25px 50px rgba(0,0,0,0.10) !important;
+}
+
+/* Header/footer borders inside light modals */
+[data-theme="light"] [style*="#0f1521"] [class*="border-white/"] {
+  border-color: var(--border) !important;
+}
+
+/* Dropdown menu hardcoded bg (#111827) */
+[data-theme="light"] [style*="#111827"]:not([class*="overlay-"]) {
+  background: var(--popover) !important;
+}
+
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 5px;

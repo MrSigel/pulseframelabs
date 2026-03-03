@@ -633,6 +633,18 @@ interface TableDef<T> {
   Update: Update<T>;
 }
 
+export interface BotCustomCommand {
+  id: string;
+  user_id: string;
+  command: string;
+  action_type: "alias" | "response";
+  alias_target: string | null;
+  response_text: string | null;
+  enabled: boolean;
+  cooldown_seconds: number;
+  created_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -687,6 +699,7 @@ export interface Database {
       user_subscriptions: TableDef<UserSubscription>;
       payment_requests: TableDef<PaymentRequest>;
       admin_audit_logs: TableDef<AdminAuditLog>;
+      bot_custom_commands: TableDef<BotCustomCommand>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

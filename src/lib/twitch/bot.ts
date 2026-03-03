@@ -11,6 +11,7 @@ type LogListener = (entry: { time: Date; type: string; message: string }) => voi
 class TwitchBot {
   private client: tmi.Client | null = null;
   private handlers: MessageHandler[] = [];
+  private commandAliases: Map<string, string> = new Map();
   private statusListeners: StatusListener[] = [];
   private logListeners: LogListener[] = [];
   private _status: BotStatus = "disconnected";
@@ -126,7 +127,19 @@ class TwitchBot {
     return [...this.handlers];
   }
 
-  private async handleMessage(channel: string, tags: ChatUserstate, message: string) {
+  setAliases(aliases: Map<string, string>) {
+    this.commandAliases = aliases;
+  }
+
+  private async handleMessage(channel: string, tags: ChatUserstate, rawMessage: string) {
+    // Apply command aliases (rewrite trigger before handlers see it)
+    let message = rawMessage;
+    const firstWord = rawMessage.split(" ")[0].toLowerCase();
+    const aliasTarget = this.commandAliases.get(firstWord);
+    if (aliasTarget) {
+      message = aliasTarget + rawMessage.slice(firstWord.length);
+    }
+
     const context: HandlerContext = {
       userId: this._userId || "",
       channel: channel.replace("#", ""),
@@ -138,7 +151,7 @@ class TwitchBot {
       try {
         if (handler.canHandle(channel, tags, message, context)) {
           await handler.handle(channel, tags, message, context);
-          this.log(handler.name, `${tags["display-name"] || tags.username}: ${message}`);
+          this.log(handler.name, `${tags["display-name"] || tags.username}: ${rawMessage}`);
         }
       } catch (err) {
         this.log("error", `Handler "${handler.name}" error: ${err instanceof Error ? err.message : String(err)}`);

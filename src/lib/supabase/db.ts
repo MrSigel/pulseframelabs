@@ -1,6 +1,6 @@
 import { createClient } from "./client";
 import type {
-  Bonushunt, BonushuntEntry, BalanceProfile, Casino, ChatMessage,
+  BotCustomCommand, Bonushunt, BonushuntEntry, BalanceProfile, Casino, ChatMessage,
   DashboardStat, DuelSession, DuelPlayer, Game, GiveawayHistoryEntry,
   GiveawaySession, GiveawayParticipant,
   HotwordSettings, HotwordEntry, LoyaltyPreset, Moderator,
@@ -804,6 +804,18 @@ export const paymentRequests = {
     if (error) throw error;
     return (data ?? []) as PaymentRequest[];
   },
+};
+
+// ============================================================
+// Bot Custom Commands
+// ============================================================
+export const botCustomCommands = {
+  list: () => selectByUser<BotCustomCommand>("bot_custom_commands", "created_at"),
+  create: (data: Pick<BotCustomCommand, "command" | "action_type" | "alias_target" | "response_text" | "cooldown_seconds">) =>
+    insertRow<BotCustomCommand>("bot_custom_commands", data),
+  update: (id: string, data: Partial<Pick<BotCustomCommand, "command" | "action_type" | "alias_target" | "response_text" | "enabled" | "cooldown_seconds">>) =>
+    updateRow<BotCustomCommand>("bot_custom_commands", id, data),
+  remove: (id: string) => deleteRow("bot_custom_commands", id),
 };
 
 // ============================================================

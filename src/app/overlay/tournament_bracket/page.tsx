@@ -222,11 +222,11 @@ function TournamentBracketContent() {
                 <div
                   className="h-full rounded-md overflow-hidden"
                   style={{
-                    background: isFinal ? "rgba(245,158,11,0.06)" : "rgba(12,14,18,0.9)",
+                    background: isFinal ? "rgba(245,158,11,0.06)" : "rgba(12,14,18,0.75)",
                     border: isFinal
                       ? "1px solid rgba(245,158,11,0.15)"
                       : "1px solid rgba(255,255,255,0.07)",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
                   }}
                 >
                   <div

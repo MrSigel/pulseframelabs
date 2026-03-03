@@ -15,11 +15,11 @@ interface SpinnerPrizeRow {
 function PokerChipOverlay({ size = 60 }: { size?: number }) {
   return (
     <svg viewBox="0 0 48 48" width={size} height={size} className="animate-spin-chip">
-      <circle cx="24" cy="24" r="23" fill="#0a0f1a" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
+      <circle cx="24" cy="24" r="23" fill="rgba(10,15,26,0.85)" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
       <circle cx="24" cy="24" r="20.5" fill="none" stroke="rgba(239,68,68,0.5)" strokeWidth="3.5" strokeDasharray="5.5 7.6" strokeLinecap="round" />
-      <circle cx="24" cy="24" r="17.5" fill="#0c1220" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+      <circle cx="24" cy="24" r="17.5" fill="rgba(12,18,32,0.85)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
       <circle cx="24" cy="24" r="13" fill="none" stroke="rgba(239,68,68,0.35)" strokeWidth="0.8" strokeDasharray="3 3" />
-      <circle cx="24" cy="24" r="10" fill="#0d1322" stroke="rgba(239,68,68,0.3)" strokeWidth="0.8" />
+      <circle cx="24" cy="24" r="10" fill="rgba(13,19,34,0.85)" stroke="rgba(239,68,68,0.3)" strokeWidth="0.8" />
       <path d="M24 16 L30 24 L24 32 L18 24 Z" fill="rgba(239,68,68,0.12)" stroke="rgba(239,68,68,0.5)" strokeWidth="0.6" />
       <circle cx="24" cy="24" r="2.5" fill="#ef4444" opacity="0.7" />
       <circle cx="24" cy="24" r="1.2" fill="#fff" opacity="0.6" />
@@ -27,6 +27,8 @@ function PokerChipOverlay({ size = 60 }: { size?: number }) {
     </svg>
   );
 }
+
+type OverlayPhase = "hidden" | "spinning" | "winner" | "fade-out";
 
 function SpinnerOverlayContent() {
   const params = useSearchParams();
@@ -43,7 +45,6 @@ function SpinnerOverlayContent() {
   const prizesParam = params.get("prizes") || "";
   const colorsParam = params.get("colors") || "";
 
-  // Determine prizes and colors from DB or URL params
   const { prizes, colors } = useMemo(() => {
     if (uid && dbPrizes && dbPrizes.length > 0) {
       return {
@@ -58,7 +59,7 @@ function SpinnerOverlayContent() {
   }, [uid, dbPrizes, prizesParam, colorsParam]);
 
   const [rotation, setRotation] = useState(0);
-  const [spinning, setSpinning] = useState(false);
+  const [phase, setPhase] = useState<OverlayPhase>("hidden");
   const [winner, setWinner] = useState<string | null>(null);
 
   const segAngle = 360 / prizes.length;
@@ -66,31 +67,35 @@ function SpinnerOverlayContent() {
   const totalSize = wheelSize + 24;
   const wheelCenter = wheelSize / 2;
 
-  // Ref to track current rotation for broadcast-triggered spins
   const rotationRef = useRef(rotation);
   rotationRef.current = rotation;
-  const spinningRef = useRef(spinning);
-  spinningRef.current = spinning;
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
 
   const spinWithRotation = useCallback((extra: number, duration: number) => {
-    if (spinningRef.current || prizes.length === 0) return;
-    setSpinning(true);
+    if (phaseRef.current === "spinning") return;
+    if (prizes.length === 0) return;
+
     setWinner(null);
+    setPhase("spinning");
+
     const newRotation = rotationRef.current + extra;
     setRotation(newRotation);
+
     setTimeout(() => {
       const normalizedAngle = newRotation % 360;
       const pointerAngle = (360 - normalizedAngle + 90) % 360;
       const winnerIdx = Math.floor(pointerAngle / segAngle) % prizes.length;
       setWinner(prizes[winnerIdx]);
-      setSpinning(false);
+      setPhase("winner");
+
+      // Auto fade out after 6 seconds
+      setTimeout(() => {
+        setPhase("fade-out");
+        setTimeout(() => setPhase("hidden"), 800);
+      }, 6000);
     }, duration);
   }, [prizes, segAngle]);
-
-  const spin = useCallback(() => {
-    const extra = 1800 + Math.random() * 1800;
-    spinWithRotation(extra, 4500);
-  }, [spinWithRotation]);
 
   // Listen for broadcast spin events from the dashboard
   useEffect(() => {
@@ -125,13 +130,24 @@ function SpinnerOverlayContent() {
     return { x2: wheelCenter + Math.cos(rad) * r, y2: wheelCenter + Math.sin(rad) * r };
   });
 
-  if (uid && loading) {
-    return <div className="text-white text-sm animate-pulse p-4">Loading...</div>;
-  }
+  if (uid && loading) return null;
+
+  // Hidden — nothing renders (fully transparent for OBS)
+  if (phase === "hidden") return null;
+
+  const isVisible = phase === "spinning" || phase === "winner";
+  const isFadingOut = phase === "fade-out";
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-6">
-      <div className="relative" style={{ width: totalSize, height: totalSize }}>
+    <div
+      className="flex flex-col items-center justify-center min-h-screen gap-6"
+      style={{
+        opacity: isFadingOut ? 0 : 1,
+        transition: isFadingOut ? "opacity 0.8s ease-out" : "opacity 0.4s ease-in",
+        animation: isVisible && !isFadingOut ? "fade-in-up 0.5s ease-out forwards" : undefined,
+      }}
+    >
+      <div className="relative" style={{ width: totalSize, height: totalSize, opacity: 0.92 }}>
         {/* Pointer */}
         <div
           className="absolute z-20"
@@ -149,10 +165,11 @@ function SpinnerOverlayContent() {
 
         {/* Outer decorative ring */}
         <div
-          className="absolute inset-0 rounded-full overlay-spinner-ring"
+          className="absolute inset-0 rounded-full"
           style={{
-            background: "conic-gradient(from 0deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.06) 100%)",
-            border: "2px solid rgba(255,255,255,0.06)",
+            background: "conic-gradient(from 0deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.04) 100%)",
+            border: "2px solid rgba(255,255,255,0.04)",
+            boxShadow: "0 0 40px rgba(0,0,0,0.2)",
           }}
         />
 
@@ -172,7 +189,7 @@ function SpinnerOverlayContent() {
                 y1={cy + Math.sin(rad) * innerR}
                 x2={cx + Math.cos(rad) * outerR}
                 y2={cy + Math.sin(rad) * outerR}
-                stroke="rgba(255,255,255,0.12)"
+                stroke="rgba(255,255,255,0.10)"
                 strokeWidth={i % 6 === 0 ? "1.5" : "0.5"}
               />
             );
@@ -181,7 +198,7 @@ function SpinnerOverlayContent() {
 
         {/* Wheel */}
         <div
-          className="absolute rounded-full overflow-hidden overlay-spinner-wheel"
+          className="absolute rounded-full overflow-hidden"
           style={{
             top: 12,
             left: 12,
@@ -189,17 +206,18 @@ function SpinnerOverlayContent() {
             height: wheelSize,
             background: `conic-gradient(${conicStops})`,
             transform: `rotate(${rotation}deg)`,
-            transition: spinning ? "transform 4.5s cubic-bezier(0.17, 0.67, 0.12, 0.99)" : "none",
-            border: "2px solid rgba(255,255,255,0.1)",
+            transition: phase === "spinning" ? "transform 4.5s cubic-bezier(0.17, 0.67, 0.12, 0.99)" : "none",
+            border: "2px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 0 20px rgba(0,0,0,0.2), inset 0 0 25px rgba(0,0,0,0.1)",
           }}
         >
           {/* Segment divider lines */}
           <svg className="absolute inset-0" width={wheelSize} height={wheelSize} style={{ zIndex: 2 }}>
             {segmentLines.map((line, i) => (
-              <line key={i} x1={wheelCenter} y1={wheelCenter} x2={line.x2} y2={line.y2} stroke="rgba(0,0,0,0.3)" strokeWidth="1.5" />
+              <line key={i} x1={wheelCenter} y1={wheelCenter} x2={line.x2} y2={line.y2} stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" />
             ))}
             {segmentLines.map((line, i) => (
-              <line key={`w${i}`} x1={wheelCenter} y1={wheelCenter} x2={line.x2} y2={line.y2} stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+              <line key={`w${i}`} x1={wheelCenter} y1={wheelCenter} x2={line.x2} y2={line.y2} stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
             ))}
           </svg>
 
@@ -234,29 +252,32 @@ function SpinnerOverlayContent() {
           })}
         </div>
 
-        {/* Center poker chip (clickable) */}
+        {/* Center poker chip */}
         <div
-          className="absolute cursor-pointer"
+          className="absolute"
           style={{
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
             zIndex: 10,
-            filter: "drop-shadow(0 0 16px rgba(239,68,68,0.35))",
+            filter: "drop-shadow(0 0 12px rgba(239,68,68,0.25))",
           }}
-          onClick={spin}
         >
           <PokerChipOverlay size={64} />
         </div>
       </div>
 
       {/* Winner display */}
-      {winner && (
+      {winner && phase === "winner" && (
         <div
-          className="animate-fade-in-up rounded-lg px-6 py-3 text-center overlay-card"
+          className="animate-fade-in-up rounded-xl px-8 py-4 text-center"
+          style={{
+            background: "rgba(12, 16, 24, 0.70)",
+            border: "1px solid rgba(16, 185, 129, 0.25)",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.25), 0 0 30px rgba(16, 185, 129, 0.08)",
+          }}
         >
-          <p className="text-[10px] uppercase tracking-widest text-slate-500 mb-1">Winner</p>
-          <p className="text-white font-bold text-lg">{winner}</p>
+          <p className="text-emerald-400 font-bold text-xl">{winner}</p>
         </div>
       )}
     </div>
@@ -266,7 +287,7 @@ function SpinnerOverlayContent() {
 export default function SpinnerOverlayPage() {
   return (
     <div style={{ background: "transparent" }}>
-      <Suspense fallback={<div className="text-white text-sm p-4">Loading...</div>}>
+      <Suspense fallback={null}>
         <SpinnerOverlayContent />
       </Suspense>
     </div>

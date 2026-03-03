@@ -10,14 +10,17 @@ import {
   type ReactNode,
 } from "react";
 import { twitchBot } from "@/lib/twitch/bot";
-import { twitchConnections } from "@/lib/supabase/db";
+import { twitchConnections, botCustomCommands } from "@/lib/supabase/db";
+import { createClient } from "@/lib/supabase/client";
 import {
   createChatHandler,
   createHotwordHandler,
   createSlotRequestHandler,
   createTournamentJoinHandler,
+  createCustomResponseHandler,
 } from "@/lib/twitch/handlers";
 import type { MessageHandler } from "@/lib/twitch/types";
+import type { BotCustomCommand } from "@/lib/supabase/types";
 
 interface LogEntry {
   time: Date;
@@ -37,6 +40,8 @@ interface TwitchBotContextValue {
   logs: LogEntry[];
   addHandler: (handler: MessageHandler) => void;
   removeHandler: (name: string) => void;
+  customCommands: BotCustomCommand[];
+  refreshCustomCommands: () => Promise<void>;
 }
 
 const TwitchBotContext = createContext<TwitchBotContextValue | null>(null);
@@ -63,6 +68,7 @@ export function TwitchBotProvider({ children }: { children: ReactNode }) {
     "tournament-join": true,
   });
 
+  const [customCommands, setCustomCommands] = useState<BotCustomCommand[]>([]);
   const handlersRef = useRef<Map<string, MessageHandler>>(new Map());
 
   // Listen to bot status changes
@@ -82,6 +88,74 @@ export function TwitchBotProvider({ children }: { children: ReactNode }) {
     });
     return unsub;
   }, []);
+
+  // Load custom commands from DB
+  const refreshCustomCommands = useCallback(async () => {
+    try {
+      const cmds = await botCustomCommands.list();
+      setCustomCommands(cmds);
+    } catch {
+      // silently ignore if table doesn't exist yet
+    }
+  }, []);
+
+  // Load custom commands on mount
+  useEffect(() => {
+    refreshCustomCommands();
+  }, [refreshCustomCommands]);
+
+  // Realtime subscription for custom commands
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("bot_custom_commands_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bot_custom_commands" },
+        () => { refreshCustomCommands(); },
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [refreshCustomCommands]);
+
+  // Apply custom commands to bot (aliases + response handler)
+  useEffect(() => {
+    const enabledCmds = customCommands.filter((c) => c.enabled);
+
+    // Build alias map
+    const aliases = new Map<string, string>();
+    for (const cmd of enabledCmds) {
+      if (cmd.action_type === "alias" && cmd.alias_target) {
+        aliases.set(cmd.command.toLowerCase(), cmd.alias_target);
+      }
+    }
+    twitchBot.setAliases(aliases);
+
+    // Build response map and register handler
+    const responses = new Map<string, { response: string; cooldown: number }>();
+    for (const cmd of enabledCmds) {
+      if (cmd.action_type === "response" && cmd.response_text) {
+        responses.set(cmd.command.toLowerCase(), {
+          response: cmd.response_text,
+          cooldown: cmd.cooldown_seconds,
+        });
+      }
+    }
+
+    // Remove old custom-responses handler if exists
+    if (handlersRef.current.has("custom-responses")) {
+      handlersRef.current.delete("custom-responses");
+      twitchBot.removeHandler("custom-responses");
+    }
+
+    // Register new one if there are response commands
+    if (responses.size > 0) {
+      const handler = createCustomResponseHandler(responses);
+      handlersRef.current.set("custom-responses", handler);
+      twitchBot.addHandler(handler);
+    }
+  }, [customCommands]);
 
   // Register default handlers when features are toggled
   useEffect(() => {
@@ -201,6 +275,8 @@ export function TwitchBotProvider({ children }: { children: ReactNode }) {
         logs,
         addHandler,
         removeHandler,
+        customCommands,
+        refreshCustomCommands,
       }}
     >
       {children}
