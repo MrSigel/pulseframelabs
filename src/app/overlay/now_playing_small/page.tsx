@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 
 interface GameRow {
   name: string;
@@ -14,6 +15,7 @@ interface GameRow {
 function NowPlayingSmallContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
 
   const { data: dbGame, loading } = useOverlayData<GameRow>({
     table: "games",
@@ -32,7 +34,7 @@ function NowPlayingSmallContent() {
   }
 
   return (
-    <div className="inline-block animate-fade-in-up">
+    <div className="inline-block animate-fade-in-up" style={cssVars}>
       <div
         className="rounded-lg overflow-hidden flex items-center overlay-card-sm"
       >

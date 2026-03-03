@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 
 interface HotwordEntry {
   word: string;
@@ -13,6 +14,7 @@ interface HotwordEntry {
 function HotwordsOverlayContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
 
   const { data: dbEntries, loading } = useOverlayData<HotwordEntry[]>({
     table: "hotword_entries",
@@ -38,7 +40,7 @@ function HotwordsOverlayContent() {
   }
 
   return (
-    <div className="inline-block animate-fade-in-up">
+    <div className="inline-block animate-fade-in-up" style={cssVars}>
       <div
         className="rounded-lg overflow-hidden overlay-card"
         style={{

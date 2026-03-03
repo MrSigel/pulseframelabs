@@ -177,6 +177,8 @@ export interface TournamentParticipant {
   user_id: string;
   tournament_id: string;
   viewer_username: string;
+  game_name: string;
+  badge_image_url: string | null;
   joined_at: string;
 }
 
@@ -413,6 +415,7 @@ export interface StoreItem {
   redemption_limit: number;
   excluded_users: Json;
   image_url: string | null;
+  item_type: 'item' | 'badge';
   created_at: string;
   updated_at: string;
 }
@@ -485,6 +488,18 @@ export interface ThemeSettings {
   is_custom: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface ThemeColors {
+  bgColor: string;
+  bgOpacity: number;
+  iconColor: string;
+  highlightColor: string;
+  textColor: string;
+  fontFamily: string;
+  borderRadius: number;
+  borderEnabled: boolean;
+  shadowEnabled: boolean;
 }
 
 export interface TwitchConnection {

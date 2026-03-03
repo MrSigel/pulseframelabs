@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 import type { ChatMessage } from "@/lib/supabase/types";
 
 const roleTextColor: Record<string, string> = {
@@ -18,6 +19,7 @@ const fallbackMessages = [
 
 function ChatSmallContent() {
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
 
   /* ---- Supabase realtime data ---- */
   const { data: messages } = useOverlayData<ChatMessage[]>({
@@ -33,7 +35,7 @@ function ChatSmallContent() {
     : null;
 
   return (
-    <div className="inline-block animate-fade-in-up">
+    <div className="inline-block animate-fade-in-up" style={cssVars}>
       <div
         className="rounded-lg overflow-hidden overlay-card"
         style={{

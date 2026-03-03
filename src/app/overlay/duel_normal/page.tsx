@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 import type { DuelSession, DuelPlayer } from "@/lib/supabase/types";
 
 const fallbackPlayers = [
@@ -16,6 +17,7 @@ const playerColors = ["#ef4444", "#10b981", "#3b82f6", "#f59e0b", "#8b5cf6", "#e
 function DuelContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
 
   /* ---- Supabase realtime data ---- */
   const { data: session } = useOverlayData<DuelSession>({
@@ -51,7 +53,7 @@ function DuelContent() {
     : fallbackPlayers;
 
   return (
-    <div className="inline-block animate-fade-in-up">
+    <div className="inline-block animate-fade-in-up" style={cssVars}>
       <div
         className="rounded-xl overflow-hidden overlay-card-lg"
         style={{

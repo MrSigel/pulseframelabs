@@ -54,6 +54,7 @@ export default function StorePage() {
   const [visible, setVisible] = useState(true);
   const [redemptionLimit, setRedemptionLimit] = useState("-1");
   const [excludedUsers, setExcludedUsers] = useState("");
+  const [itemType, setItemType] = useState<"item" | "badge">("item");
 
   // Store Settings state
   const [storeName, setStoreName] = useState("Streamer Store");
@@ -104,6 +105,7 @@ export default function StorePage() {
     setVisible(true);
     setRedemptionLimit("-1");
     setExcludedUsers("");
+    setItemType("item");
   };
 
   async function handleCreateItem() {
@@ -115,6 +117,7 @@ export default function StorePage() {
         description: itemDescription.trim(),
         price_points: parseInt(itemPrice) || 0,
         quantity_available: parseInt(itemQuantity) || -1,
+        item_type: itemType,
       });
       setAddItemOpen(false);
       setItemName(""); setItemDescription(""); setItemPrice(""); setItemQuantity("");
@@ -508,6 +511,42 @@ export default function StorePage() {
                 </Button>
                 <p className="text-[11px] text-slate-500 mt-2">
                   Upload a clear image representing the item (PNG, JPG) with dimensions 250x100px.
+                </p>
+              </div>
+
+              {/* Item Type */}
+              <div>
+                <Label className="text-sm font-semibold text-white mb-2 block">Type</Label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setItemType("item")}
+                    className="flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all"
+                    style={{
+                      background: itemType === "item" ? "var(--color-primary)" : "rgba(255,255,255,0.05)",
+                      color: itemType === "item" ? "#fff" : "rgba(255,255,255,0.5)",
+                      border: itemType === "item" ? "1px solid var(--color-primary)" : "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    Item
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setItemType("badge")}
+                    className="flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all"
+                    style={{
+                      background: itemType === "badge" ? "var(--color-primary)" : "rgba(255,255,255,0.05)",
+                      color: itemType === "badge" ? "#fff" : "rgba(255,255,255,0.5)",
+                      border: itemType === "badge" ? "1px solid var(--color-primary)" : "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    Badge
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1.5">
+                  {itemType === "badge"
+                    ? "Badges appear as background images behind player names in tournament overlays."
+                    : "Regular items that viewers can redeem from your store."}
                 </p>
               </div>
 

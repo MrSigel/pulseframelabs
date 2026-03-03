@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { useOverlayData } from "@/hooks/useOverlayData";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useGlobalCurrency, currencySymbol } from "@/hooks/useGlobalCurrency";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 
 interface WagerSession {
   casino_name: string;
@@ -19,6 +20,7 @@ interface WagerSession {
 function WagerBarNormalContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
   const { symbol: globalCurrency } = useGlobalCurrency(uid);
 
   const { data, loading } = useOverlayData<WagerSession>({
@@ -54,6 +56,7 @@ function WagerBarNormalContent() {
         pct={pct}
         start={start}
         currency={currency}
+        cssVars={cssVars}
       />
     );
   }
@@ -81,6 +84,7 @@ function WagerBarNormalContent() {
       pct={pct}
       start={start}
       currency={currency}
+      cssVars={cssVars}
     />
   );
 }
@@ -95,6 +99,7 @@ function WagerBarNormalView({
   pct,
   start,
   currency,
+  cssVars,
 }: {
   casino: string;
   header: string;
@@ -104,9 +109,10 @@ function WagerBarNormalView({
   pct: number;
   start: number;
   currency: string;
+  cssVars?: React.CSSProperties;
 }) {
   return (
-    <div className="inline-block animate-fade-in-up">
+    <div className="inline-block animate-fade-in-up" style={cssVars}>
       <div
         className="rounded-xl overflow-hidden overlay-card-vertical"
         style={{

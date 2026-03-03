@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 
 interface SlotRequest {
   id: string;
@@ -16,6 +17,7 @@ interface SlotRequest {
 function SlotRequestsOverlayContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
 
   const { data: dbRequests, loading } = useOverlayData<SlotRequest[]>({
     table: "slot_requests",
@@ -38,7 +40,7 @@ function SlotRequestsOverlayContent() {
   }
 
   return (
-    <div className="inline-block animate-fade-in-up">
+    <div className="inline-block animate-fade-in-up" style={cssVars}>
       <div
         className="rounded-xl overflow-hidden overlay-card"
         style={{

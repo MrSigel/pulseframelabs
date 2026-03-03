@@ -5,11 +5,13 @@ import { Suspense } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
 import { useGlobalCurrency, currencySymbol } from "@/hooks/useGlobalCurrency";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 import type { Bonushunt, BonushuntEntry } from "@/lib/supabase/types";
 
 function BonushuntGuessContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
   const { symbol: globalCurrency } = useGlobalCurrency(uid);
 
   /* ---- Supabase realtime data ---- */
@@ -44,7 +46,7 @@ function BonushuntGuessContent() {
     : (params.get("balance") || "$0.00");
 
   return (
-    <div className="inline-block animate-fade-in-up">
+    <div className="inline-block animate-fade-in-up" style={cssVars}>
       <div
         className="rounded-xl overflow-hidden overlay-card"
         style={{

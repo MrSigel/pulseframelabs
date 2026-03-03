@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { useOverlayData } from "@/hooks/useOverlayData";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useGlobalCurrency, currencySymbol } from "@/hooks/useGlobalCurrency";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 
 interface BalanceProfile {
   deposits: number;
@@ -19,6 +20,7 @@ interface BalanceProfile {
 function BalanceSmallContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
   const { symbol: globalCurrency } = useGlobalCurrency(uid);
 
   const { data, loading } = useOverlayData<BalanceProfile>({
@@ -40,6 +42,7 @@ function BalanceSmallContent() {
         deposits={deposits}
         withdrawals={withdrawals}
         currency={currency}
+        cssVars={cssVars}
       />
     );
   }
@@ -54,6 +57,7 @@ function BalanceSmallContent() {
       deposits={deposits}
       withdrawals={withdrawals}
       currency={currency}
+      cssVars={cssVars}
     />
   );
 }
@@ -63,13 +67,15 @@ function BalanceSmallView({
   deposits,
   withdrawals,
   currency,
+  cssVars,
 }: {
   deposits: number;
   withdrawals: number;
   currency: string;
+  cssVars?: React.CSSProperties;
 }) {
   return (
-    <div className="inline-block animate-fade-in-up">
+    <div className="inline-block animate-fade-in-up" style={cssVars}>
       <div
         className="rounded-lg overflow-hidden flex items-center gap-5 overlay-card-sm"
         style={{

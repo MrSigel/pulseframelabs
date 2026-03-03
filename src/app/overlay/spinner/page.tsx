@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 import { createClient } from "@/lib/supabase/client";
 
 interface SpinnerPrizeRow {
@@ -33,6 +34,7 @@ type OverlayPhase = "hidden" | "spinning" | "winner" | "fade-out";
 function SpinnerOverlayContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
 
   const { data: dbPrizes, loading } = useOverlayData<SpinnerPrizeRow[]>({
     table: "spinner_prizes",
@@ -142,6 +144,7 @@ function SpinnerOverlayContent() {
     <div
       className="flex flex-col items-center justify-center min-h-screen gap-6"
       style={{
+        ...cssVars,
         opacity: isFadingOut ? 0 : 1,
         transition: isFadingOut ? "opacity 0.8s ease-out" : "opacity 0.4s ease-in",
         animation: isVisible && !isFadingOut ? "fade-in-up 0.5s ease-out forwards" : undefined,

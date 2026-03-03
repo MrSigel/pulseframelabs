@@ -12,7 +12,7 @@ import {
   CheckCircle2, AlertCircle, Plus, X, Star, Pencil,
   Inbox, GripVertical, Tag,
 } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
 import { streamerPage, casinoDeals as dealsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
@@ -94,9 +94,9 @@ export default function StreamerPageSettingsPage() {
     setSlugManuallyEdited(true);
   }
 
-  const baseUrl = useMemo(() => {
-    if (typeof window !== "undefined") return window.location.origin;
-    return "";
+  const [baseUrl, setBaseUrl] = useState("");
+  useEffect(() => {
+    setBaseUrl(window.location.origin);
   }, []);
 
   const pageUrl = slug ? `${baseUrl}/s/${slug}` : "";

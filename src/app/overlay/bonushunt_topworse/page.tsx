@@ -4,11 +4,13 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 import type { Bonushunt, BonushuntEntry } from "@/lib/supabase/types";
 
 function BonushuntTopWorseContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
 
   /* ---- Supabase realtime data ---- */
   const { data: hunt } = useOverlayData<Bonushunt>({
@@ -38,7 +40,7 @@ function BonushuntTopWorseContent() {
   const title = uid && hunt ? hunt.name : (params.get("title") || "%TITLE%");
 
   return (
-    <div className="inline-block animate-fade-in-up">
+    <div className="inline-block animate-fade-in-up" style={cssVars}>
       <div
         className="rounded-xl overflow-hidden overlay-card"
         style={{

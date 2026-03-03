@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 import { useGlobalCurrency, currencySymbol } from "@/hooks/useGlobalCurrency";
 import type { Bonushunt, BonushuntEntry } from "@/lib/supabase/types";
 
@@ -295,6 +296,7 @@ function IdleWidget() {
 
 function AutoWidgetContent() {
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
   const { symbol: globalCurrency } = useGlobalCurrency(uid);
 
   const { data: wager, loading: wagerLoading } = useOverlayData<WagerSession>({
@@ -366,6 +368,7 @@ function AutoWidgetContent() {
   return (
     <div
       style={{
+        ...cssVars,
         opacity: visible ? 1 : 0,
         transition: "opacity 0.4s ease-in-out",
       }}

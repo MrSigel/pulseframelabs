@@ -4,10 +4,12 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 
 /* ─── Types ─── */
 
 interface TournamentRow {
+  id: string;
   name: string;
   description: string | null;
   participant_count: number;
@@ -30,6 +32,12 @@ interface BracketMatchup {
   player2: string;
 }
 
+interface ParticipantRow {
+  viewer_username: string;
+  game_name: string;
+  badge_image_url: string | null;
+}
+
 /* ─── Helpers ─── */
 
 function getRoundName(roundIndex: number, totalRounds: number): string {
@@ -47,11 +55,72 @@ function getLayout(p: number) {
   return { matchH: 40, matchW: 130, vGap: 6, hGap: 28, fs: 9 };
 }
 
+/* ─── Player Slot Component ─── */
+
+function PlayerSlot({
+  name,
+  participant,
+  fontSize,
+  isTop,
+}: {
+  name: string;
+  participant?: ParticipantRow;
+  fontSize: number;
+  isTop: boolean;
+}) {
+  const isTBD = !name || name === "TBD";
+  const badge = participant?.badge_image_url;
+  const game = participant?.game_name;
+
+  return (
+    <div
+      className="relative flex items-center px-2.5 overflow-hidden"
+      style={{
+        height: "50%",
+        borderBottom: isTop ? "1px solid rgba(255,255,255,0.04)" : undefined,
+      }}
+    >
+      {/* Badge background */}
+      {badge && (
+        <img
+          src={badge}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.25, filter: "blur(0.5px)" }}
+        />
+      )}
+      <div className="relative z-10 flex flex-col justify-center min-w-0 w-full">
+        <span
+          className="font-semibold truncate leading-tight"
+          style={{
+            fontSize,
+            color: isTBD ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.9)",
+          }}
+        >
+          {name || "---"}
+        </span>
+        {game && !isTBD && (
+          <span
+            className="truncate leading-tight"
+            style={{
+              fontSize: Math.max(fontSize - 2, 7),
+              color: "rgba(255,255,255,0.4)",
+            }}
+          >
+            {game}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main Content ─── */
 
 function TournamentBracketContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
 
   const { data: dbTournament, loading } = useOverlayData<TournamentRow>({
     table: "tournaments",
@@ -60,6 +129,25 @@ function TournamentBracketContent() {
     ascending: false,
     single: true,
   });
+
+  // Fetch participants for badge lookup
+  const { data: participantsArr } = useOverlayData<ParticipantRow[]>({
+    table: "tournament_participants",
+    userId: uid,
+    orderBy: "joined_at",
+    ascending: true,
+  });
+
+  // Build participant lookup map
+  const participantMap = useMemo(() => {
+    const map = new Map<string, ParticipantRow>();
+    if (Array.isArray(participantsArr)) {
+      for (const p of participantsArr) {
+        map.set(p.viewer_username, p);
+      }
+    }
+    return map;
+  }, [participantsArr]);
 
   const fallbackTitle = params.get("title") || "TOURNAMENT";
   const fallbackParticipants = parseInt(params.get("participants") || "8");
@@ -87,9 +175,9 @@ function TournamentBracketContent() {
       } else {
         rounds.push({
           name: getRoundName(r, totalRounds),
-          matchups: Array.from({ length: expected }, (_, i) => ({
-            player1: r === 0 ? `Player ${i * 2 + 1}` : "TBD",
-            player2: r === 0 ? `Player ${i * 2 + 2}` : "TBD",
+          matchups: Array.from({ length: expected }, () => ({
+            player1: "TBD",
+            player2: "TBD",
           })),
         });
       }
@@ -132,14 +220,14 @@ function TournamentBracketContent() {
   const winnerBoxY = finalPos.y + matchH / 2 - 26;
 
   return (
-    <div className="inline-block">
+    <div className="inline-block" style={cssVars}>
       {/* ── Header ── */}
       <div className="flex items-center gap-2.5 mb-4">
-        <TrophyIcon size={20} color="#f59e0b" />
+        <TrophyIcon size={20} color="var(--overlay-icon-color, #f59e0b)" />
         <span
           className="font-bold text-[15px] tracking-wide"
           style={{
-            background: "linear-gradient(90deg, #f59e0b, #ef4444)",
+            background: `linear-gradient(90deg, var(--overlay-highlight, #f59e0b), var(--overlay-icon-color, #ef4444))`,
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
           }}
@@ -163,8 +251,8 @@ function TournamentBracketContent() {
           </div>
         ))}
         <div
-          className="text-[9px] font-bold uppercase tracking-wider text-amber-500/40 text-center shrink-0"
-          style={{ width: 94 }}
+          className="text-[9px] font-bold uppercase tracking-wider text-center shrink-0"
+          style={{ width: 94, color: "var(--overlay-highlight, rgba(245,158,11,0.4))", opacity: 0.6 }}
         >
           Champion
         </div>
@@ -222,34 +310,28 @@ function TournamentBracketContent() {
                 <div
                   className="h-full rounded-md overflow-hidden"
                   style={{
-                    background: isFinal ? "rgba(245,158,11,0.06)" : "rgba(12,14,18,0.75)",
+                    background: isFinal
+                      ? `color-mix(in srgb, var(--overlay-highlight, #f59e0b) 6%, transparent)`
+                      : "var(--overlay-bg-dark, rgba(12,14,18,0.75))",
                     border: isFinal
-                      ? "1px solid rgba(245,158,11,0.15)"
-                      : "1px solid rgba(255,255,255,0.07)",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+                      ? `1px solid color-mix(in srgb, var(--overlay-highlight, #f59e0b) 15%, transparent)`
+                      : "1px solid var(--overlay-border, rgba(255,255,255,0.07))",
+                    boxShadow: "var(--overlay-shadow-sm, 0 2px 8px rgba(0,0,0,0.25))",
+                    borderRadius: "var(--overlay-border-radius, 6px)",
                   }}
                 >
-                  <div
-                    className="flex items-center px-2.5 font-semibold truncate"
-                    style={{
-                      height: "50%",
-                      fontSize: fs,
-                      color: m.player1 && m.player1 !== "TBD" ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.22)",
-                      borderBottom: "1px solid rgba(255,255,255,0.04)",
-                    }}
-                  >
-                    {m.player1 || "---"}
-                  </div>
-                  <div
-                    className="flex items-center px-2.5 font-semibold truncate"
-                    style={{
-                      height: "50%",
-                      fontSize: fs,
-                      color: m.player2 && m.player2 !== "TBD" ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.22)",
-                    }}
-                  >
-                    {m.player2 || "---"}
-                  </div>
+                  <PlayerSlot
+                    name={m.player1}
+                    participant={participantMap.get(m.player1)}
+                    fontSize={fs}
+                    isTop={true}
+                  />
+                  <PlayerSlot
+                    name={m.player2}
+                    participant={participantMap.get(m.player2)}
+                    fontSize={fs}
+                    isTop={false}
+                  />
                 </div>
               </div>
             );
@@ -262,18 +344,18 @@ function TournamentBracketContent() {
             className="rounded-lg px-3 py-3 text-center"
             style={{
               background: winner
-                ? "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(239,68,68,0.08))"
+                ? `linear-gradient(135deg, color-mix(in srgb, var(--overlay-highlight, #f59e0b) 12%, transparent), color-mix(in srgb, var(--overlay-icon-color, #ef4444) 8%, transparent))`
                 : "rgba(255,255,255,0.02)",
               border: winner
-                ? "1px solid rgba(245,158,11,0.2)"
+                ? `1px solid color-mix(in srgb, var(--overlay-highlight, #f59e0b) 20%, transparent)`
                 : "1px solid rgba(255,255,255,0.06)",
-              boxShadow: winner ? "0 0 24px rgba(245,158,11,0.08)" : "none",
+              boxShadow: winner ? `0 0 24px color-mix(in srgb, var(--overlay-highlight, #f59e0b) 8%, transparent)` : "none",
             }}
           >
-            <TrophyIcon size={16} color={winner ? "#f59e0b" : "rgba(255,255,255,0.15)"} />
+            <TrophyIcon size={16} color={winner ? "var(--overlay-highlight, #f59e0b)" : "rgba(255,255,255,0.15)"} />
             <div
               className="font-bold text-[11px] mt-1"
-              style={{ color: winner ? "#fbbf24" : "rgba(255,255,255,0.2)" }}
+              style={{ color: winner ? "var(--overlay-highlight, #fbbf24)" : "rgba(255,255,255,0.2)" }}
             >
               {winner || "TBD"}
             </div>

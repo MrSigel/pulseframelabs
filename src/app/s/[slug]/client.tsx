@@ -240,17 +240,61 @@ export function StreamerPageClient({ page, deals, storeItems, storeSettings }: P
                 <p className="text-sm mt-1">Check back later!</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {storeItems.map((item, i) => (
-                  <StoreItemCard
-                    key={item.id}
-                    item={item}
-                    currency={storeSettings?.store_currency || "Points"}
-                    accent={accent}
-                    index={i}
-                  />
-                ))}
-              </div>
+              <>
+                {/* Badges Section */}
+                {storeItems.some((i) => i.item_type === "badge") && (
+                  <div className="mb-8">
+                    <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                      Badges
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {storeItems
+                        .filter((i) => i.item_type === "badge")
+                        .map((item, i) => (
+                          <BadgeCard
+                            key={item.id}
+                            item={item}
+                            currency={storeSettings?.store_currency || "Points"}
+                            accent={accent}
+                            index={i}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Regular Items Section */}
+                {storeItems.some((i) => i.item_type !== "badge") && (
+                  <div>
+                    {storeItems.some((i) => i.item_type === "badge") && (
+                      <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                          <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+                          <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+                        </svg>
+                        Items
+                      </h3>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {storeItems
+                        .filter((i) => i.item_type !== "badge")
+                        .map((item, i) => (
+                          <StoreItemCard
+                            key={item.id}
+                            item={item}
+                            currency={storeSettings?.store_currency || "Points"}
+                            accent={accent}
+                            index={i}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </motion.div>
         )}
@@ -534,6 +578,72 @@ function DealCard({ deal, accent, index }: { deal: CasinoDeal; accent: string; i
           </a>
         </motion.div>
       )}
+    </motion.div>
+  );
+}
+
+// ============================================================
+// Badge Card Component (for badge-type store items)
+// ============================================================
+
+function BadgeCard({ item, currency, accent, index }: { item: StoreItem; currency: string; accent: string; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      className="rounded-xl overflow-hidden flex flex-col items-center text-center"
+      style={{
+        background: "#2a2d37",
+        border: "1px solid rgba(255,255,255,0.08)",
+      }}
+    >
+      {/* Badge Image - centered, prominent */}
+      <div className="w-full pt-5 pb-3 px-4 flex items-center justify-center">
+        {item.image_url ? (
+          <img
+            src={item.image_url}
+            alt={item.name}
+            className="h-24 w-24 object-contain rounded-lg"
+            style={{
+              filter: "drop-shadow(0 4px 16px rgba(0,0,0,0.5))",
+            }}
+          />
+        ) : (
+          <div
+            className="h-24 w-24 rounded-lg flex items-center justify-center"
+            style={{ background: `${accent}12` }}
+          >
+            <svg className="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke={`${accent}60`} strokeWidth="1.5">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+          </div>
+        )}
+      </div>
+
+      {/* Name + Description */}
+      <div className="px-4 pb-2">
+        <h3 className="text-sm font-bold text-white">{item.name}</h3>
+        {item.description && (
+          <p className="text-[11px] text-white/40 mt-0.5 line-clamp-2">{item.description}</p>
+        )}
+      </div>
+
+      {/* Price + Buy */}
+      <div
+        className="w-full px-4 py-3 mt-auto flex items-center justify-between"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <span className="text-sm font-bold" style={{ color: accent }}>
+          {item.price_points} {currency}
+        </span>
+        <span
+          className="px-3 py-1 rounded-md text-xs font-bold"
+          style={{ background: `${accent}20`, color: accent }}
+        >
+          Badge
+        </span>
+      </div>
     </motion.div>
   );
 }

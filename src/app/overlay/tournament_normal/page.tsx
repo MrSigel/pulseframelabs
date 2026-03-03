@@ -4,17 +4,26 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
+import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 
 interface TournamentRow {
+  id: string;
   name: string;
   description: string | null;
   participant_count: number;
   status: string;
 }
 
+interface ParticipantRow {
+  viewer_username: string;
+  game_name: string;
+  badge_image_url: string | null;
+}
+
 function TournamentNormalContent() {
   const params = useSearchParams();
   const uid = useOverlayUid();
+  const { cssVars } = useOverlayTheme(uid);
 
   const { data: dbTournament, loading } = useOverlayData<TournamentRow>({
     table: "tournaments",
@@ -24,29 +33,37 @@ function TournamentNormalContent() {
     single: true,
   });
 
+  // Fetch participants
+  const { data: participantsArr } = useOverlayData<ParticipantRow[]>({
+    table: "tournament_participants",
+    userId: uid,
+    orderBy: "joined_at",
+    ascending: true,
+  });
+
+  const participants = Array.isArray(participantsArr) ? participantsArr : [];
+
   // DB values or URL param fallback
-  const title = uid && dbTournament ? dbTournament.name : (params.get("title") || "SLOT BATTLE");
-  const status = uid && dbTournament ? dbTournament.status.toUpperCase() : (params.get("status") || "TOURNAMENT FINISHED");
-  const winner = params.get("winner") || "WINNER";
-  const subtitle = params.get("subtitle") || "HIGHEST X-FACTOR";
-  const multiplier = params.get("multiplier") || "0X";
+  const title = uid && dbTournament ? dbTournament.name : (params.get("title") || "TOURNAMENT");
+  const status = uid && dbTournament ? dbTournament.status.toUpperCase() : (params.get("status") || "TOURNAMENT");
+  const winner = params.get("winner") || "";
+  const subtitle = params.get("subtitle") || "";
+  const multiplier = params.get("multiplier") || "";
 
   if (uid && loading) {
     return <div className="text-white text-sm animate-pulse">Loading...</div>;
   }
 
   return (
-    <div className="inline-block animate-fade-in-up">
+    <div className="inline-block animate-fade-in-up" style={cssVars}>
       <div
         className="rounded-xl overflow-hidden overlay-card-lg"
-        style={{
-          minWidth: "340px",
-        }}
+        style={{ minWidth: "340px", maxWidth: "420px" }}
       >
         {/* Header */}
         <div className="px-5 pt-5 pb-3 text-center">
           <div className="flex items-center justify-center gap-2.5 mb-1">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--overlay-highlight, #f59e0b)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
               <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
               <path d="M4 22h16" />
@@ -57,7 +74,7 @@ function TournamentNormalContent() {
             <span
               className="font-black text-base tracking-wide"
               style={{
-                background: "linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b)",
+                background: `linear-gradient(90deg, var(--overlay-highlight, #f59e0b), var(--overlay-icon-color, #ef4444), var(--overlay-highlight, #f59e0b))`,
                 backgroundSize: "200% 100%",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -70,61 +87,110 @@ function TournamentNormalContent() {
           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">{status}</span>
         </div>
 
-        {/* Winner Card */}
-        <div className="px-5 pb-4">
-          <div
-            className="relative rounded-lg overflow-hidden"
-            style={{
-              background: "linear-gradient(135deg, rgba(239,68,68,0.15) 0%, rgba(239,68,68,0.05) 100%)",
-              border: "1px solid rgba(239, 68, 68, 0.25)",
-              boxShadow: "0 0 20px rgba(239, 68, 68, 0.1)",
-            }}
-          >
-            <div className="flex items-center gap-3 px-4 py-3">
-              {/* Avatar */}
-              <div
-                className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
-                style={{
-                  background: "linear-gradient(135deg, #78350f, #92400e)",
-                  border: "2px solid rgba(245, 158, 11, 0.4)",
-                  boxShadow: "0 0 12px rgba(245, 158, 11, 0.2)",
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b" stroke="none">
-                  <circle cx="12" cy="8" r="5" />
-                  <path d="M20 21a8 8 0 0 0-16 0" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <span className="text-white font-bold text-sm block">{winner}</span>
-                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{subtitle}</span>
-              </div>
-              <div
-                className="px-2.5 py-1 rounded-md text-xs font-black"
-                style={{
-                  background: "rgba(239, 68, 68, 0.15)",
-                  color: "#ef4444",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
-                }}
-              >
-                {multiplier}
+        {/* Participants List */}
+        {participants.length > 0 && (
+          <div className="px-5 pb-3 space-y-1.5">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-white/25 mb-2">
+              Participants ({participants.length})
+            </div>
+            <div className="max-h-[280px] overflow-y-auto space-y-1.5 pr-1">
+              {participants.map((p) => (
+                <div
+                  key={p.viewer_username}
+                  className="relative flex items-center gap-2.5 px-3 py-2 rounded-lg overflow-hidden"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border: "1px solid rgba(255,255,255,0.06)",
+                  }}
+                >
+                  {/* Badge background */}
+                  {p.badge_image_url && (
+                    <img
+                      src={p.badge_image_url}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover"
+                      style={{ opacity: 0.2 }}
+                    />
+                  )}
+                  <div className="relative z-10 flex-1 min-w-0">
+                    <span className="text-white font-semibold text-xs block truncate">
+                      {p.viewer_username}
+                    </span>
+                    {p.game_name && (
+                      <span className="text-[10px] text-white/40 truncate block">
+                        {p.game_name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Winner Card (shown when winner param is set) */}
+        {winner && (
+          <div className="px-5 pb-4">
+            <div
+              className="relative rounded-lg overflow-hidden"
+              style={{
+                background: `linear-gradient(135deg, color-mix(in srgb, var(--overlay-icon-color, #ef4444) 15%, transparent), color-mix(in srgb, var(--overlay-icon-color, #ef4444) 5%, transparent))`,
+                border: `1px solid color-mix(in srgb, var(--overlay-icon-color, #ef4444) 25%, transparent)`,
+                boxShadow: `0 0 20px color-mix(in srgb, var(--overlay-icon-color, #ef4444) 10%, transparent)`,
+              }}
+            >
+              <div className="flex items-center gap-3 px-4 py-3">
+                {/* Avatar */}
+                <div
+                  className="h-10 w-10 rounded-full flex items-center justify-center shrink-0"
+                  style={{
+                    background: `linear-gradient(135deg, color-mix(in srgb, var(--overlay-highlight, #f59e0b) 40%, #000), color-mix(in srgb, var(--overlay-highlight, #f59e0b) 50%, #000))`,
+                    border: `2px solid color-mix(in srgb, var(--overlay-highlight, #f59e0b) 40%, transparent)`,
+                    boxShadow: `0 0 12px color-mix(in srgb, var(--overlay-highlight, #f59e0b) 20%, transparent)`,
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--overlay-highlight, #f59e0b)" stroke="none">
+                    <circle cx="12" cy="8" r="5" />
+                    <path d="M20 21a8 8 0 0 0-16 0" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <span className="text-white font-bold text-sm block">{winner}</span>
+                  {subtitle && (
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">{subtitle}</span>
+                  )}
+                </div>
+                {multiplier && (
+                  <div
+                    className="px-2.5 py-1 rounded-md text-xs font-black"
+                    style={{
+                      background: `color-mix(in srgb, var(--overlay-icon-color, #ef4444) 15%, transparent)`,
+                      color: "var(--overlay-icon-color, #ef4444)",
+                      border: `1px solid color-mix(in srgb, var(--overlay-icon-color, #ef4444) 20%, transparent)`,
+                    }}
+                  >
+                    {multiplier}
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Footer */}
-        <div
-          className="px-5 py-3 text-center"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
-        >
-          <span
-            className="text-sm font-black tracking-wider"
-            style={{ color: "#10b981" }}
+        {winner && (
+          <div
+            className="px-5 py-3 text-center"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
           >
-            {winner}
-          </span>
-        </div>
+            <span
+              className="text-sm font-black tracking-wider"
+              style={{ color: "var(--overlay-icon-color, #10b981)" }}
+            >
+              {winner}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

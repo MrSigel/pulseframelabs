@@ -308,12 +308,55 @@ export const tournaments = {
       if (error) throw error;
       return (data ?? []) as TournamentParticipant[];
     },
-    add: async (tournamentId: string, viewerUsername: string, streamerId: string): Promise<void> => {
+    add: async (tournamentId: string, viewerUsername: string, streamerId: string, gameName: string = ''): Promise<void> => {
       const supabase = getSupabase();
+
+      // Lookup the viewer's most recently purchased badge
+      let badgeImageUrl: string | null = null;
+      try {
+        const { data: redemptions } = await supabase
+          .from("store_redemptions")
+          .select("item_id, redeemed_at")
+          .eq("user_id", streamerId)
+          .eq("viewer_username", viewerUsername)
+          .eq("status", "completed")
+          .order("redeemed_at", { ascending: false });
+
+        if (redemptions && redemptions.length > 0) {
+          const itemIds = redemptions.map((r: { item_id: string }) => r.item_id);
+          const { data: badgeItems } = await supabase
+            .from("store_items")
+            .select("id, image_url")
+            .eq("user_id", streamerId)
+            .eq("item_type", "badge")
+            .in("id", itemIds);
+
+          if (badgeItems && badgeItems.length > 0) {
+            for (const r of redemptions) {
+              const badge = badgeItems.find(
+                (b: { id: string; image_url: string | null }) => b.id === r.item_id
+              );
+              if (badge?.image_url) {
+                badgeImageUrl = badge.image_url;
+                break;
+              }
+            }
+          }
+        }
+      } catch {
+        // Badge lookup is non-critical — continue without badge
+      }
+
       const { error } = await supabase
         .from("tournament_participants")
         .upsert(
-          { user_id: streamerId, tournament_id: tournamentId, viewer_username: viewerUsername },
+          {
+            user_id: streamerId,
+            tournament_id: tournamentId,
+            viewer_username: viewerUsername,
+            game_name: gameName,
+            badge_image_url: badgeImageUrl,
+          },
           { onConflict: "tournament_id,viewer_username", ignoreDuplicates: true }
         );
       if (error) throw error;
@@ -584,7 +627,7 @@ export const store = {
   },
   items: {
     list: () => selectByUser<StoreItem>("store_items", "created_at", false),
-    create: (data: { name: string; description?: string; price_points?: number; quantity_available?: number }) =>
+    create: (data: { name: string; description?: string; price_points?: number; quantity_available?: number; item_type?: 'item' | 'badge' }) =>
       insertRow<StoreItem>("store_items", data),
     update: (id: string, updates: Partial<StoreItem>) => updateRow<StoreItem>("store_items", id, updates),
     remove: (id: string) => deleteRow("store_items", id),
@@ -823,8 +866,36 @@ export const botCustomCommands = {
 // ============================================================
 export const streamerPage = {
   get: () => selectSingleByUser<StreamerPageSettings>("streamer_page_settings"),
-  update: (updates: Partial<StreamerPageSettings>) =>
-    upsertSingleton<StreamerPageSettings>("streamer_page_settings", updates),
+  update: async (updates: Partial<StreamerPageSettings>): Promise<StreamerPageSettings> => {
+    const supabase = getSupabase();
+    const userId = await getUserId();
+
+    // Check if a row already exists for this user
+    const { data: existing } = await supabase
+      .from("streamer_page_settings")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (existing) {
+      const { data, error } = await supabase
+        .from("streamer_page_settings")
+        .update(updates)
+        .eq("user_id", userId)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as StreamerPageSettings;
+    } else {
+      const { data, error } = await supabase
+        .from("streamer_page_settings")
+        .insert({ ...updates, user_id: userId })
+        .select()
+        .single();
+      if (error) throw error;
+      return data as StreamerPageSettings;
+    }
+  },
   getBySlug: async (slug: string): Promise<StreamerPageSettings | null> => {
     const supabase = getSupabase();
     const { data, error } = await supabase
