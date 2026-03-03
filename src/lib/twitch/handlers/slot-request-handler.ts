@@ -20,7 +20,7 @@ export function createSlotRequestHandler(): MessageHandler {
         slot_name: slotName,
       });
 
-      context.say(`@${username} your slot request "${slotName}" has been added!`);
+      context.say(`🎰 @${username} dein Slot-Wunsch "${slotName}" wurde hinzugefügt! ✅`);
     },
   };
 }

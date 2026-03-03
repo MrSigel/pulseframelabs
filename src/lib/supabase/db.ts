@@ -627,7 +627,7 @@ export const store = {
   },
   items: {
     list: () => selectByUser<StoreItem>("store_items", "created_at", false),
-    create: (data: { name: string; description?: string; price_points?: number; quantity_available?: number; item_type?: 'item' | 'badge' }) =>
+    create: (data: { name: string; description?: string; price_points?: number; quantity_available?: number; item_type?: 'item' | 'badge'; image_url?: string }) =>
       insertRow<StoreItem>("store_items", data),
     update: (id: string, updates: Partial<StoreItem>) => updateRow<StoreItem>("store_items", id, updates),
     remove: (id: string) => deleteRow("store_items", id),

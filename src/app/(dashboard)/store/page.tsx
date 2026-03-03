@@ -33,9 +33,10 @@ import {
   Headphones,
   Loader2,
 } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
 import { store as storeDb, streamerPage } from "@/lib/supabase/db";
+import { createClient } from "@/lib/supabase/client";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import type { StoreItem, StoreSettings, StoreRedemption, StreamerPageSettings } from "@/lib/supabase/types";
 
@@ -55,6 +56,9 @@ export default function StorePage() {
   const [redemptionLimit, setRedemptionLimit] = useState("-1");
   const [excludedUsers, setExcludedUsers] = useState("");
   const [itemType, setItemType] = useState<"item" | "badge">("item");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Store Settings state
   const [storeName, setStoreName] = useState("Streamer Store");
@@ -96,6 +100,46 @@ export default function StorePage() {
     return `${window.location.origin}/s/${pageSettings.slug}`;
   }, [pageSettings]);
 
+  const handleImageUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validTypes = ["image/png", "image/jpeg", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      alert("Please upload a PNG, JPG, or WebP image.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image must be under 2MB.");
+      return;
+    }
+
+    setImageUploading(true);
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const filePath = `${user.id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("store-images")
+        .upload(filePath, file, { upsert: true, contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("store-images").getPublicUrl(filePath);
+      setImageUrl(urlData.publicUrl);
+    } catch (err) {
+      console.error("Image upload failed:", err);
+      alert("Failed to upload image. Make sure the 'store-images' bucket exists in Supabase Storage.");
+    } finally {
+      setImageUploading(false);
+      if (imageInputRef.current) imageInputRef.current.value = "";
+    }
+  }, []);
+
   const resetAddItem = () => {
     setItemName("");
     setItemDescription("");
@@ -106,6 +150,7 @@ export default function StorePage() {
     setRedemptionLimit("-1");
     setExcludedUsers("");
     setItemType("item");
+    setImageUrl(null);
   };
 
   async function handleCreateItem() {
@@ -118,6 +163,7 @@ export default function StorePage() {
         price_points: parseInt(itemPrice) || 0,
         quantity_available: parseInt(itemQuantity) || -1,
         item_type: itemType,
+        ...(imageUrl ? { image_url: imageUrl } : {}),
       });
       setAddItemOpen(false);
       setItemName(""); setItemDescription(""); setItemPrice(""); setItemQuantity("");
@@ -501,13 +547,35 @@ export default function StorePage() {
               <div className="text-center">
                 <Label className="text-sm font-semibold text-white block mb-3">Item Image</Label>
                 <div
-                  className="h-20 w-20 mx-auto rounded-lg flex items-center justify-center mb-3"
+                  className="h-20 w-20 mx-auto rounded-lg flex items-center justify-center mb-3 overflow-hidden"
                   style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}
                 >
-                  <ImageIcon className="h-8 w-8 text-slate-600" />
+                  {imageUrl ? (
+                    <img src={imageUrl} alt="Preview" className="h-20 w-20 object-cover" />
+                  ) : (
+                    <ImageIcon className="h-8 w-8 text-slate-600" />
+                  )}
                 </div>
-                <Button size="sm" className="gap-1">
-                  Upload Image
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.webp"
+                  className="hidden"
+                  onChange={handleImageUpload}
+                />
+                <Button
+                  size="sm"
+                  className="gap-1"
+                  onClick={() => imageInputRef.current?.click()}
+                  disabled={imageUploading}
+                >
+                  {imageUploading ? (
+                    <><Loader2 className="h-3 w-3 animate-spin" /> Uploading...</>
+                  ) : imageUrl ? (
+                    "Change Image"
+                  ) : (
+                    "Upload Image"
+                  )}
                 </Button>
                 <p className="text-[11px] text-slate-500 mt-2">
                   Upload a clear image representing the item (PNG, JPG) with dimensions 250x100px.

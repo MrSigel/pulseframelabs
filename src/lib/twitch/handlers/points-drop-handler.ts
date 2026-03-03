@@ -6,6 +6,7 @@ interface PointsDropConfig {
   keyword: string;
   amount: number;
   onClaim?: (username: string) => void;
+  onEnd?: () => void;
 }
 
 /**
@@ -14,19 +15,37 @@ interface PointsDropConfig {
  */
 export function createPointsDropHandler(config: PointsDropConfig): MessageHandler {
   const claimed = new Set<string>();
+  let ended = false;
 
-  return {
+  const handler: MessageHandler & { markEnded: () => void } = {
     name: "points-drop",
     enabled: true,
+
+    /** Call this to mark the drop as ended (timer ran out). */
+    markEnded() {
+      ended = true;
+      config.onEnd?.();
+    },
+
     canHandle(_channel: string, _tags: ChatUserstate, message: string) {
       return message.trim().toLowerCase() === config.keyword.toLowerCase();
     },
+
     async handle(_channel: string, tags: ChatUserstate, _message: string, context: HandlerContext) {
       const username = tags["display-name"] || tags.username || "anonymous";
       const lowerUser = username.toLowerCase();
 
+      // Drop already ended
+      if (ended) {
+        context.say(`❌ @${username}, der Points Drop ist vorbei! Warte auf den nächsten. ⏳`);
+        return;
+      }
+
       // Prevent double-claim
-      if (claimed.has(lowerUser)) return;
+      if (claimed.has(lowerUser)) {
+        context.say(`⚠️ @${username}, du hast bereits teilgenommen!`);
+        return;
+      }
       claimed.add(lowerUser);
 
       try {
@@ -54,10 +73,13 @@ export function createPointsDropHandler(config: PointsDropConfig): MessageHandle
             .insert({ user_id: context.userId, username, total_points: config.amount, watch_time_minutes: 0 });
         }
 
+        context.say(`🎉 @${username} hat ${config.amount} Punkte erhalten! ✨`);
         config.onClaim?.(username);
       } catch (err) {
         console.error(`Failed to award points to ${username}:`, err);
       }
     },
   };
+
+  return handler;
 }

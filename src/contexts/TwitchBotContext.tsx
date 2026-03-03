@@ -18,6 +18,7 @@ import {
   createSlotRequestHandler,
   createTournamentJoinHandler,
   createCustomResponseHandler,
+  createViewerJoinHandler,
 } from "@/lib/twitch/handlers";
 import type { MessageHandler } from "@/lib/twitch/types";
 import type { BotCustomCommand } from "@/lib/supabase/types";
@@ -212,12 +213,21 @@ export function TwitchBotProvider({ children }: { children: ReactNode }) {
 
       setTwitchUsername(connection.twitch_username);
 
+      const registerJoinHandler = (username: string) => {
+        if (!handlersRef.current.has("viewer-join")) {
+          const handler = createViewerJoinHandler({ streamerUsername: username });
+          handlersRef.current.set("viewer-join", handler);
+          twitchBot.addHandler(handler);
+        }
+      };
+
       try {
         await twitchBot.connect(
           connection.access_token,
           connection.twitch_username,
           connection.user_id,
         );
+        registerJoinHandler(connection.twitch_username);
       } catch {
         // Token might be expired, try refresh
         const res = await fetch("/api/twitch/refresh", { method: "POST" });
@@ -228,6 +238,7 @@ export function TwitchBotProvider({ children }: { children: ReactNode }) {
         }
         const { access_token, twitch_username } = await res.json();
         await twitchBot.connect(access_token, twitch_username, connection.user_id);
+        registerJoinHandler(twitch_username);
       }
     } catch (err) {
       console.error("Failed to connect bot:", err);

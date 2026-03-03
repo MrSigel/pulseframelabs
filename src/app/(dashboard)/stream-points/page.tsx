@@ -37,6 +37,7 @@ export default function StreamPointsPage() {
   const [claimCount, setClaimCount] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const claimCountRef = useRef(0);
+  const handlerRef = useRef<ReturnType<typeof createPointsDropHandler> | null>(null);
 
   // Seed form state from DB
   useEffect(() => {
@@ -85,6 +86,7 @@ export default function StreamPointsPage() {
         setClaimCount(claimCountRef.current);
       },
     });
+    handlerRef.current = handler;
     addHandler(handler);
 
     timerRef.current = setInterval(() => {
@@ -94,8 +96,13 @@ export default function StreamPointsPage() {
             clearInterval(timerRef.current);
             timerRef.current = null;
           }
-          removeHandler("points-drop");
+          // Mark handler as ended so late messages get the "drop over" reply
+          if (handlerRef.current && "markEnded" in handlerRef.current) {
+            (handlerRef.current as ReturnType<typeof createPointsDropHandler> & { markEnded: () => void }).markEnded();
+          }
           setDropActive(false);
+          // Remove handler after a grace period for late messages
+          setTimeout(() => removeHandler("points-drop"), 15000);
           return 0;
         }
         return prev - 1;
@@ -108,9 +115,13 @@ export default function StreamPointsPage() {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    removeHandler("points-drop");
+    // Mark as ended so anyone typing the keyword gets the "over" message
+    if (handlerRef.current && "markEnded" in handlerRef.current) {
+      (handlerRef.current as ReturnType<typeof createPointsDropHandler> & { markEnded: () => void }).markEnded();
+    }
     setDropActive(false);
     setTimeRemaining(0);
+    setTimeout(() => removeHandler("points-drop"), 15000);
   }, [removeHandler]);
 
   // Cleanup timer on unmount

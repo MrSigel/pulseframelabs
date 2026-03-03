@@ -25,7 +25,7 @@ export function createTournamentJoinHandler(): MessageHandler {
         await tournaments.participants.add(tournament.id, username, context.userId, gameName);
 
         const gameInfo = gameName ? ` (${gameName})` : "";
-        context.say(`@${username} wurde zum Turnier "${tournament.name}" angemeldet${gameInfo}! 🏆`);
+        context.say(`🏆 @${username} wurde zum Turnier "${tournament.name}" angemeldet${gameInfo}! ✅`);
       } catch {
         // Ignore duplicate join errors silently
       }
