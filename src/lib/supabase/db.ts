@@ -71,13 +71,15 @@ async function insertRow<T>(table: string, row: Record<string, unknown>): Promis
   return data as T;
 }
 
-// Generic update by id
+// Generic update by id — always scoped to current user
 async function updateRow<T>(table: string, id: string, updates: Record<string, unknown>): Promise<T> {
   const supabase = getSupabase();
+  const userId = await getUserId();
   const { data, error } = await supabase
     .from(table)
     .update(updates)
     .eq("id", id)
+    .eq("user_id", userId)
     .select()
     .single();
   if (error) throw error;
@@ -97,10 +99,11 @@ async function upsertSingleton<T>(table: string, row: Record<string, unknown>): 
   return data as T;
 }
 
-// Generic delete by id
+// Generic delete by id — always scoped to current user
 async function deleteRow(table: string, id: string): Promise<void> {
   const supabase = getSupabase();
-  const { error } = await supabase.from(table).delete().eq("id", id);
+  const userId = await getUserId();
+  const { error } = await supabase.from(table).delete().eq("id", id).eq("user_id", userId);
   if (error) throw error;
 }
 
@@ -153,10 +156,12 @@ export const bonushunts = {
   entries: {
     list: async (bonushuntId: string) => {
       const supabase = getSupabase();
+      const userId = await getUserId();
       const { data, error } = await supabase
         .from("bonushunt_entries")
         .select("*")
         .eq("bonushunt_id", bonushuntId)
+        .eq("user_id", userId)
         .order("position");
       if (error) throw error;
       return (data ?? []) as BonushuntEntry[];
@@ -223,10 +228,12 @@ export const duelSessions = {
   players: {
     list: async (sessionId: string) => {
       const supabase = getSupabase();
+      const userId = await getUserId();
       const { data, error } = await supabase
         .from("duel_players")
         .select("*")
         .eq("session_id", sessionId)
+        .eq("user_id", userId)
         .order("position");
       if (error) throw error;
       return (data ?? []) as DuelPlayer[];
@@ -250,10 +257,12 @@ export const slotBattles = {
   entries: {
     list: async (battleId: string) => {
       const supabase = getSupabase();
+      const userId = await getUserId();
       const { data, error } = await supabase
         .from("slot_battle_entries")
         .select("*")
         .eq("battle_id", battleId)
+        .eq("user_id", userId)
         .order("position");
       if (error) throw error;
       return (data ?? []) as SlotBattleEntry[];
@@ -421,10 +430,12 @@ export const quickGuesses = {
   entries: {
     list: async (sessionId: string) => {
       const supabase = getSupabase();
+      const userId = await getUserId();
       const { data, error } = await supabase
         .from("quick_guess_entries")
         .select("*")
         .eq("session_id", sessionId)
+        .eq("user_id", userId)
         .order("guessed_at");
       if (error) throw error;
       return (data ?? []) as QuickGuessEntry[];
@@ -434,10 +445,12 @@ export const quickGuesses = {
     remove: (id: string) => deleteRow("quick_guess_entries", id),
     clearSession: async (sessionId: string) => {
       const supabase = getSupabase();
+      const userId = await getUserId();
       const { error } = await supabase
         .from("quick_guess_entries")
         .delete()
-        .eq("session_id", sessionId);
+        .eq("session_id", sessionId)
+        .eq("user_id", userId);
       if (error) throw error;
     },
   },
@@ -652,10 +665,12 @@ export const twitchConnections = {
 export const pointsBattleBets = {
   list: async (sessionId: string) => {
     const supabase = getSupabase();
+    const userId = await getUserId();
     const { data, error } = await supabase
       .from("points_battle_bets")
       .select("*")
       .eq("session_id", sessionId)
+      .eq("user_id", userId)
       .order("placed_at");
     if (error) throw error;
     return (data ?? []) as PointsBattleBet[];
@@ -689,10 +704,12 @@ export const giveaways = {
   participants: {
     list: async (sessionId: string) => {
       const supabase = getSupabase();
+      const userId = await getUserId();
       const { data, error } = await supabase
         .from("giveaway_participants")
         .select("*")
         .eq("session_id", sessionId)
+        .eq("user_id", userId)
         .order("joined_at");
       if (error) throw error;
       return (data ?? []) as GiveawayParticipant[];
@@ -701,10 +718,12 @@ export const giveaways = {
       insertRow<GiveawayParticipant>("giveaway_participants", data),
     count: async (sessionId: string) => {
       const supabase = getSupabase();
+      const userId = await getUserId();
       const { count, error } = await supabase
         .from("giveaway_participants")
         .select("*", { count: "exact", head: true })
-        .eq("session_id", sessionId);
+        .eq("session_id", sessionId)
+        .eq("user_id", userId);
       if (error) throw error;
       return count ?? 0;
     },

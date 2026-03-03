@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,7 @@ import { useDbQuery } from "@/hooks/useDbQuery";
 import { Loader2, ArrowRight, Check, User, DollarSign, Sparkles } from "lucide-react";
 import type { UserProfile } from "@/lib/supabase/types";
 
+const STORAGE_KEY = "pfl_onboarding_done";
 const STEPS = ["welcome", "profile", "currency", "done"] as const;
 type Step = (typeof STEPS)[number];
 
@@ -34,10 +35,18 @@ export function OnboardingWizard() {
   const [displayName, setDisplayName] = useState("");
   const [currency, setCurrency] = useState("USD");
   const [saving, setSaving] = useState(false);
+  const dismissed = useRef(false);
 
-  // Show wizard when profile is loaded and onboarding not completed
+  // Show wizard ONLY on first load when profile has onboarding_completed=false
+  // Never reopen once dismissed in this session
   useEffect(() => {
+    if (dismissed.current) return;
     if (!loading && profile && !profile.onboarding_completed) {
+      // Also check localStorage fallback — if onboarding was completed but DB
+      // update was slow or failed, don't re-show the wizard
+      if (typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY)) {
+        return;
+      }
       setOpen(true);
       if (profile.display_name) setDisplayName(profile.display_name);
       if (profile.currency) setCurrency(profile.currency);
@@ -73,17 +82,25 @@ export function OnboardingWizard() {
       setSaving(true);
       try {
         await userProfiles.update({ onboarding_completed: true });
+        // Persist in localStorage as a fallback so the wizard never re-appears
+        if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, "1");
+        dismissed.current = true;
+        setOpen(false);
       } catch (err) {
         console.error("Failed to complete onboarding:", err);
+        // Still close + persist locally so user is not stuck in a loop
+        if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, "1");
+        dismissed.current = true;
+        setOpen(false);
       } finally {
         setSaving(false);
       }
-      setOpen(false);
     }
   }
 
-  // Don't render anything while loading or if onboarding is already done
-  if (loading || !profile || profile.onboarding_completed) return null;
+  // Don't render anything while loading, if profile is missing, already completed, or dismissed
+  const localDone = typeof window !== "undefined" && localStorage.getItem(STORAGE_KEY);
+  if (loading || !profile || profile.onboarding_completed || localDone || dismissed.current) return null;
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
