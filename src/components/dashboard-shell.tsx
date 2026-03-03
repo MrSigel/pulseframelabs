@@ -1,23 +1,39 @@
 "use client";
 
-import { type ReactNode } from "react";
-import { DashboardProviders } from "@/components/providers";
+import { useState, useEffect, type ReactNode } from "react";
+import { DashboardProviders, useThemeContext } from "@/components/providers";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
 import { TwitchBotProvider } from "@/contexts/TwitchBotContext";
 import { UpgradeBanner } from "@/components/upgrade-banner";
 import { OnboardingWizard } from "@/components/onboarding-wizard";
 import AnimatedBackground3D from "@/components/landing/background/AnimatedBackground3D";
+import AnimationToggle from "@/components/landing/ui/AnimationToggle";
+import ThemeToggleWidget from "@/components/landing/ui/ThemeToggleWidget";
 import LanguageWidget from "@/components/landing/ui/LanguageWidget";
 
-export function DashboardShell({ children }: { children: ReactNode }) {
+const ANIM_KEY = "pfl-bg-animation";
+
+function DashboardInner({ children }: { children: ReactNode }) {
+  const { preference, cycleTheme } = useThemeContext();
+  const [animEnabled, setAnimEnabled] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(ANIM_KEY);
+    if (stored === "true") setAnimEnabled(true);
+  }, []);
+
+  function toggleAnimation() {
+    const next = !animEnabled;
+    setAnimEnabled(next);
+    localStorage.setItem(ANIM_KEY, String(next));
+  }
 
   return (
-    <DashboardProviders>
-      <TwitchBotProvider>
+    <TwitchBotProvider>
       <div className="flex min-h-screen bg-background">
-        {/* Animated particle background (same as landing page) */}
-        <AnimatedBackground3D />
+        {/* Animated particle background — only if user enabled */}
+        {animEnabled && <AnimatedBackground3D />}
 
         {/* Subtle noise texture overlay */}
         <div className="fixed inset-0 pointer-events-none bg-noise opacity-[0.025] z-[1]" />
@@ -38,15 +54,24 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           </footer>
         </div>
 
-        {/* Language widget (bottom-right, above z-index of content) */}
-        <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 1001 }}>
+        {/* Settings widgets (bottom-right) — same as landing page */}
+        <div style={{ position: "fixed", bottom: "24px", right: "24px", zIndex: 1001, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
+          <AnimationToggle enabled={animEnabled} onToggle={toggleAnimation} />
+          <ThemeToggleWidget preference={preference} onCycle={cycleTheme} />
           <LanguageWidget />
         </div>
 
         {/* First-login onboarding wizard */}
         <OnboardingWizard />
       </div>
-      </TwitchBotProvider>
+    </TwitchBotProvider>
+  );
+}
+
+export function DashboardShell({ children }: { children: ReactNode }) {
+  return (
+    <DashboardProviders>
+      <DashboardInner>{children}</DashboardInner>
     </DashboardProviders>
   );
 }

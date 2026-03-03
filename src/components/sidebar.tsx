@@ -6,7 +6,6 @@ import {
   Home,
   X,
   Trophy,
-  Play,
   Flame,
   Monitor,
   Dice5,
@@ -17,7 +16,6 @@ import {
   Paintbrush,
   Building2,
   Megaphone,
-  Images,
   Store,
   Star,
   Target,
@@ -43,7 +41,6 @@ const overlayApps: NavItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Wager Bar", href: "/wager", icon: X },
   { name: "Personal Bests", href: "/personal-bests", icon: Trophy },
-  { name: "Now Playing", href: "/now-playing", icon: Play, comingSoon: true },
   { name: "Hotwords", href: "/hotwords", icon: Flame },
   { name: "Slot Requests", href: "/slot-requests", icon: Monitor },
   { name: "Spinner", href: "/spinner", icon: Dice5 },
@@ -57,7 +54,6 @@ const overlayApps: NavItem[] = [
 const casinos: NavItem[] = [
   { name: "Casino Management", href: "/casino-management", icon: Building2 },
   { name: "Promo Management", href: "/promo-management", icon: Megaphone },
-  { name: "Slideshow", href: "/slideshow", icon: Images },
 ];
 
 const account: NavItem[] = [
