@@ -40,6 +40,7 @@ interface BracketMatchup {
 }
 
 interface ParticipantRow {
+  tournament_id: string;
   viewer_username: string;
   game_name: string;
   badge_image_url: string | null;
@@ -190,16 +191,18 @@ function TournamentBracketContent() {
     ascending: true,
   });
 
-  // Build participant lookup map
+  // Build participant lookup map — filtered by selected tournament
   const participantMap = useMemo(() => {
     const map = new Map<string, ParticipantRow>();
-    if (Array.isArray(participantsArr)) {
+    if (Array.isArray(participantsArr) && dbTournament) {
       for (const p of participantsArr) {
-        map.set(p.viewer_username, p);
+        if (p.tournament_id === dbTournament.id) {
+          map.set(p.viewer_username, p);
+        }
       }
     }
     return map;
-  }, [participantsArr]);
+  }, [participantsArr, dbTournament]);
 
   const fallbackTitle = params.get("title") || "TOURNAMENT";
   const fallbackParticipants = parseInt(params.get("participants") || "8");

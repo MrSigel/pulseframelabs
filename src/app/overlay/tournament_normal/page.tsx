@@ -16,6 +16,7 @@ interface TournamentRow {
 }
 
 interface ParticipantRow {
+  tournament_id: string;
   viewer_username: string;
   game_name: string;
   badge_image_url: string | null;
@@ -52,7 +53,11 @@ function TournamentNormalContent() {
     ascending: true,
   });
 
-  const participants = Array.isArray(participantsArr) ? participantsArr : [];
+  // Filter participants to only the selected tournament
+  const participants = useMemo(() => {
+    if (!Array.isArray(participantsArr) || !dbTournament) return [];
+    return participantsArr.filter((p) => p.tournament_id === dbTournament.id);
+  }, [participantsArr, dbTournament]);
 
   // DB values or URL param fallback
   const title = uid && dbTournament ? dbTournament.name : (params.get("title") || "TOURNAMENT");
@@ -60,7 +65,7 @@ function TournamentNormalContent() {
   const statusLabels: Record<string, string> = {
     pending: "PENDING",
     join_open: "JOIN OPEN",
-    draw: "AUSLOSUNG",
+    draw: "DRAW",
     ongoing: "ONGOING",
     finished: "FINISHED",
   };
