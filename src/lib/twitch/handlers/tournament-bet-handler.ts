@@ -22,7 +22,7 @@ export function createTournamentBetHandler(state: TournamentBetState): MessageHa
       const parts = message.trim().split(/\s+/);
 
       if (parts.length < 3) {
-        context.say(`@${username} Nutze: !tbet SpielerName Punkte`);
+        context.say(`@${username} Usage: !tbet PlayerName Points`);
         return;
       }
 
@@ -34,12 +34,12 @@ export function createTournamentBetHandler(state: TournamentBetState): MessageHa
         (p) => p.toLowerCase() === playerName.toLowerCase()
       );
       if (!matchedPlayer) {
-        context.say(`@${username} Spieler "${playerName}" nicht im Turnier!`);
+        context.say(`@${username} Player "${playerName}" is not in the tournament!`);
         return;
       }
 
       if (isNaN(amount) || amount <= 0) {
-        context.say(`@${username} Ungueltiger Betrag!`);
+        context.say(`@${username} Invalid amount!`);
         return;
       }
 
@@ -54,7 +54,7 @@ export function createTournamentBetHandler(state: TournamentBetState): MessageHa
         .maybeSingle();
 
       if (!viewer || viewer.total_points < amount) {
-        context.say(`@${username} Du hast nicht genug Punkte!`);
+        context.say(`@${username} You don't have enough points!`);
         return;
       }
 
@@ -67,7 +67,7 @@ export function createTournamentBetHandler(state: TournamentBetState): MessageHa
         .maybeSingle();
 
       if (existingBet) {
-        context.say(`@${username} Du hast bereits auf dieses Turnier gewettet!`);
+        context.say(`@${username} You already placed a bet on this tournament!`);
         return;
       }
 
@@ -93,11 +93,11 @@ export function createTournamentBetHandler(state: TournamentBetState): MessageHa
         user_id: context.userId,
         viewer_id: viewer.id,
         amount: -amount,
-        reason: `Turnierwette auf ${matchedPlayer}`,
+        reason: `Tournament bet on ${matchedPlayer}`,
         type: "remove",
       });
 
-      context.say(`@${username} setzt ${amount} Punkte auf ${matchedPlayer}!`);
+      context.say(`@${username} bets ${amount} points on ${matchedPlayer}!`);
     },
   };
 }

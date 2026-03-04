@@ -31,11 +31,11 @@ export function createTournamentJoinHandler(): MessageHandler {
         await tournaments.participants.add(tournament.id, username, context.userId, gameName);
 
         if (alreadyJoined) {
-          const gameInfo = gameName ? ` auf ${gameName}` : "";
-          context.say(`🏆 @${username} — Spiel aktualisiert${gameInfo}! 🔄`);
+          const gameInfo = gameName ? ` to ${gameName}` : "";
+          context.say(`🏆 @${username} — Game updated${gameInfo}! 🔄`);
         } else {
           const gameInfo = gameName ? ` (${gameName})` : "";
-          context.say(`🏆 @${username} wurde zum Turnier "${tournament.name}" angemeldet${gameInfo}! ✅`);
+          context.say(`🏆 @${username} has joined tournament "${tournament.name}"${gameInfo}! ✅`);
         }
       } catch {
         // Ignore errors silently

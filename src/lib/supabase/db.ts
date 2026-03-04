@@ -472,7 +472,7 @@ export const tournaments = {
             user_id: userId,
             viewer_id: viewer.id,
             amount: payout,
-            reason: `Turnierwette gewonnen (${bet.bet_on_player})`,
+            reason: `Tournament bet won (${bet.bet_on_player})`,
             type: "add",
           });
         }

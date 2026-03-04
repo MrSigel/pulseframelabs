@@ -99,7 +99,7 @@ export default function BonushuntDetailPage() {
       await bonushuntsDb.entries.update(entry.id, { win_amount: winAmount, multiplier });
       setEditingWin((prev) => { const next = { ...prev }; delete next[entry.id]; return next; });
       await refetch();
-      setToast(`Gewinn gespeichert: ${winAmount.toLocaleString()} (${multiplier.toFixed(2)}x)`);
+      setToast(`Win saved: ${winAmount.toLocaleString()} (${multiplier.toFixed(2)}x)`);
       setTimeout(() => setToast(null), 3000);
     } catch (err) {
       console.error("Failed to save win:", err);
@@ -135,7 +135,7 @@ export default function BonushuntDetailPage() {
           <Link href="/bonushunts">
             <Button variant="outline" className="gap-2">
               <ChevronLeft className="h-4 w-4" />
-              Zurück
+              Back
             </Button>
           </Link>
         }
@@ -144,11 +144,11 @@ export default function BonushuntDetailPage() {
       {/* Stats bar */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
         {[
-          { label: "Spiele", value: `${totals.playedCount} / ${totals.totalCount}` },
-          { label: "Total Einsatz", value: `${currencySymbol}${totals.totalBuyIn.toLocaleString()}` },
-          { label: "Total Gewinn", value: `${currencySymbol}${totals.totalWin.toLocaleString()}`, green: totals.totalWin >= totals.totalBuyIn },
-          { label: "Benötigter X", value: `${totals.requiredX.toFixed(2)}x`, green: totals.requiredX <= 100 },
-          { label: "Erreichter X", value: `${totals.achievedX.toFixed(2)}x`, green: totals.achievedX >= 1 },
+          { label: "Games", value: `${totals.playedCount} / ${totals.totalCount}` },
+          { label: "Total Buy-In", value: `${currencySymbol}${totals.totalBuyIn.toLocaleString()}` },
+          { label: "Total Win", value: `${currencySymbol}${totals.totalWin.toLocaleString()}`, green: totals.totalWin >= totals.totalBuyIn },
+          { label: "Required X", value: `${totals.requiredX.toFixed(2)}x`, green: totals.requiredX <= 100 },
+          { label: "Achieved X", value: `${totals.achievedX.toFixed(2)}x`, green: totals.achievedX >= 1 },
         ].map((s) => (
           <div
             key={s.label}
@@ -169,9 +169,9 @@ export default function BonushuntDetailPage() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm text-slate-400 uppercase tracking-wider">
-                Spielliste
+                Game List
               </CardTitle>
-              <span className="text-xs text-slate-600">{sortedEntries.length} Spiele</span>
+              <span className="text-xs text-slate-600">{sortedEntries.length} Games</span>
             </CardHeader>
             <CardContent className="p-0">
               {loading ? (
@@ -181,16 +181,16 @@ export default function BonushuntDetailPage() {
               ) : sortedEntries.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-600">
                   <Trophy className="h-8 w-8 mb-2 text-slate-700" />
-                  <p className="text-sm">Noch keine Spiele hinzugefügt.</p>
+                  <p className="text-sm">No games added yet.</p>
                 </div>
               ) : (
                 <>
                   {/* Table header */}
                   <div className="grid grid-cols-[28px_1fr_80px_110px_64px_32px] gap-2 px-4 py-2 text-[10px] text-slate-600 font-semibold uppercase tracking-wider border-b border-white/[0.06]">
                     <span>#</span>
-                    <span>Spiel</span>
-                    <span className="text-right">Einsatz</span>
-                    <span className="text-right">Gewinn</span>
+                    <span>Game</span>
+                    <span className="text-right">Buy-In</span>
+                    <span className="text-right">Win</span>
                     <span className="text-right">x</span>
                     <span />
                   </div>
@@ -208,10 +208,10 @@ export default function BonushuntDetailPage() {
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span className="text-sm font-semibold text-white truncate">{entry.game_name}</span>
                           {entry.id === currentId && (
-                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 uppercase tracking-wider shrink-0">Aktuell</span>
+                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 uppercase tracking-wider shrink-0">Current</span>
                           )}
                           {entry.id === nextId && (
-                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 uppercase tracking-wider shrink-0">Nächstes</span>
+                            <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 uppercase tracking-wider shrink-0">Next</span>
                           )}
                         </div>
                       </div>
@@ -239,7 +239,7 @@ export default function BonushuntDetailPage() {
                             <button
                               onClick={() => handleSaveWin(entry)}
                               className="h-7 px-2 flex items-center gap-1 rounded-lg bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/40 hover:scale-[1.02] transition-all text-[10px] font-bold shadow-[0_0_8px_rgba(16,185,129,0.15)]"
-                              title="Gewinn speichern"
+                              title="Save win"
                             >
                               <Check className="h-3.5 w-3.5" />
                               OK
@@ -252,14 +252,14 @@ export default function BonushuntDetailPage() {
                             disabled={!canModify}
                           >
                             <Pencil className="h-3.5 w-3.5" />
-                            Gewinn eintragen
+                            Enter win
                           </button>
                         ) : (
                           <button
                             className="group flex items-center gap-1 text-xs font-mono text-right hover:opacity-80 transition-all"
                             style={{ color: entry.multiplier >= 2 ? "#34d399" : "#f87171" }}
                             onClick={() => setEditingWin((prev) => ({ ...prev, [entry.id]: String(entry.win_amount) }))}
-                            title="Klicken zum Bearbeiten"
+                            title="Click to edit"
                             disabled={!canModify}
                           >
                             {currencySymbol}{entry.win_amount.toLocaleString()}
@@ -289,7 +289,7 @@ export default function BonushuntDetailPage() {
                   {/* Footer totals */}
                   <div className="grid grid-cols-[28px_1fr_80px_110px_64px_32px] gap-2 px-4 py-3 mt-1 border-t border-white/[0.06] mx-2">
                     <span />
-                    <span className="text-xs font-semibold text-slate-500 uppercase">Gesamt</span>
+                    <span className="text-xs font-semibold text-slate-500 uppercase">Total</span>
                     <span className="text-xs font-bold text-white text-right font-mono">
                       {currencySymbol}{totals.totalBuyIn.toLocaleString()}
                     </span>
@@ -313,21 +313,21 @@ export default function BonushuntDetailPage() {
             <CardHeader>
               <CardTitle className="text-lg text-white flex items-center gap-2">
                 <Plus className="h-5 w-5" />
-                Spiel hinzufügen
+                Add Game
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label className="text-sm font-semibold text-white mb-1.5 block">Spielname *</Label>
+                <Label className="text-sm font-semibold text-white mb-1.5 block">Game Name *</Label>
                 <Input
-                  placeholder="z.B. Sweet Bonanza"
+                  placeholder="e.g. Sweet Bonanza"
                   value={gameName}
                   onChange={(e) => setGameName(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") handleAdd(); }}
                 />
               </div>
               <div>
-                <Label className="text-sm font-semibold text-white mb-1.5 block">Einsatz</Label>
+                <Label className="text-sm font-semibold text-white mb-1.5 block">Buy-In</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">{currencySymbol}</span>
                   <Input
@@ -347,11 +347,11 @@ export default function BonushuntDetailPage() {
                 disabled={adding || !gameName.trim() || !buyIn || !canModify}
               >
                 {adding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                {adding ? "Wird hinzugefügt..." : "Hinzufügen"}
+                {adding ? "Adding..." : "Add"}
               </Button>
 
               <p className="text-[11px] text-slate-600 text-center">
-                Gewinn wird über den &quot;Eintragen&quot; Button in der Tabelle eingegeben.
+                Win amount is entered via the &quot;Enter win&quot; button in the table.
               </p>
             </CardContent>
           </Card>
@@ -369,7 +369,7 @@ export default function BonushuntDetailPage() {
             </div>
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-sm bg-white/[0.04] border border-white/[0.1] shrink-0" />
-              <span className="text-xs text-slate-400">Noch nicht gespielt</span>
+              <span className="text-xs text-slate-400">Not played yet</span>
             </div>
           </div>
         </div>

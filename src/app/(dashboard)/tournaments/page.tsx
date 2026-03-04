@@ -31,11 +31,11 @@ import { createTournamentBetHandler } from "@/lib/twitch/handlers";
 
 function getRoundNames(playerCount: number): string[] {
   const names: string[] = [];
-  if (playerCount >= 32) names.push("Runde der 32");
-  if (playerCount >= 16) names.push("Achtelfinale");
-  if (playerCount >= 8) names.push("Viertelfinale");
-  if (playerCount >= 4) names.push("Halbfinale");
-  names.push("Finale");
+  if (playerCount >= 32) names.push("Round of 32");
+  if (playerCount >= 16) names.push("Round of 16");
+  if (playerCount >= 8) names.push("Quarterfinals");
+  if (playerCount >= 4) names.push("Semifinals");
+  names.push("Final");
   return names;
 }
 
@@ -117,9 +117,9 @@ type OverlayTab = (typeof overlayTabs)[number]["key"];
 
 const phases = [
   { status: "join_open", label: "Join", icon: Users, color: "blue" },
-  { status: "draw", label: "Draw & Wetten", icon: Dices, color: "purple" },
-  { status: "ongoing", label: "Turnier", icon: Play, color: "emerald" },
-  { status: "finished", label: "Fertig", icon: Trophy, color: "amber" },
+  { status: "draw", label: "Draw & Bets", icon: Dices, color: "purple" },
+  { status: "ongoing", label: "Tournament", icon: Play, color: "emerald" },
+  { status: "finished", label: "Finished", icon: Trophy, color: "amber" },
 ] as const;
 
 const statusColors: Record<string, string> = {
@@ -134,8 +134,8 @@ const statusLabels: Record<string, string> = {
   pending: "PENDING",
   join_open: "PHASE 1 — JOIN",
   draw: "PHASE 2 — DRAW",
-  ongoing: "PHASE 3 — TURNIER",
-  finished: "ABGESCHLOSSEN",
+  ongoing: "PHASE 3 — TOURNAMENT",
+  finished: "FINISHED",
 };
 
 /* ====== Phase Indicator Component ====== */
@@ -299,7 +299,7 @@ export default function TournamentsPage() {
       });
       // Announce in Twitch chat
       twitchBot.say(
-        `Das Turnier "${name.trim()}" ist jetzt offen! Schreibe !join Spielname um teilzunehmen!`
+        `Tournament "${name.trim()}" is now open! Type !join GameName to participate!`
       );
       setCreateOpen(false);
       setName(""); setDesc(""); setParticipants("8");
@@ -328,12 +328,12 @@ export default function TournamentsPage() {
       // Bot announcements per phase transition
       if (newStatus === "join_open") {
         const tournament = tournamentsList?.find((t) => t.id === id);
-        const tName = tournament?.name || "Turnier";
+        const tName = tournament?.name || "Tournament";
         twitchBot.say(
-          `Das Turnier "${tName}" ist jetzt offen! Schreibe !join Spielname um teilzunehmen!`
+          `Tournament "${tName}" is now open! Type !join GameName to participate!`
         );
       } else if (newStatus === "ongoing") {
-        twitchBot.say(`Wetten sind geschlossen! Das Turnier startet jetzt!`);
+        twitchBot.say(`Bets are closed! The tournament starts now!`);
       }
     } catch (err) {
       console.error("Failed to update status:", err);
@@ -410,7 +410,7 @@ export default function TournamentsPage() {
       // Announce betting
       const playerNames = players.filter((p) => p.name !== "BYE").map((p) => p.name);
       twitchBot.say(
-        `Auslosung abgeschlossen! Wetten sind offen! Schreibe !tbet SpielerName Punkte um zu wetten! Spieler: ${playerNames.join(", ")}`
+        `Draw complete! Bets are open! Type !tbet PlayerName Points to place a bet! Players: ${playerNames.join(", ")}`
       );
 
       setDrawModal(null);
@@ -438,7 +438,7 @@ export default function TournamentsPage() {
         if (data.winner) {
           await tournamentsDb.bets.resolveWinner(bracketModal.id, data.winner);
           await tournamentsDb.update(bracketModal.id, { status: "finished" });
-          twitchBot.say(`${data.winner} hat das Turnier gewonnen! Gewinnwetten werden ausgezahlt!`);
+          twitchBot.say(`${data.winner} won the tournament! Winning bets are being paid out!`);
           await refetch();
         }
       } catch (err) {
@@ -497,7 +497,7 @@ export default function TournamentsPage() {
           >
             <span>Tournament</span>
             <span>Phase</span>
-            <span>Spieler</span>
+            <span>Player</span>
             <span>Erstellt</span>
             <span className="text-right">Aktionen</span>
           </div>
@@ -539,7 +539,7 @@ export default function TournamentsPage() {
                         <button
                           onClick={() => setParticipantsModal(t)}
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 transition-all"
-                          title="Teilnehmer anzeigen"
+                          title="View participants"
                         >
                           <Users className="h-4 w-4" />
                         </button>
@@ -547,7 +547,7 @@ export default function TournamentsPage() {
                           onClick={() => setDrawModal(t)}
                           disabled={!canModify}
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-purple-400 hover:bg-purple-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                          title="Auslosung starten"
+                          title="Start draw"
                         >
                           <Dices className="h-4 w-4" />
                         </button>
@@ -560,14 +560,14 @@ export default function TournamentsPage() {
                         <button
                           onClick={() => openBracketModal(t)}
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 transition-all"
-                          title="Bracket anzeigen"
+                          title="View bracket"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => setBetsModal(t)}
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
-                          title="Wetten anzeigen"
+                          title="View bets"
                         >
                           <Coins className="h-4 w-4" />
                         </button>
@@ -575,7 +575,7 @@ export default function TournamentsPage() {
                           onClick={() => handleStatusChange(t.id, "ongoing")}
                           disabled={!canModify}
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                          title="Turnier starten (Wetten schliessen)"
+                          title="Start tournament (close bets)"
                         >
                           <Play className="h-4 w-4" />
                         </button>
@@ -588,14 +588,14 @@ export default function TournamentsPage() {
                         <button
                           onClick={() => openBracketModal(t)}
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all"
-                          title="Bracket bearbeiten"
+                          title="Edit bracket"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => setBetsModal(t)}
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
-                          title="Wetten anzeigen"
+                          title="View bets"
                         >
                           <Coins className="h-4 w-4" />
                         </button>
@@ -608,14 +608,14 @@ export default function TournamentsPage() {
                         <button
                           onClick={() => openBracketModal(t)}
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
-                          title="Bracket anzeigen"
+                          title="View bracket"
                         >
                           <Trophy className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => setBetsModal(t)}
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all"
-                          title="Wetten anzeigen"
+                          title="View bets"
                         >
                           <Coins className="h-4 w-4" />
                         </button>
@@ -628,7 +628,7 @@ export default function TournamentsPage() {
                         onClick={() => handleStatusChange(t.id, "join_open")}
                         disabled={!canModify}
                         className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                        title="Join oeffnen"
+                        title="Open join"
                       >
                         <Users className="h-4 w-4" />
                       </button>
@@ -759,21 +759,21 @@ export default function TournamentsPage() {
             }}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-              <h2 className="text-white font-bold text-lg">Turnier erstellen</h2>
+              <h2 className="text-white font-bold text-lg">Create Tournament</h2>
               <button onClick={() => setCreateOpen(false)} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all">
                 <X className="h-4 w-4" />
               </button>
             </div>
             <div className="px-6 py-5 space-y-5">
               <div>
-                <Label className="text-sm font-semibold text-white mb-2 block">Turnier Name</Label>
-                <Input placeholder="Name des Turniers eingeben" value={name} onChange={(e) => setName(e.target.value)} />
-                <p className="text-[11px] text-slate-500 mt-1.5">Turnier wird sofort mit offener Join-Phase erstellt. Bot kuendigt im Chat an.</p>
+                <Label className="text-sm font-semibold text-white mb-2 block">Tournament Name</Label>
+                <Input placeholder="Enter tournament name" value={name} onChange={(e) => setName(e.target.value)} />
+                <p className="text-[11px] text-slate-500 mt-1.5">Tournament will be created with open join phase. Bot announces in chat.</p>
               </div>
               <div>
                 <Label className="text-sm font-semibold text-white mb-2 block">Beschreibung</Label>
                 <textarea
-                  placeholder="Turnier Beschreibung eingeben"
+                  placeholder="Enter tournament description"
                   value={desc}
                   onChange={(e) => setDesc(e.target.value)}
                   rows={3}
@@ -784,20 +784,20 @@ export default function TournamentsPage() {
                 />
               </div>
               <div>
-                <Label className="text-sm font-semibold text-white mb-2 block">Teilnehmer</Label>
+                <Label className="text-sm font-semibold text-white mb-2 block">Participants</Label>
                 <Select value={participants} onValueChange={setParticipants}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="4">4 Teilnehmer</SelectItem>
-                    <SelectItem value="8">8 Teilnehmer</SelectItem>
-                    <SelectItem value="16">16 Teilnehmer</SelectItem>
-                    <SelectItem value="32">32 Teilnehmer</SelectItem>
+                    <SelectItem value="4">4 Participants</SelectItem>
+                    <SelectItem value="8">8 Participants</SelectItem>
+                    <SelectItem value="16">16 Participants</SelectItem>
+                    <SelectItem value="32">32 Participants</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <Button className="w-full gap-2 py-5 text-sm font-semibold" onClick={handleCreate} disabled={creating || !name.trim() || !canModify}>
                 {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                {creating ? "Wird erstellt..." : "Turnier erstellen & Join oeffnen"}
+                {creating ? "Creating..." : "Create Tournament & Open Join"}
               </Button>
             </div>
           </div>
@@ -822,9 +822,9 @@ export default function TournamentsPage() {
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
               <div className="flex items-center gap-3">
-                <h2 className="text-white font-bold text-lg">Teilnehmer</h2>
+                <h2 className="text-white font-bold text-lg">Participants</h2>
                 <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  !join aktiv
+                  !join active
                 </span>
               </div>
               <button onClick={() => setParticipantsModal(null)} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all">
@@ -833,15 +833,15 @@ export default function TournamentsPage() {
             </div>
             <div className="px-6 pt-4 pb-2">
               <p className="text-xs text-slate-400">
-                Zuschauer koennen mit <span className="text-blue-400 font-semibold">!join Spielname</span> im Chat beitreten.
-                Turnier: <span className="text-white font-semibold">{participantsModal.name}</span>
+                Viewers can join with <span className="text-blue-400 font-semibold">!join GameName</span> in chat.
+                Tournament: <span className="text-white font-semibold">{participantsModal.name}</span>
               </p>
             </div>
             <div className="px-6 pb-4 max-h-64 overflow-y-auto">
               {!participantsList || participantsList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-slate-500">
                   <Users className="h-8 w-8 mb-2 text-slate-600" />
-                  <p className="text-sm">Noch keine Teilnehmer</p>
+                  <p className="text-sm">No participants yet</p>
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -866,12 +866,12 @@ export default function TournamentsPage() {
               )}
             </div>
             <div className="px-6 py-4 border-t border-white/[0.06] flex items-center justify-between">
-              <span className="text-xs text-slate-500">{participantsList?.length ?? 0} Teilnehmer</span>
+              <span className="text-xs text-slate-500">{participantsList?.length ?? 0} Participants</span>
               <div className="flex gap-2">
                 <Button variant="destructive" size="sm" onClick={() => handleClearParticipants(participantsModal.id)}>
                   Liste leeren
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setParticipantsModal(null)}>Schliessen</Button>
+                <Button variant="outline" size="sm" onClick={() => setParticipantsModal(null)}>Close</Button>
               </div>
             </div>
           </div>
@@ -897,7 +897,7 @@ export default function TournamentsPage() {
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
               <div className="flex items-center gap-3">
-                <h2 className="text-white font-bold text-lg">Auslosung</h2>
+                <h2 className="text-white font-bold text-lg">Draw</h2>
                 {drawStep !== "choose" && (
                   <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
                     {drawnPlayers.length}/{drawModal.participant_count}
@@ -918,16 +918,16 @@ export default function TournamentsPage() {
                 <div className="space-y-4">
                   <div className="text-center">
                     <p className="text-sm text-slate-300 mb-1">
-                      <span className="text-white font-semibold">{participantsList?.length ?? 0}</span> Teilnehmer angemeldet
+                      <span className="text-white font-semibold">{participantsList?.length ?? 0}</span> participants registered
                     </p>
                     <p className="text-xs text-slate-500">
-                      {drawModal.participant_count} werden fuer das Bracket gezogen
+                      {drawModal.participant_count} will be drawn for the bracket
                     </p>
                   </div>
 
                   {(participantsList?.length ?? 0) < drawModal.participant_count && (
                     <div className="px-3 py-2 rounded-lg text-xs text-amber-400 bg-amber-500/10 border border-amber-500/15 text-center">
-                      Nicht genug Teilnehmer — fehlende Plaetze werden als BYE gefuellt
+                      Not enough participants — missing slots will be filled as BYE
                     </div>
                   )}
 
@@ -1006,7 +1006,7 @@ export default function TournamentsPage() {
               {drawStep === "done" && (
                 <div className="space-y-4">
                   <div className="text-center mb-2">
-                    <span className="text-emerald-400 font-semibold text-sm">Auslosung abgeschlossen!</span>
+                    <span className="text-emerald-400 font-semibold text-sm">Draw complete!</span>
                   </div>
 
                   <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -1047,7 +1047,7 @@ export default function TournamentsPage() {
                     disabled={savingDraw}
                   >
                     {savingDraw ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-                    Bracket erstellen & Wetten oeffnen
+                    Create Bracket & Open Bets
                   </Button>
                 </>
               ) : (
@@ -1104,14 +1104,14 @@ export default function TournamentsPage() {
             <div className="px-6 py-4 border-t border-white/[0.06] flex justify-between items-center shrink-0">
               <span className="text-xs text-slate-500">
                 {bracketModal.status === "ongoing"
-                  ? "Klicke auf das Trophy-Icon um einen Gewinner zu waehlen. Spiel + Gewinn sind editierbar."
+                  ? "Click the trophy icon to pick a winner. Game + win amount are editable."
                   : bracketModal.status === "finished" && liveBracket.winner
-                    ? `Gewinner: ${liveBracket.winner}`
+                    ? `Winner: ${liveBracket.winner}`
                     : bracketModal.status === "draw"
-                      ? "Bracket-Vorschau — Wetten sind offen"
-                      : "Bracket-Vorschau"}
+                      ? "Bracket preview — bets are open"
+                      : "Bracket preview"}
               </span>
-              <Button variant="outline" size="sm" onClick={() => setBracketModal(null)}>Schliessen</Button>
+              <Button variant="outline" size="sm" onClick={() => setBracketModal(null)}>Close</Button>
             </div>
           </div>
         </div>
@@ -1135,7 +1135,7 @@ export default function TournamentsPage() {
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
               <div className="flex items-center gap-3">
-                <h2 className="text-white font-bold text-lg">Wetten</h2>
+                <h2 className="text-white font-bold text-lg">Bets</h2>
                 <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
                   betsModal.status === "draw"
                     ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
@@ -1151,8 +1151,8 @@ export default function TournamentsPage() {
             <div className="px-6 pt-4 pb-2">
               <p className="text-xs text-slate-400">
                 {betsModal.status === "draw"
-                  ? <>Zuschauer wetten mit <span className="text-amber-400 font-semibold">!tbet SpielerName Punkte</span> im Chat.</>
-                  : "Uebersicht aller platzierten Wetten."}
+                  ? <>Viewers bet with <span className="text-amber-400 font-semibold">!tbet PlayerName Punkte</span> in chat.</>
+                  : "Overview of all placed bets."}
               </p>
             </div>
 
@@ -1160,11 +1160,11 @@ export default function TournamentsPage() {
             {betsList && betsList.length > 0 && (
               <div className="px-6 py-3 flex gap-3">
                 <div className="flex-1 rounded-lg px-3 py-2 bg-white/[0.03] border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Wetten</span>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Bets</span>
                   <span className="text-white font-bold">{betsList.length}</span>
                 </div>
                 <div className="flex-1 rounded-lg px-3 py-2 bg-white/[0.03] border border-white/[0.06]">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Punkte gesamt</span>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Total Points</span>
                   <span className="text-amber-400 font-bold">{betsList.reduce((s, b) => s + b.amount, 0).toLocaleString()}</span>
                 </div>
               </div>
@@ -1174,7 +1174,7 @@ export default function TournamentsPage() {
               {!betsList || betsList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8 text-slate-500">
                   <Coins className="h-8 w-8 mb-2 text-slate-600" />
-                  <p className="text-sm">Noch keine Wetten</p>
+                  <p className="text-sm">No bets yet</p>
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -1198,7 +1198,7 @@ export default function TournamentsPage() {
               )}
             </div>
             <div className="px-6 py-4 border-t border-white/[0.06] flex justify-end">
-              <Button variant="outline" size="sm" onClick={() => setBetsModal(null)}>Schliessen</Button>
+              <Button variant="outline" size="sm" onClick={() => setBetsModal(null)}>Close</Button>
             </div>
           </div>
         </div>
@@ -1246,14 +1246,14 @@ function NormalPreview() {
         <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">PHASE 1 — JOIN</span>
       </div>
       <div className="px-4 pb-3 space-y-1">
-        {["Spieler1", "Spieler2", "Spieler3"].map((p) => (
+        {["Player1", "Player2", "Player3"].map((p) => (
           <div key={p} className="px-3 py-1.5 rounded-lg text-[10px] text-slate-400" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
             {p}
           </div>
         ))}
       </div>
       <div className="px-4 py-2.5 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-        <span className="text-[11px] font-black tracking-wider text-blue-400">!join Spielname</span>
+        <span className="text-[11px] font-black tracking-wider text-blue-400">!join GameName</span>
       </div>
     </div>
   );

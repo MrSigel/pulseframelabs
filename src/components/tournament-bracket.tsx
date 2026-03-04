@@ -160,7 +160,7 @@ export default function TournamentBracket({
           <button
             onClick={() => pickWinner(rIdx, mIdx, pKey)}
             className="shrink-0 h-6 w-6 rounded flex items-center justify-center text-slate-600 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all opacity-0 group-hover:opacity-100"
-            title="Als Gewinner wählen"
+            title="Pick as winner"
           >
             <Trophy className="h-3 w-3" />
           </button>

@@ -25,9 +25,9 @@ export function createSlotRequestHandler(): MessageHandler {
           );
           if (own) {
             await slotRequests.remove(own.id);
-            context.say(`🎰 @${username} dein Slot-Wunsch wurde entfernt! ❌`);
+            context.say(`🎰 @${username} your slot request has been removed! ❌`);
           } else {
-            context.say(`@${username} du hast keinen aktiven Slot-Wunsch.`);
+            context.say(`@${username} you don't have an active slot request.`);
           }
         } catch {
           // Ignore errors
@@ -50,7 +50,7 @@ export function createSlotRequestHandler(): MessageHandler {
           );
           if (existing) {
             context.say(
-              `@${username} du hast bereits einen Slot-Wunsch ("${existing.slot_name}"). Nutze !sr cancel um ihn zu entfernen.`
+              `@${username} you already have a slot request ("${existing.slot_name}"). Use !sr cancel to remove it.`
             );
             return;
           }
@@ -64,7 +64,7 @@ export function createSlotRequestHandler(): MessageHandler {
         slot_name: slotName,
       });
 
-      context.say(`🎰 @${username} dein Slot-Wunsch "${slotName}" wurde hinzugefügt! ✅`);
+      context.say(`🎰 @${username} your slot request "${slotName}" has been added! ✅`);
     },
   };
 }

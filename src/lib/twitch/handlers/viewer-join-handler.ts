@@ -38,7 +38,7 @@ export function createViewerJoinHandler(config: ViewerJoinConfig): MessageHandle
           .maybeSingle();
 
         if (existing) {
-          context.say(`✅ @${username}, du bist bereits registriert! Deine Punkte: ${existing.total_points.toLocaleString()} 🪙`);
+          context.say(`✅ @${username}, you are already registered! Your points: ${existing.total_points.toLocaleString()} 🪙`);
           return;
         }
 
@@ -52,10 +52,10 @@ export function createViewerJoinHandler(config: ViewerJoinConfig): MessageHandle
             watch_time_minutes: 0,
           });
 
-        context.say(`🎉 @${username} wurde erfolgreich registriert! Willkommen! 🌟`);
+        context.say(`🎉 @${username} has been successfully registered! Welcome! 🌟`);
       } catch (err) {
         console.error(`Failed to register viewer ${username}:`, err);
-        context.say(`❌ @${username}, Registrierung fehlgeschlagen. Bitte versuche es erneut.`);
+        context.say(`❌ @${username}, registration failed. Please try again.`);
       }
     },
   };

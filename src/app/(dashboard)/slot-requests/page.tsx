@@ -489,7 +489,7 @@ export default function SlotRequestsPage() {
                   disabled={!canModify}
                 >
                   <Trash2 className="h-4 w-4" />
-                  Bestätigen &amp; Liste leeren
+                  Confirm &amp; Clear List
                 </Button>
                 <Button
                   variant="success"
@@ -498,7 +498,7 @@ export default function SlotRequestsPage() {
                   disabled={!canModify}
                 >
                   <Save className="h-4 w-4" />
-                  Bestätigen &amp; Behalten
+                  Confirm &amp; Keep
                 </Button>
               </div>
             )}

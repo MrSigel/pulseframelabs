@@ -170,7 +170,7 @@ export default function BonushuntsPage() {
                     <Link href={`/bonushunts/${hunt.id}`}>
                       <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
                         <ExternalLink className="h-3 w-3" />
-                        Öffnen
+                        Open
                       </Button>
                     </Link>
                     <button onClick={() => handleDeleteHunt(hunt.id)} disabled={!canModify} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none">

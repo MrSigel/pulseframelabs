@@ -224,7 +224,7 @@ function TournamentWidget({ tournament }: { tournament: TournamentRow }) {
             {tournament.status.toUpperCase()}
           </span>
           <span className="text-slate-500">
-            {tournament.participant_count ?? 0} Teilnehmer
+            {tournament.participant_count ?? 0} Participants
           </span>
         </div>
       </div>
@@ -285,7 +285,7 @@ function IdleWidget() {
       }}
     >
       <div className="h-2 w-2 rounded-full bg-slate-600 animate-pulse" />
-      <span className="text-[11px] text-slate-500 font-semibold">Kein aktives Feature</span>
+      <span className="text-[11px] text-slate-500 font-semibold">No active feature</span>
     </div>
   );
 }

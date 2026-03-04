@@ -37,12 +37,12 @@ export function createPointsBattleHandler(state: PointsBattleState): MessageHand
 
       if (optionIndex === -1) {
         const validKeywords = state.options.map((o) => o.keyword).join(", ");
-        context.say(`❌ @${username} ungültige Option. Nutze: ${validKeywords}`);
+        context.say(`❌ @${username} invalid option. Use: ${validKeywords}`);
         return;
       }
 
       if (isNaN(amount) || amount < state.minPoints || amount > state.maxPoints) {
-        context.say(`⚠️ @${username} Einsatz muss zwischen ${state.minPoints} und ${state.maxPoints} Punkten liegen.`);
+        context.say(`⚠️ @${username} bet must be between ${state.minPoints} and ${state.maxPoints} points.`);
         return;
       }
 
@@ -57,7 +57,7 @@ export function createPointsBattleHandler(state: PointsBattleState): MessageHand
         .maybeSingle();
 
       if (!viewer || viewer.total_points < amount) {
-        context.say(`💸 @${username} du hast nicht genug Punkte!`);
+        context.say(`💸 @${username} you don't have enough points!`);
         return;
       }
 
@@ -70,7 +70,7 @@ export function createPointsBattleHandler(state: PointsBattleState): MessageHand
         .maybeSingle();
 
       if (existingBet) {
-        context.say(`⚠️ @${username} du hast bereits gewettet!`);
+        context.say(`⚠️ @${username} you already placed a bet!`);
         return;
       }
 
@@ -98,7 +98,7 @@ export function createPointsBattleHandler(state: PointsBattleState): MessageHand
         type: "remove",
       });
 
-      context.say(`🎲 @${username} setzt ${amount} Punkte auf "${state.options[optionIndex].keyword}"! 🔥`);
+      context.say(`🎲 @${username} bets ${amount} points on "${state.options[optionIndex].keyword}"! 🔥`);
     },
   };
 }

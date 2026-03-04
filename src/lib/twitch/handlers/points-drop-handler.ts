@@ -37,13 +37,13 @@ export function createPointsDropHandler(config: PointsDropConfig): MessageHandle
 
       // Drop already ended
       if (ended) {
-        context.say(`❌ @${username}, der Points Drop ist vorbei! Warte auf den nächsten. ⏳`);
+        context.say(`❌ @${username}, the points drop is over! Wait for the next one. ⏳`);
         return;
       }
 
       // Prevent double-claim
       if (claimed.has(lowerUser)) {
-        context.say(`⚠️ @${username}, du hast bereits teilgenommen!`);
+        context.say(`⚠️ @${username}, you already participated!`);
         return;
       }
       claimed.add(lowerUser);
@@ -73,7 +73,7 @@ export function createPointsDropHandler(config: PointsDropConfig): MessageHandle
             .insert({ user_id: context.userId, username, total_points: config.amount, watch_time_minutes: 0 });
         }
 
-        context.say(`🎉 @${username} hat ${config.amount} Punkte erhalten! ✨`);
+        context.say(`🎉 @${username} received ${config.amount} points! ✨`);
         config.onClaim?.(username);
       } catch (err) {
         console.error(`Failed to award points to ${username}:`, err);
