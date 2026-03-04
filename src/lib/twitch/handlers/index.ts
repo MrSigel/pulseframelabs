@@ -8,3 +8,4 @@ export { createPointsDropHandler } from "./points-drop-handler";
 export { createTournamentJoinHandler } from "./tournament-join-handler";
 export { createCustomResponseHandler } from "./custom-response-handler";
 export { createViewerJoinHandler } from "./viewer-join-handler";
+export { createTournamentBetHandler } from "./tournament-bet-handler";

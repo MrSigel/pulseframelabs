@@ -162,13 +162,25 @@ function TournamentBracketContent() {
   const uid = useOverlayUid();
   const { cssVars } = useOverlayTheme(uid);
 
-  const { data: dbTournament, loading } = useOverlayData<TournamentRow>({
+  // Fetch all tournaments and pick the most relevant one with bracket data
+  const { data: allTournaments, loading } = useOverlayData<TournamentRow[]>({
     table: "tournaments",
     userId: uid,
-    orderBy: "created_at",
+    orderBy: "updated_at",
     ascending: false,
-    single: true,
   });
+
+  const dbTournament = useMemo(() => {
+    if (!Array.isArray(allTournaments)) return null;
+    // Priority: ongoing > draw > finished — always show one with real bracket data
+    for (const status of ["ongoing", "draw", "finished"]) {
+      const t = allTournaments.find(
+        (t) => t.status === status && t.bracket_data?.rounds && t.bracket_data.rounds.length > 0
+      );
+      if (t) return t;
+    }
+    return null;
+  }, [allTournaments]);
 
   // Fetch participants for badge lookup
   const { data: participantsArr } = useOverlayData<ParticipantRow[]>({

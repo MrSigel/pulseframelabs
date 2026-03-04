@@ -15,16 +15,17 @@ import {
 } from "@/components/ui/select";
 import {
   Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2,
-  Loader2, Play, CheckCircle, Users, Dices, Eye,
+  Loader2, Play, CheckCircle, Users, Dices, Eye, Trophy, Coins,
 } from "lucide-react";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { tournaments as tournamentsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
 import TournamentBracket from "@/components/tournament-bracket";
-import type { Tournament, TournamentParticipant, BracketData, BracketPlayer, BracketRound, BracketMatchup } from "@/lib/supabase/types";
+import type { Tournament, TournamentParticipant, TournamentBet, BracketData, BracketPlayer, BracketRound, BracketMatchup } from "@/lib/supabase/types";
 import { twitchBot } from "@/lib/twitch/bot";
+import { createTournamentBetHandler } from "@/lib/twitch/handlers";
 
 /* ====== Helper Functions ====== */
 
@@ -92,6 +93,17 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+/** Extract all real player names from first round of bracket */
+function getDrawnPlayerNames(bracketData: BracketData | null): string[] {
+  if (!bracketData?.rounds?.[0]) return [];
+  const names: string[] = [];
+  for (const m of bracketData.rounds[0].matchups) {
+    if (m.player1.name !== "TBD" && m.player1.name !== "BYE") names.push(m.player1.name);
+    if (m.player2.name !== "TBD" && m.player2.name !== "BYE") names.push(m.player2.name);
+  }
+  return names;
+}
+
 /* ====== Overlay Tabs ====== */
 
 const overlayTabs = [
@@ -101,23 +113,72 @@ const overlayTabs = [
 
 type OverlayTab = (typeof overlayTabs)[number]["key"];
 
-/* ====== Status config ====== */
+/* ====== Phase config ====== */
+
+const phases = [
+  { status: "join_open", label: "Join", icon: Users, color: "blue" },
+  { status: "draw", label: "Draw & Wetten", icon: Dices, color: "purple" },
+  { status: "ongoing", label: "Turnier", icon: Play, color: "emerald" },
+  { status: "finished", label: "Fertig", icon: Trophy, color: "amber" },
+] as const;
 
 const statusColors: Record<string, string> = {
   pending: "bg-amber-500/10 text-amber-400",
   join_open: "bg-blue-500/10 text-blue-400",
   draw: "bg-purple-500/10 text-purple-400",
   ongoing: "bg-emerald-500/10 text-emerald-400",
-  finished: "bg-slate-500/10 text-slate-400",
+  finished: "bg-amber-500/10 text-amber-400",
 };
 
 const statusLabels: Record<string, string> = {
   pending: "PENDING",
-  join_open: "JOIN OPEN",
-  draw: "DRAW",
-  ongoing: "ONGOING",
-  finished: "FINISHED",
+  join_open: "PHASE 1 — JOIN",
+  draw: "PHASE 2 — DRAW",
+  ongoing: "PHASE 3 — TURNIER",
+  finished: "ABGESCHLOSSEN",
 };
+
+/* ====== Phase Indicator Component ====== */
+
+function PhaseIndicator({ currentStatus }: { currentStatus: string }) {
+  const currentIdx = phases.findIndex((p) => p.status === currentStatus);
+  return (
+    <div className="flex items-center gap-1">
+      {phases.map((phase, i) => {
+        const isActive = i === currentIdx;
+        const isDone = i < currentIdx;
+        const Icon = phase.icon;
+        return (
+          <div key={phase.status} className="flex items-center gap-1">
+            {i > 0 && (
+              <div
+                className="w-4 h-px"
+                style={{ background: isDone ? `rgba(16,185,129,0.4)` : "rgba(255,255,255,0.08)" }}
+              />
+            )}
+            <div
+              className="flex items-center gap-1 px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider"
+              style={{
+                background: isActive
+                  ? `rgba(${phase.color === "blue" ? "59,130,246" : phase.color === "purple" ? "139,92,246" : phase.color === "emerald" ? "16,185,129" : "245,158,11"},0.12)`
+                  : isDone ? "rgba(16,185,129,0.08)" : "transparent",
+                color: isActive
+                  ? `rgba(${phase.color === "blue" ? "96,165,250" : phase.color === "purple" ? "167,139,250" : phase.color === "emerald" ? "52,211,153" : "251,191,36"},1)`
+                  : isDone ? "rgba(52,211,153,0.6)" : "rgba(255,255,255,0.15)",
+                border: isActive
+                  ? `1px solid rgba(${phase.color === "blue" ? "59,130,246" : phase.color === "purple" ? "139,92,246" : phase.color === "emerald" ? "16,185,129" : "245,158,11"},0.2)`
+                  : "1px solid transparent",
+              }}
+            >
+              <Icon className="h-3 w-3" />
+              <span className="hidden sm:inline">{phase.label}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 /* ====== Main Component ====== */
 
@@ -131,6 +192,7 @@ export default function TournamentsPage() {
   const [participantsModal, setParticipantsModal] = useState<Tournament | null>(null);
   const [drawModal, setDrawModal] = useState<Tournament | null>(null);
   const [bracketModal, setBracketModal] = useState<Tournament | null>(null);
+  const [betsModal, setBetsModal] = useState<Tournament | null>(null);
 
   /* ---- Form state ---- */
   const [activeTab, setActiveTab] = useState<OverlayTab>("normal");
@@ -151,6 +213,10 @@ export default function TournamentsPage() {
   /* ---- Bracket state ---- */
   const [liveBracket, setLiveBracket] = useState<BracketData | null>(null);
 
+  /* ---- Bet handler state ---- */
+  const betStateRef = useRef({ activeTournamentId: null as string | null, drawnPlayers: [] as string[], bettingOpen: false });
+  const betHandlerRegistered = useRef(false);
+
   /* ---- Data queries ---- */
   const { data: tournamentsList, loading, refetch } = useDbQuery<Tournament[]>(() => tournamentsDb.list(), []);
 
@@ -160,9 +226,44 @@ export default function TournamentsPage() {
     [activeParticipantsTournamentId]
   );
 
+  const activeBetsTournamentId = betsModal?.id || null;
+  const { data: betsList, refetch: refetchBets } = useDbQuery<TournamentBet[]>(
+    () => activeBetsTournamentId ? tournamentsDb.bets.list(activeBetsTournamentId) : Promise.resolve([]),
+    [activeBetsTournamentId]
+  );
+
   const filteredTournaments = (tournamentsList ?? []).filter(
     (t) => !searchQuery || t.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  /* ---- Register/unregister bet handler based on active draw tournaments ---- */
+  const syncBetHandler = useCallback(() => {
+    const drawTournament = tournamentsList?.find((t) => t.status === "draw");
+    if (drawTournament) {
+      const bracket = parseBracketData(drawTournament.bracket_data);
+      const players = getDrawnPlayerNames(bracket);
+      betStateRef.current.activeTournamentId = drawTournament.id;
+      betStateRef.current.drawnPlayers = players;
+      betStateRef.current.bettingOpen = true;
+      if (!betHandlerRegistered.current) {
+        const handler = createTournamentBetHandler(betStateRef.current);
+        twitchBot.addHandler(handler);
+        betHandlerRegistered.current = true;
+      }
+    } else {
+      betStateRef.current.bettingOpen = false;
+      betStateRef.current.activeTournamentId = null;
+      betStateRef.current.drawnPlayers = [];
+      if (betHandlerRegistered.current) {
+        twitchBot.removeHandler("tournament-bet");
+        betHandlerRegistered.current = false;
+      }
+    }
+  }, [tournamentsList]);
+
+  useEffect(() => {
+    syncBetHandler();
+  }, [syncBetHandler]);
 
   /* ---- Cleanup raffle timer ---- */
   useEffect(() => {
@@ -196,6 +297,10 @@ export default function TournamentsPage() {
         description: desc.trim(),
         participant_count: parseInt(participants) || 8,
       });
+      // Announce in Twitch chat
+      twitchBot.say(
+        `Das Turnier "${name.trim()}" ist jetzt offen! Schreibe !join Spielname um teilzunehmen!`
+      );
       setCreateOpen(false);
       setName(""); setDesc(""); setParticipants("8");
       await refetch();
@@ -220,13 +325,8 @@ export default function TournamentsPage() {
       await tournamentsDb.update(id, { status: newStatus });
       await refetch();
 
-      // Auto-announce in Twitch chat when join phase opens
-      if (newStatus === "join_open") {
-        const tournament = tournamentsList?.find((t) => t.id === id);
-        const name = tournament?.name || "Turnier";
-        twitchBot.say(
-          `🏆 Das Turnier "${name}" ist jetzt offen! Schreibe !join Spielname um teilzunehmen! 🎮`
-        );
+      if (newStatus === "ongoing") {
+        twitchBot.say(`Wetten sind geschlossen! Das Turnier startet jetzt!`);
       }
     } catch (err) {
       console.error("Failed to update status:", err);
@@ -299,6 +399,13 @@ export default function TournamentsPage() {
       const bracket = buildBracket(players, drawModal.participant_count);
       await tournamentsDb.updateBracket(drawModal.id, bracket);
       await tournamentsDb.update(drawModal.id, { status: "draw" });
+
+      // Announce betting
+      const playerNames = players.filter((p) => p.name !== "BYE").map((p) => p.name);
+      twitchBot.say(
+        `Auslosung abgeschlossen! Wetten sind offen! Schreibe !tbet SpielerName Punkte um zu wetten! Spieler: ${playerNames.join(", ")}`
+      );
+
       setDrawModal(null);
       await refetch();
     } catch (err) {
@@ -319,9 +426,12 @@ export default function TournamentsPage() {
     if (bracketModal) {
       try {
         await tournamentsDb.updateBracket(bracketModal.id, data);
-        // If winner is set, auto-finish the tournament
+
+        // If winner is set, resolve all bets and finish tournament
         if (data.winner) {
+          await tournamentsDb.bets.resolveWinner(bracketModal.id, data.winner);
           await tournamentsDb.update(bracketModal.id, { status: "finished" });
+          twitchBot.say(`${data.winner} hat das Turnier gewonnen! Gewinnwetten werden ausgezahlt!`);
           await refetch();
         }
       } catch (err) {
@@ -374,16 +484,15 @@ export default function TournamentsPage() {
           <div
             className="grid gap-4 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500"
             style={{
-              gridTemplateColumns: "1.5fr 1.2fr 0.8fr 1fr 1fr 1fr",
+              gridTemplateColumns: "1.5fr 2fr 0.8fr 1fr 1.2fr",
               borderBottom: "1px solid rgba(255,255,255,0.06)",
             }}
           >
             <span>Tournament</span>
-            <span>Participants</span>
-            <span>Status</span>
-            <span>Created</span>
-            <span>Last Update</span>
-            <span className="text-right">Manage</span>
+            <span>Phase</span>
+            <span>Spieler</span>
+            <span>Erstellt</span>
+            <span className="text-right">Aktionen</span>
           </div>
 
           {/* Data rows */}
@@ -403,7 +512,7 @@ export default function TournamentsPage() {
                   key={t.id}
                   className="grid gap-4 px-4 py-3 text-sm items-center hover:bg-white/[0.02] transition-colors"
                   style={{
-                    gridTemplateColumns: "1.5fr 1.2fr 0.8fr 1fr 1fr 1fr",
+                    gridTemplateColumns: "1.5fr 2fr 0.8fr 1fr 1.2fr",
                     borderBottom: "1px solid rgba(255,255,255,0.04)",
                   }}
                 >
@@ -411,26 +520,13 @@ export default function TournamentsPage() {
                     <span className="font-semibold text-white">{t.name}</span>
                     {t.description && <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{t.description}</p>}
                   </div>
+                  <PhaseIndicator currentStatus={t.status} />
                   <span className="text-slate-300">{t.participant_count}</span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full w-fit ${statusColors[t.status] || "bg-slate-500/10 text-slate-400"}`}>
-                    {statusLabels[t.status] || t.status.toUpperCase()}
-                  </span>
                   <span className="text-xs text-slate-500">{new Date(t.created_at).toLocaleDateString()}</span>
-                  <span className="text-xs text-slate-500">{new Date(t.updated_at).toLocaleDateString()}</span>
 
-                  {/* ---- Status-specific action buttons ---- */}
+                  {/* ---- Action buttons per phase ---- */}
                   <div className="flex justify-end gap-1">
-                    {t.status === "pending" && (
-                      <button
-                        onClick={() => handleStatusChange(t.id, "join_open")}
-                        disabled={!canModify}
-                        className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                        title="Join öffnen (!join)"
-                      >
-                        <Users className="h-4 w-4" />
-                      </button>
-                    )}
-
+                    {/* Phase 1: Join Open */}
                     {t.status === "join_open" && (
                       <>
                         <button
@@ -444,13 +540,14 @@ export default function TournamentsPage() {
                           onClick={() => setDrawModal(t)}
                           disabled={!canModify}
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-purple-400 hover:bg-purple-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                          title="Auslosen"
+                          title="Auslosung starten"
                         >
                           <Dices className="h-4 w-4" />
                         </button>
                       </>
                     )}
 
+                    {/* Phase 2: Draw + Betting */}
                     {t.status === "draw" && (
                       <>
                         <button
@@ -461,16 +558,24 @@ export default function TournamentsPage() {
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
+                          onClick={() => setBetsModal(t)}
+                          className="h-8 w-8 rounded-lg flex items-center justify-center text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
+                          title="Wetten anzeigen"
+                        >
+                          <Coins className="h-4 w-4" />
+                        </button>
+                        <button
                           onClick={() => handleStatusChange(t.id, "ongoing")}
                           disabled={!canModify}
                           className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                          title="Turnier starten"
+                          title="Turnier starten (Wetten schliessen)"
                         >
                           <Play className="h-4 w-4" />
                         </button>
                       </>
                     )}
 
+                    {/* Phase 3: Ongoing */}
                     {t.status === "ongoing" && (
                       <>
                         <button
@@ -481,23 +586,44 @@ export default function TournamentsPage() {
                           <Eye className="h-4 w-4" />
                         </button>
                         <button
-                          onClick={() => handleStatusChange(t.id, "finished")}
-                          disabled={!canModify}
-                          className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-amber-400 hover:bg-amber-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                          title="Turnier beenden"
+                          onClick={() => setBetsModal(t)}
+                          className="h-8 w-8 rounded-lg flex items-center justify-center text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
+                          title="Wetten anzeigen"
                         >
-                          <CheckCircle className="h-4 w-4" />
+                          <Coins className="h-4 w-4" />
                         </button>
                       </>
                     )}
 
+                    {/* Finished */}
                     {t.status === "finished" && (
+                      <>
+                        <button
+                          onClick={() => openBracketModal(t)}
+                          className="h-8 w-8 rounded-lg flex items-center justify-center text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
+                          title="Bracket anzeigen"
+                        >
+                          <Trophy className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => setBetsModal(t)}
+                          className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all"
+                          title="Wetten anzeigen"
+                        >
+                          <Coins className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
+
+                    {/* Pending (legacy) */}
+                    {t.status === "pending" && (
                       <button
-                        onClick={() => openBracketModal(t)}
-                        className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all"
-                        title="Bracket anzeigen"
+                        onClick={() => handleStatusChange(t.id, "join_open")}
+                        disabled={!canModify}
+                        className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
+                        title="Join oeffnen"
                       >
-                        <Eye className="h-4 w-4" />
+                        <Users className="h-4 w-4" />
                       </button>
                     )}
 
@@ -505,7 +631,7 @@ export default function TournamentsPage() {
                       onClick={() => handleDelete(t.id)}
                       disabled={!canModify}
                       className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                      title="Löschen"
+                      title="Loeschen"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -584,7 +710,7 @@ export default function TournamentsPage() {
               ))}
             </div>
             <div className="px-6 py-5 space-y-5">
-              <OverlayLink url={overlayUrls[activeTab] || ""} obsSize={activeTab === "normal" ? "460 × 300" : "800 × 500"} />
+              <OverlayLink url={overlayUrls[activeTab] || ""} obsSize={activeTab === "normal" ? "460 x 300" : "800 x 500"} />
               <div>
                 <Label className="text-sm font-semibold text-slate-400 mb-2 block">Preview</Label>
                 <div
@@ -626,21 +752,21 @@ export default function TournamentsPage() {
             }}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
-              <h2 className="text-white font-bold text-lg">Create Tournament</h2>
+              <h2 className="text-white font-bold text-lg">Turnier erstellen</h2>
               <button onClick={() => setCreateOpen(false)} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all">
                 <X className="h-4 w-4" />
               </button>
             </div>
             <div className="px-6 py-5 space-y-5">
               <div>
-                <Label className="text-sm font-semibold text-white mb-2 block">Tournament Name</Label>
-                <Input placeholder="Enter tournament name" value={name} onChange={(e) => setName(e.target.value)} />
-                <p className="text-[11px] text-slate-500 mt-1.5">Provide a short, clear name for your tournament. This will be visible to viewers.</p>
+                <Label className="text-sm font-semibold text-white mb-2 block">Turnier Name</Label>
+                <Input placeholder="Name des Turniers eingeben" value={name} onChange={(e) => setName(e.target.value)} />
+                <p className="text-[11px] text-slate-500 mt-1.5">Turnier wird sofort mit offener Join-Phase erstellt. Bot kuendigt im Chat an.</p>
               </div>
               <div>
-                <Label className="text-sm font-semibold text-white mb-2 block">Tournament Description</Label>
+                <Label className="text-sm font-semibold text-white mb-2 block">Beschreibung</Label>
                 <textarea
-                  placeholder="Enter tournament description"
+                  placeholder="Turnier Beschreibung eingeben"
                   value={desc}
                   onChange={(e) => setDesc(e.target.value)}
                   rows={3}
@@ -649,25 +775,22 @@ export default function TournamentsPage() {
                   onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(59, 130, 246, 0.5)"; e.currentTarget.style.boxShadow = "0 0 0 2px rgba(59, 130, 246, 0.15)"; }}
                   onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(56, 79, 125, 0.25)"; e.currentTarget.style.boxShadow = "none"; }}
                 />
-                <p className="text-[11px] text-slate-500 mt-1.5">Provide a brief description of your tournament. This will be visible to viewers.</p>
               </div>
               <div>
-                <Label className="text-sm font-semibold text-white mb-2 block">Participants</Label>
+                <Label className="text-sm font-semibold text-white mb-2 block">Teilnehmer</Label>
                 <Select value={participants} onValueChange={setParticipants}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="4">4 Participants</SelectItem>
-                    <SelectItem value="8">8 Participants</SelectItem>
-                    <SelectItem value="16">16 Participants</SelectItem>
-                    <SelectItem value="32">32 Participants</SelectItem>
-                    <SelectItem value="64">64 Participants</SelectItem>
+                    <SelectItem value="4">4 Teilnehmer</SelectItem>
+                    <SelectItem value="8">8 Teilnehmer</SelectItem>
+                    <SelectItem value="16">16 Teilnehmer</SelectItem>
+                    <SelectItem value="32">32 Teilnehmer</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-[11px] text-slate-500 mt-1.5">Select the number of participants for your tournament.</p>
               </div>
               <Button className="w-full gap-2 py-5 text-sm font-semibold" onClick={handleCreate} disabled={creating || !name.trim() || !canModify}>
                 {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                {creating ? "Creating..." : "Create Tournament"}
+                {creating ? "Wird erstellt..." : "Turnier erstellen & Join oeffnen"}
               </Button>
             </div>
           </div>
@@ -703,7 +826,7 @@ export default function TournamentsPage() {
             </div>
             <div className="px-6 pt-4 pb-2">
               <p className="text-xs text-slate-400">
-                Zuschauer können mit <span className="text-blue-400 font-semibold">!join Spielname</span> im Chat beitreten.
+                Zuschauer koennen mit <span className="text-blue-400 font-semibold">!join Spielname</span> im Chat beitreten.
                 Turnier: <span className="text-white font-semibold">{participantsModal.name}</span>
               </p>
             </div>
@@ -741,7 +864,7 @@ export default function TournamentsPage() {
                 <Button variant="destructive" size="sm" onClick={() => handleClearParticipants(participantsModal.id)}>
                   Liste leeren
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setParticipantsModal(null)}>Schließen</Button>
+                <Button variant="outline" size="sm" onClick={() => setParticipantsModal(null)}>Schliessen</Button>
               </div>
             </div>
           </div>
@@ -791,13 +914,13 @@ export default function TournamentsPage() {
                       <span className="text-white font-semibold">{participantsList?.length ?? 0}</span> Teilnehmer angemeldet
                     </p>
                     <p className="text-xs text-slate-500">
-                      {drawModal.participant_count} werden für das Bracket gezogen
+                      {drawModal.participant_count} werden fuer das Bracket gezogen
                     </p>
                   </div>
 
                   {(participantsList?.length ?? 0) < drawModal.participant_count && (
                     <div className="px-3 py-2 rounded-lg text-xs text-amber-400 bg-amber-500/10 border border-amber-500/15 text-center">
-                      Nicht genug Teilnehmer — fehlende Plätze werden als BYE gefüllt
+                      Nicht genug Teilnehmer — fehlende Plaetze werden als BYE gefuellt
                     </div>
                   )}
 
@@ -827,7 +950,6 @@ export default function TournamentsPage() {
               {/* Step: Drawing (single raffle) */}
               {drawStep === "drawing" && (
                 <div className="space-y-4">
-                  {/* Raffle display */}
                   <div
                     className="text-center py-6 rounded-xl"
                     style={{
@@ -848,7 +970,6 @@ export default function TournamentsPage() {
                     </span>
                   </div>
 
-                  {/* Already drawn */}
                   {drawnPlayers.length > 0 && (
                     <div className="space-y-1">
                       <span className="text-[10px] uppercase tracking-wider text-slate-600 font-semibold">Gezogen:</span>
@@ -862,14 +983,13 @@ export default function TournamentsPage() {
                     </div>
                   )}
 
-                  {/* Next draw button */}
                   {!raffleAnimating && drawnPlayers.length < drawModal.participant_count && (
                     <Button
                       className="w-full gap-2"
                       onClick={startSingleRaffle}
                     >
                       <Dices className="h-4 w-4" />
-                      Nächsten ziehen
+                      Naechsten ziehen
                     </Button>
                   )}
                 </div>
@@ -920,7 +1040,7 @@ export default function TournamentsPage() {
                     disabled={savingDraw}
                   >
                     {savingDraw ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-                    Bracket erstellen & speichern
+                    Bracket erstellen & Wetten oeffnen
                   </Button>
                 </>
               ) : (
@@ -977,12 +1097,101 @@ export default function TournamentsPage() {
             <div className="px-6 py-4 border-t border-white/[0.06] flex justify-between items-center shrink-0">
               <span className="text-xs text-slate-500">
                 {bracketModal.status === "ongoing"
-                  ? "Klicke auf das Trophy-Icon um einen Gewinner zu wählen"
+                  ? "Klicke auf das Trophy-Icon um einen Gewinner zu waehlen. Spiel + Gewinn sind editierbar."
                   : bracketModal.status === "finished" && liveBracket.winner
                     ? `Gewinner: ${liveBracket.winner}`
-                    : "Bracket-Vorschau"}
+                    : bracketModal.status === "draw"
+                      ? "Bracket-Vorschau — Wetten sind offen"
+                      : "Bracket-Vorschau"}
               </span>
-              <Button variant="outline" size="sm" onClick={() => setBracketModal(null)}>Schließen</Button>
+              <Button variant="outline" size="sm" onClick={() => setBracketModal(null)}>Schliessen</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ====== Bets Modal ====== */}
+      {betsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            style={{ animation: "fadeIn 0.2s ease-out" }}
+            onClick={() => setBetsModal(null)}
+          />
+          <div
+            className="relative z-10 w-full max-w-lg rounded-xl border border-white/[0.08] shadow-2xl"
+            style={{
+              background: "linear-gradient(135deg, #0f1521 0%, #1a2235 50%, #0f1521 100%)",
+              animation: "modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+              boxShadow: "0 0 60px rgba(245, 158, 11, 0.08), 0 25px 50px rgba(0,0,0,0.5)",
+            }}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+              <div className="flex items-center gap-3">
+                <h2 className="text-white font-bold text-lg">Wetten</h2>
+                <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                  betsModal.status === "draw"
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                    : "bg-red-500/10 text-red-400 border border-red-500/20"
+                }`}>
+                  {betsModal.status === "draw" ? "Offen" : "Geschlossen"}
+                </span>
+              </div>
+              <button onClick={() => setBetsModal(null)} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="px-6 pt-4 pb-2">
+              <p className="text-xs text-slate-400">
+                {betsModal.status === "draw"
+                  ? <>Zuschauer wetten mit <span className="text-amber-400 font-semibold">!tbet SpielerName Punkte</span> im Chat.</>
+                  : "Uebersicht aller platzierten Wetten."}
+              </p>
+            </div>
+
+            {/* Stats */}
+            {betsList && betsList.length > 0 && (
+              <div className="px-6 py-3 flex gap-3">
+                <div className="flex-1 rounded-lg px-3 py-2 bg-white/[0.03] border border-white/[0.06]">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Wetten</span>
+                  <span className="text-white font-bold">{betsList.length}</span>
+                </div>
+                <div className="flex-1 rounded-lg px-3 py-2 bg-white/[0.03] border border-white/[0.06]">
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Punkte gesamt</span>
+                  <span className="text-amber-400 font-bold">{betsList.reduce((s, b) => s + b.amount, 0).toLocaleString()}</span>
+                </div>
+              </div>
+            )}
+
+            <div className="px-6 pb-4 max-h-64 overflow-y-auto">
+              {!betsList || betsList.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-slate-500">
+                  <Coins className="h-8 w-8 mb-2 text-slate-600" />
+                  <p className="text-sm">Noch keine Wetten</p>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {betsList.map((b) => (
+                    <div key={b.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[0.03] transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm text-white font-medium block truncate">{b.viewer_username}</span>
+                        <span className="text-[10px] text-slate-500">wettet auf {b.bet_on_player}</span>
+                      </div>
+                      <span className="text-xs font-bold text-amber-400 shrink-0">{b.amount.toLocaleString()} P</span>
+                      {b.resolved && (
+                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                          b.won ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"
+                        }`}>
+                          {b.won ? "WON" : "LOST"}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="px-6 py-4 border-t border-white/[0.06] flex justify-end">
+              <Button variant="outline" size="sm" onClick={() => setBetsModal(null)}>Schliessen</Button>
             </div>
           </div>
         </div>
@@ -1024,39 +1233,20 @@ function NormalPreview() {
               animation: "shimmer 3s ease-in-out infinite",
             }}
           >
-            SLOT BATTLE
+            TURNIER
           </span>
         </div>
-        <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">TOURNAMENT FINISHED</span>
+        <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">PHASE 1 — JOIN</span>
       </div>
-      <div className="px-4 pb-3">
-        <div
-          className="rounded-lg overflow-hidden"
-          style={{
-            background: "linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.04) 100%)",
-            border: "1px solid rgba(239, 68, 68, 0.2)",
-          }}
-        >
-          <div className="flex items-center gap-2.5 px-3 py-2.5">
-            <div
-              className="h-8 w-8 rounded-full flex items-center justify-center shrink-0"
-              style={{ background: "linear-gradient(135deg, #78350f, #92400e)", border: "2px solid rgba(245,158,11,0.4)" }}
-            >
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="none">
-                <circle cx="12" cy="8" r="5" />
-                <path d="M20 21a8 8 0 0 0-16 0" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <span className="text-white font-bold text-[11px] block">WINNER</span>
-              <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">HIGHEST X-FACTOR</span>
-            </div>
-            <span className="text-[10px] font-black px-2 py-0.5 rounded" style={{ background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.15)" }}>0X</span>
+      <div className="px-4 pb-3 space-y-1">
+        {["Spieler1", "Spieler2", "Spieler3"].map((p) => (
+          <div key={p} className="px-3 py-1.5 rounded-lg text-[10px] text-slate-400" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
+            {p}
           </div>
-        </div>
+        ))}
       </div>
       <div className="px-4 py-2.5 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-        <span className="text-[11px] font-black tracking-wider" style={{ color: "#10b981" }}>WINNER</span>
+        <span className="text-[11px] font-black tracking-wider text-blue-400">!join Spielname</span>
       </div>
     </div>
   );

@@ -11,7 +11,7 @@ import type {
   SlotBattle, SlotBattleEntry, SlotRequest, SlotRequestSettings,
   SlideshowItem, SpinnerPrize, SpinnerHistoryEntry, StoreItem,
   StoreRedemption, StoreSettings, StreamerPageSettings, StreamPointsConfig,
-  StreamViewer, ThemeSettings, Tournament, TournamentParticipant, BracketData, TwitchConnection, UserProfile,
+  StreamViewer, ThemeSettings, Tournament, TournamentBet, TournamentParticipant, BracketData, TwitchConnection, UserProfile,
   UserSubscription, WagerSession, Wallet, WalletTransaction,
 } from "./types";
 
@@ -281,7 +281,7 @@ export const slotBattles = {
 export const tournaments = {
   list: () => selectByUser<Tournament>("tournaments", "created_at", false),
   create: (data: { name: string; description?: string; participant_count?: number }) =>
-    insertRow<Tournament>("tournaments", data),
+    insertRow<Tournament>("tournaments", { ...data, status: "join_open" }),
   update: (id: string, updates: Partial<Tournament>) => updateRow<Tournament>("tournaments", id, updates),
   remove: (id: string) => deleteRow("tournaments", id),
   getJoinOpen: async (userId: string): Promise<Tournament | null> => {
@@ -390,6 +390,94 @@ export const tournaments = {
       .update({ bracket_data: bracketData as unknown as Record<string, unknown>, updated_at: new Date().toISOString() })
       .eq("id", id);
     if (error) throw error;
+  },
+  bets: {
+    list: async (tournamentId: string): Promise<TournamentBet[]> => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { data, error } = await supabase
+        .from("tournament_bets")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("tournament_id", tournamentId)
+        .order("created_at");
+      if (error) throw error;
+      return (data ?? []) as TournamentBet[];
+    },
+    place: async (tournamentId: string, viewerUsername: string, betOnPlayer: string, amount: number): Promise<void> => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { error } = await supabase.from("tournament_bets").insert({
+        user_id: userId,
+        tournament_id: tournamentId,
+        viewer_username: viewerUsername,
+        bet_on_player: betOnPlayer,
+        amount,
+        resolved: false,
+        won: null,
+      });
+      if (error) throw error;
+    },
+    resolveEliminated: async (tournamentId: string, eliminatedPlayer: string): Promise<void> => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      await supabase
+        .from("tournament_bets")
+        .update({ resolved: true, won: false })
+        .eq("user_id", userId)
+        .eq("tournament_id", tournamentId)
+        .eq("bet_on_player", eliminatedPlayer)
+        .eq("resolved", false);
+    },
+    resolveWinner: async (tournamentId: string, winnerName: string): Promise<void> => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      // Mark winning bets
+      await supabase
+        .from("tournament_bets")
+        .update({ resolved: true, won: true })
+        .eq("user_id", userId)
+        .eq("tournament_id", tournamentId)
+        .eq("bet_on_player", winnerName)
+        .eq("resolved", false);
+      // Mark remaining bets as lost
+      await supabase
+        .from("tournament_bets")
+        .update({ resolved: true, won: false })
+        .eq("user_id", userId)
+        .eq("tournament_id", tournamentId)
+        .eq("resolved", false);
+      // Payout winners (2x multiplier)
+      const { data: winningBets } = await supabase
+        .from("tournament_bets")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("tournament_id", tournamentId)
+        .eq("won", true);
+      if (!winningBets) return;
+      for (const bet of winningBets) {
+        const payout = bet.amount * 2;
+        const { data: viewer } = await supabase
+          .from("stream_viewers")
+          .select("id, total_points")
+          .eq("user_id", userId)
+          .ilike("username", bet.viewer_username)
+          .maybeSingle();
+        if (viewer) {
+          await supabase
+            .from("stream_viewers")
+            .update({ total_points: viewer.total_points + payout })
+            .eq("id", viewer.id);
+          await supabase.from("points_transactions").insert({
+            user_id: userId,
+            viewer_id: viewer.id,
+            amount: payout,
+            reason: `Turnierwette gewonnen (${bet.bet_on_player})`,
+            type: "add",
+          });
+        }
+      }
+    },
   },
 };
 

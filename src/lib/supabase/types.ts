@@ -204,6 +204,18 @@ export interface BracketData {
   winner?: string;
 }
 
+export interface TournamentBet {
+  id: string;
+  user_id: string;
+  tournament_id: string;
+  viewer_username: string;
+  bet_on_player: string;
+  amount: number;
+  resolved: boolean;
+  won: boolean | null;
+  created_at: string;
+}
+
 export interface SpinnerPrize {
   id: string;
   user_id: string;

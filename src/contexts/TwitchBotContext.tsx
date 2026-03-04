@@ -245,6 +245,21 @@ export function TwitchBotProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Auto-reconnect on mount if Twitch connection exists
+  useEffect(() => {
+    if (twitchBot.status === "connected" || twitchBot.status === "connecting") return;
+    let cancelled = false;
+    async function autoConnect() {
+      try {
+        const connection = await twitchConnections.get();
+        if (!connection || cancelled) return;
+        await connect();
+      } catch { /* user may not have linked Twitch */ }
+    }
+    autoConnect();
+    return () => { cancelled = true; };
+  }, [connect]);
+
   const disconnect = useCallback(async () => {
     await twitchBot.disconnect();
     setTwitchUsername(null);

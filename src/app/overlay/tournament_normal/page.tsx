@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
 import { useOverlayTheme } from "@/hooks/useOverlayTheme";
@@ -26,13 +26,23 @@ function TournamentNormalContent() {
   const uid = useOverlayUid();
   const { cssVars } = useOverlayTheme(uid);
 
-  const { data: dbTournament, loading } = useOverlayData<TournamentRow>({
+  // Fetch all tournaments and pick the most relevant one
+  const { data: allTournaments, loading } = useOverlayData<TournamentRow[]>({
     table: "tournaments",
     userId: uid,
-    orderBy: "created_at",
+    orderBy: "updated_at",
     ascending: false,
-    single: true,
   });
+
+  const dbTournament = useMemo(() => {
+    if (!Array.isArray(allTournaments)) return null;
+    // Priority: join_open > ongoing > draw > finished
+    for (const status of ["join_open", "ongoing", "draw", "finished"]) {
+      const t = allTournaments.find((t) => t.status === status);
+      if (t) return t;
+    }
+    return null;
+  }, [allTournaments]);
 
   // Fetch participants
   const { data: participantsArr } = useOverlayData<ParticipantRow[]>({
