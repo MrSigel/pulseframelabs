@@ -1,0 +1,144 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic:
+      - img
+    - generic [ref=e3]:
+      - link "Pulseframelabs" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - button "Login" [ref=e10] [cursor=pointer]
+          - button "Register" [ref=e11] [cursor=pointer]
+        - generic [ref=e13]:
+          - generic [ref=e14]:
+            - heading "Welcome Back" [level=2] [ref=e15]
+            - paragraph [ref=e16]: Sign in to your account to continue.
+          - generic [ref=e17]:
+            - generic [ref=e18]: Failed to fetch
+            - generic [ref=e19]:
+              - generic [ref=e20]: Email
+              - textbox "your@email.com" [ref=e22]: freelancer.enricofullstack@gmail.com
+            - generic [ref=e23]:
+              - generic [ref=e24]: Password
+              - generic [ref=e25]:
+                - textbox "••••••••" [ref=e26]: qweqwe123!
+                - button [ref=e27] [cursor=pointer]:
+                  - img [ref=e28]
+            - link "Forgot password?" [ref=e32] [cursor=pointer]:
+              - /url: /forgot-password
+            - button "Sign In" [ref=e33] [cursor=pointer]
+          - paragraph [ref=e34]:
+            - text: Don't have an account?
+            - button "Register" [ref=e35] [cursor=pointer]
+      - link "← Back to Homepage" [ref=e37] [cursor=pointer]:
+        - /url: /
+    - generic [ref=e48]:
+      - generic [ref=e50]:
+        - generic [ref=e53]:
+          - generic [ref=e54]:
+            - generic [ref=e55]: +
+            - generic [ref=e56]: $12,475
+          - generic [ref=e57]:
+            - generic [ref=e58]: −
+            - generic [ref=e59]: $4,192
+          - generic [ref=e60]:
+            - generic [ref=e61]: ⇅
+            - generic [ref=e62]: $8,283
+        - generic [ref=e65]:
+          - generic [ref=e67]: PULSEFRAMELABS.COM
+          - generic [ref=e69]:
+            - generic [ref=e70]: $7,500 / $50,000
+            - generic [ref=e71]: 15.0%
+        - generic [ref=e76]:
+          - generic [ref=e77]:
+            - img [ref=e78]
+            - generic [ref=e80]: Live Chat
+            - generic [ref=e83]: LIVE
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - generic [ref=e87]: S
+              - generic [ref=e88]:
+                - text: BigWinMax
+                - paragraph [ref=e89]: GG!
+            - generic [ref=e90]:
+              - generic [ref=e92]: V
+              - generic [ref=e93]:
+                - text: LuckyRoller
+                - paragraph [ref=e94]: POGCHAMP
+            - generic [ref=e95]:
+              - generic [ref=e97]: V
+              - generic [ref=e98]:
+                - text: GoldSpin
+                - paragraph [ref=e99]: "!guess 250"
+            - generic [ref=e100]:
+              - generic [ref=e102]: S
+              - generic [ref=e103]:
+                - text: ProGamer
+                - paragraph [ref=e104]: Insane!
+        - generic [ref=e107]:
+          - generic [ref=e108]: SLOT BATTLE
+          - generic [ref=e110]:
+            - generic [ref=e111]:
+              - img [ref=e113]
+              - generic [ref=e116]: Sweet Bonanza
+            - generic [ref=e117]: VS
+            - generic [ref=e118]:
+              - generic [ref=e119]: Gates of Olympus
+              - img [ref=e121]
+          - generic [ref=e125]:
+            - generic [ref=e126]: "5.00"
+            - generic [ref=e127]: SCORE
+            - generic [ref=e128]: "5.00"
+        - generic [ref=e131]:
+          - generic [ref=e132]: HOT WORDS
+          - generic [ref=e133]:
+            - generic [ref=e134]:
+              - text: GG
+              - generic [ref=e135]: (132)
+            - generic [ref=e136]:
+              - text: HYPE
+              - generic [ref=e137]: (190)
+            - generic [ref=e138]:
+              - text: LET'S GO
+              - generic [ref=e139]: (156)
+            - generic [ref=e140]:
+              - text: WIN
+              - generic [ref=e141]: (105)
+            - generic [ref=e142]:
+              - text: CLUTCH
+              - generic [ref=e143]: (115)
+        - generic [ref=e146]:
+          - generic [ref=e147]:
+            - img [ref=e149]
+            - generic [ref=e151]: "Bonus Hunt #5"
+          - generic [ref=e152]:
+            - generic [ref=e154]: $2.5K
+            - generic [ref=e156]: $5,000
+            - generic [ref=e158]: 187X+
+            - generic [ref=e160]: 42.5X
+      - generic [ref=e161]:
+        - heading "Stream Like a High Roller" [level=3] [ref=e162]
+        - paragraph [ref=e163]: OBS overlays, Twitch bot, viewer loyalty, and more — all in one platform.
+  - alert [ref=e164]
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - img
+        - generic:
+          - generic: Pulseframe Support
+          - generic: Online
+      - button:
+        - img
+    - generic:
+      - paragraph: Start a conversation with our support team. We typically respond within a few minutes.
+      - generic:
+        - textbox "Your name (optional)"
+        - textbox "Email (optional, for replies)"
+        - button "Start Chat"
+  - button "Open live chat" [ref=e165] [cursor=pointer]:
+    - img [ref=e166]
+```
