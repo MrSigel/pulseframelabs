@@ -325,7 +325,14 @@ export default function TournamentsPage() {
       await tournamentsDb.update(id, { status: newStatus });
       await refetch();
 
-      if (newStatus === "ongoing") {
+      // Bot announcements per phase transition
+      if (newStatus === "join_open") {
+        const tournament = tournamentsList?.find((t) => t.id === id);
+        const tName = tournament?.name || "Turnier";
+        twitchBot.say(
+          `Das Turnier "${tName}" ist jetzt offen! Schreibe !join Spielname um teilzunehmen!`
+        );
+      } else if (newStatus === "ongoing") {
         twitchBot.say(`Wetten sind geschlossen! Das Turnier startet jetzt!`);
       }
     } catch (err) {
