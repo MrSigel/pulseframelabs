@@ -6,98 +6,79 @@ import { useLanguage } from '@/context/LanguageContext';
 import { languages } from '@/i18n/translations';
 
 // ── Minimal Professional Flag SVGs ────────────────────
-// Clean geometric flags in small circles — theme-aware borders
+// Uses CSS clip-path instead of SVG clipPath to avoid global ID collisions
+
+const circleClip = { clipPath: 'circle(50%)' };
 
 function FlagEN() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18">
-      <clipPath id="en"><circle cx="9" cy="9" r="9"/></clipPath>
-      <g clipPath="url(#en)">
-        <rect width="18" height="18" fill="#012169"/>
-        <path d="M0 0L18 18M18 0L0 18" stroke="#fff" strokeWidth="3"/>
-        <path d="M0 0L18 18M18 0L0 18" stroke="#C8102E" strokeWidth="1.5"/>
-        <path d="M9 0V18M0 9H18" stroke="#fff" strokeWidth="5"/>
-        <path d="M9 0V18M0 9H18" stroke="#C8102E" strokeWidth="3"/>
-      </g>
+    <svg width="18" height="18" viewBox="0 0 18 18" style={circleClip}>
+      <rect width="18" height="18" fill="#012169"/>
+      <path d="M0 0L18 18M18 0L0 18" stroke="#fff" strokeWidth="3"/>
+      <path d="M0 0L18 18M18 0L0 18" stroke="#C8102E" strokeWidth="1.5"/>
+      <path d="M9 0V18M0 9H18" stroke="#fff" strokeWidth="5"/>
+      <path d="M9 0V18M0 9H18" stroke="#C8102E" strokeWidth="3"/>
     </svg>
   );
 }
 
 function FlagDE() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18">
-      <clipPath id="de"><circle cx="9" cy="9" r="9"/></clipPath>
-      <g clipPath="url(#de)">
-        <rect width="18" height="6" fill="#000"/>
-        <rect y="6" width="18" height="6" fill="#DD0000"/>
-        <rect y="12" width="18" height="6" fill="#FFCC00"/>
-      </g>
+    <svg width="18" height="18" viewBox="0 0 18 18" style={circleClip}>
+      <rect width="18" height="6" fill="#000"/>
+      <rect y="6" width="18" height="6" fill="#DD0000"/>
+      <rect y="12" width="18" height="6" fill="#FFCC00"/>
     </svg>
   );
 }
 
 function FlagIT() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18">
-      <clipPath id="it"><circle cx="9" cy="9" r="9"/></clipPath>
-      <g clipPath="url(#it)">
-        <rect width="6" height="18" fill="#009246"/>
-        <rect x="6" width="6" height="18" fill="#fff"/>
-        <rect x="12" width="6" height="18" fill="#CE2B37"/>
-      </g>
+    <svg width="18" height="18" viewBox="0 0 18 18" style={circleClip}>
+      <rect width="6" height="18" fill="#009246"/>
+      <rect x="6" width="6" height="18" fill="#fff"/>
+      <rect x="12" width="6" height="18" fill="#CE2B37"/>
     </svg>
   );
 }
 
 function FlagFR() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18">
-      <clipPath id="fr"><circle cx="9" cy="9" r="9"/></clipPath>
-      <g clipPath="url(#fr)">
-        <rect width="6" height="18" fill="#002395"/>
-        <rect x="6" width="6" height="18" fill="#fff"/>
-        <rect x="12" width="6" height="18" fill="#ED2939"/>
-      </g>
+    <svg width="18" height="18" viewBox="0 0 18 18" style={circleClip}>
+      <rect width="6" height="18" fill="#002395"/>
+      <rect x="6" width="6" height="18" fill="#fff"/>
+      <rect x="12" width="6" height="18" fill="#ED2939"/>
     </svg>
   );
 }
 
 function FlagTR() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18">
-      <clipPath id="tr"><circle cx="9" cy="9" r="9"/></clipPath>
-      <g clipPath="url(#tr)">
-        <rect width="18" height="18" fill="#E30A17"/>
-        <circle cx="7.5" cy="9" r="3.6" fill="#fff"/>
-        <circle cx="8.4" cy="9" r="2.9" fill="#E30A17"/>
-        <polygon points="10.2,9 11.5,7.8 10.8,9.3 12.2,9 10.8,9.7 11.5,10.2" fill="#fff"/>
-      </g>
+    <svg width="18" height="18" viewBox="0 0 18 18" style={circleClip}>
+      <rect width="18" height="18" fill="#E30A17"/>
+      <circle cx="7.5" cy="9" r="3.6" fill="#fff"/>
+      <circle cx="8.4" cy="9" r="2.9" fill="#E30A17"/>
+      <polygon points="10.2,9 11.5,7.8 10.8,9.3 12.2,9 10.8,9.7 11.5,10.2" fill="#fff"/>
     </svg>
   );
 }
 
 function FlagPT() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18">
-      <clipPath id="pt"><circle cx="9" cy="9" r="9"/></clipPath>
-      <g clipPath="url(#pt)">
-        <rect width="7" height="18" fill="#006600"/>
-        <rect x="7" width="11" height="18" fill="#FF0000"/>
-        <circle cx="7" cy="9" r="2.8" fill="#FFCC00" opacity="0.9"/>
-      </g>
+    <svg width="18" height="18" viewBox="0 0 18 18" style={circleClip}>
+      <rect width="7" height="18" fill="#006600"/>
+      <rect x="7" width="11" height="18" fill="#FF0000"/>
+      <circle cx="7" cy="9" r="2.8" fill="#FFCC00" opacity="0.9"/>
     </svg>
   );
 }
 
 function FlagES() {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18">
-      <clipPath id="es"><circle cx="9" cy="9" r="9"/></clipPath>
-      <g clipPath="url(#es)">
-        <rect width="18" height="4.5" fill="#AA151B"/>
-        <rect y="4.5" width="18" height="9" fill="#F1BF00"/>
-        <rect y="13.5" width="18" height="4.5" fill="#AA151B"/>
-      </g>
+    <svg width="18" height="18" viewBox="0 0 18 18" style={circleClip}>
+      <rect width="18" height="4.5" fill="#AA151B"/>
+      <rect y="4.5" width="18" height="9" fill="#F1BF00"/>
+      <rect y="13.5" width="18" height="4.5" fill="#AA151B"/>
     </svg>
   );
 }
