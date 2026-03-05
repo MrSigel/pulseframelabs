@@ -27,6 +27,7 @@ import {
   Users,
   BarChart3,
   Coins,
+  FileSpreadsheet,
   type LucideIcon,
 } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -67,6 +68,7 @@ const adminNav: NavItem[] = [
   { name: "Wallets", href: "/admin/wallets", icon: Wallet },
   { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { name: "Casino Deals", href: "/admin/deals", icon: Trophy },
+  { name: "Referon", href: "/admin/referon", icon: FileSpreadsheet },
 ];
 
 const stream: NavItem[] = [
