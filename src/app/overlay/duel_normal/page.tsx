@@ -1,11 +1,25 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { useOverlayUid } from "@/hooks/useOverlayUid";
 import { useOverlayData } from "@/hooks/useOverlayData";
 import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 import type { DuelSession, DuelPlayer } from "@/lib/supabase/types";
+
+/* ─── Types ─── */
+
+interface BracketPlayer { name: string; game: string; win_amount?: number }
+interface BracketMatchup { player1: BracketPlayer; player2: BracketPlayer; winner?: string }
+interface BracketRound { name: string; matchups: BracketMatchup[] }
+interface TournamentRow {
+  id: string;
+  name: string;
+  bracket_data: { rounds?: BracketRound[]; winner?: string } | null;
+  status: string;
+}
+
+/* ─── Constants ─── */
 
 const fallbackPlayers = [
   { name: "Player 1", game: "Sweet Bonanza",     result: "---", rank: 1 },
@@ -19,7 +33,7 @@ function DuelContent() {
   const uid = useOverlayUid();
   const { cssVars } = useOverlayTheme(uid);
 
-  /* ---- Supabase realtime data ---- */
+  /* ---- Duel session data ---- */
   const { data: session } = useOverlayData<DuelSession>({
     table: "duel_sessions",
     userId: uid,
@@ -34,22 +48,73 @@ function DuelContent() {
     ascending: true,
   });
 
-  /* ---- Filter players to active session ---- */
   const sessionPlayers = session && allPlayers
     ? allPlayers.filter((p) => p.session_id === session.id)
     : [];
 
-  /* ---- Resolve display values: Supabase -> URL fallback ---- */
-  const title = uid && session ? "DUEL" : (params.get("title") || "DUEL");
+  /* ---- Tournament data (for match mode) ---- */
+  const { data: allTournaments } = useOverlayData<TournamentRow[]>({
+    table: "tournaments",
+    userId: uid,
+    orderBy: "updated_at",
+    ascending: false,
+  });
 
-  const players = uid && sessionPlayers.length > 0
-    ? sessionPlayers.map((p) => ({
-        name: p.name,
-        game: p.game,
-        result: p.result || "---",
-        rank: Number(p.rank) || p.position,
-      }))
-    : fallbackPlayers;
+  const ongoingTournament = useMemo(() => {
+    if (!Array.isArray(allTournaments)) return null;
+    return allTournaments.find(
+      (t) => t.status === "ongoing" && t.bracket_data?.rounds && t.bracket_data.rounds.length > 0
+    ) ?? null;
+  }, [allTournaments]);
+
+  const currentMatch = useMemo(() => {
+    if (!ongoingTournament?.bracket_data?.rounds) return null;
+    for (const round of ongoingTournament.bracket_data.rounds) {
+      for (const match of round.matchups) {
+        const p1 = match.player1?.name;
+        const p2 = match.player2?.name;
+        if (
+          !match.winner &&
+          p1 && p1 !== "TBD" && p1 !== "BYE" &&
+          p2 && p2 !== "TBD" && p2 !== "BYE"
+        ) {
+          return match;
+        }
+      }
+    }
+    return null;
+  }, [ongoingTournament]);
+
+  /* ---- Resolve display values ---- */
+  const isTournamentMode = !!ongoingTournament && !!currentMatch;
+
+  const title = isTournamentMode
+    ? ongoingTournament.name
+    : uid && session ? "DUEL" : (params.get("title") || "DUEL");
+
+  const players = isTournamentMode
+    ? [
+        {
+          name: currentMatch.player1.name,
+          game: currentMatch.player1.game,
+          result: currentMatch.player1.win_amount != null ? `$${currentMatch.player1.win_amount}` : "---",
+          rank: 1,
+        },
+        {
+          name: currentMatch.player2.name,
+          game: currentMatch.player2.game,
+          result: currentMatch.player2.win_amount != null ? `$${currentMatch.player2.win_amount}` : "---",
+          rank: 2,
+        },
+      ]
+    : uid && sessionPlayers.length > 0
+      ? sessionPlayers.map((p) => ({
+          name: p.name,
+          game: p.game,
+          result: p.result || "---",
+          rank: Number(p.rank) || p.position,
+        }))
+      : fallbackPlayers;
 
   return (
     <div className="inline-block animate-fade-in-up" style={cssVars}>
@@ -84,7 +149,7 @@ function DuelContent() {
             </span>
           </div>
           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-            {players.length} Players
+            {isTournamentMode ? "Current Match" : `${players.length} Players`}
           </span>
         </div>
 

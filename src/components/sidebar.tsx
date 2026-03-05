@@ -48,7 +48,6 @@ const overlayApps: NavItem[] = [
   { name: "Spinner", href: "/spinner", icon: Dice5 },
   { name: "Bonushunts", href: "/bonushunts", icon: Gift },
   { name: "Tournaments", href: "/tournaments", icon: Swords },
-  { name: "Duel", href: "/duel", icon: Heart },
   { name: "Chat", href: "/chat", icon: MessageCircle },
   { name: "Theme Settings", href: "/theme-settings", icon: Paintbrush },
 ];
