@@ -52,7 +52,7 @@ export default function TournamentBracket({
     if (rIdx + 1 < d.rounds.length) {
       const nm = Math.floor(mIdx / 2);
       const ns: "player1" | "player2" = mIdx % 2 === 0 ? "player1" : "player2";
-      d.rounds[rIdx + 1].matchups[nm][ns] = { name: w.name, game: w.game };
+      d.rounds[rIdx + 1].matchups[nm][ns] = { name: w.name, game: w.game, win_amount: w.win_amount };
     }
 
     // Check if final is decided
