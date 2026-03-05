@@ -520,7 +520,7 @@ export default function TournamentsPage() {
           <div
             className="grid gap-4 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-slate-500"
             style={{
-              gridTemplateColumns: "1.5fr 2fr 0.8fr 1fr 1.2fr",
+              gridTemplateColumns: "1.2fr 1.8fr 0.6fr 0.8fr auto",
               borderBottom: "1px solid rgba(255,255,255,0.06)",
             }}
           >
@@ -548,7 +548,7 @@ export default function TournamentsPage() {
                   key={t.id}
                   className="grid gap-4 px-4 py-3 text-sm items-center hover:bg-white/[0.02] transition-colors"
                   style={{
-                    gridTemplateColumns: "1.5fr 2fr 0.8fr 1fr 1.2fr",
+                    gridTemplateColumns: "1.2fr 1.8fr 0.6fr 0.8fr auto",
                     borderBottom: "1px solid rgba(255,255,255,0.04)",
                   }}
                 >
@@ -561,24 +561,24 @@ export default function TournamentsPage() {
                   <span className="text-xs text-slate-500">{new Date(t.created_at).toLocaleDateString()}</span>
 
                   {/* ---- Action buttons per phase ---- */}
-                  <div className="flex justify-end gap-1">
+                  <div className="flex justify-end gap-1.5 flex-wrap">
                     {/* Phase 1: Join Open */}
                     {t.status === "join_open" && (
                       <>
                         <button
                           onClick={() => setParticipantsModal(t)}
-                          className="h-8 w-8 rounded-lg flex items-center justify-center text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 transition-all"
-                          title="View participants"
+                          className="h-7 px-2.5 rounded-md flex items-center gap-1.5 text-[11px] font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 transition-all"
                         >
-                          <Users className="h-4 w-4" />
+                          <Users className="h-3.5 w-3.5" />
+                          Participants
                         </button>
                         <button
                           onClick={() => setDrawModal(t)}
                           disabled={!canModify}
-                          className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-purple-400 hover:bg-purple-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                          title="Start draw"
+                          className="h-7 px-2.5 rounded-md flex items-center gap-1.5 text-[11px] font-medium text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 transition-all disabled:opacity-50 disabled:pointer-events-none"
                         >
-                          <Dices className="h-4 w-4" />
+                          <Dices className="h-3.5 w-3.5" />
+                          Draw
                         </button>
                       </>
                     )}
@@ -588,25 +588,25 @@ export default function TournamentsPage() {
                       <>
                         <button
                           onClick={() => openBracketModal(t)}
-                          className="h-8 w-8 rounded-lg flex items-center justify-center text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 transition-all"
-                          title="View bracket"
+                          className="h-7 px-2.5 rounded-md flex items-center gap-1.5 text-[11px] font-medium text-purple-400 bg-purple-500/10 hover:bg-purple-500/20 transition-all"
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-3.5 w-3.5" />
+                          Bracket
                         </button>
                         <button
                           onClick={() => setBetsModal(t)}
-                          className="h-8 w-8 rounded-lg flex items-center justify-center text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
-                          title="View bets"
+                          className="h-7 px-2.5 rounded-md flex items-center gap-1.5 text-[11px] font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
                         >
-                          <Coins className="h-4 w-4" />
+                          <Coins className="h-3.5 w-3.5" />
+                          Bets
                         </button>
                         <button
                           onClick={() => handleStatusChange(t.id, "ongoing")}
                           disabled={!canModify}
-                          className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                          title="Start tournament (close bets)"
+                          className="h-7 px-2.5 rounded-md flex items-center gap-1.5 text-[11px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all disabled:opacity-50 disabled:pointer-events-none"
                         >
-                          <Play className="h-4 w-4" />
+                          <Play className="h-3.5 w-3.5" />
+                          Start
                         </button>
                       </>
                     )}
@@ -616,17 +616,17 @@ export default function TournamentsPage() {
                       <>
                         <button
                           onClick={() => openBracketModal(t)}
-                          className="h-8 w-8 rounded-lg flex items-center justify-center text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all"
-                          title="Edit bracket"
+                          className="h-7 px-2.5 rounded-md flex items-center gap-1.5 text-[11px] font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all"
                         >
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-3.5 w-3.5" />
+                          Bracket
                         </button>
                         <button
                           onClick={() => setBetsModal(t)}
-                          className="h-8 w-8 rounded-lg flex items-center justify-center text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
-                          title="View bets"
+                          className="h-7 px-2.5 rounded-md flex items-center gap-1.5 text-[11px] font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
                         >
-                          <Coins className="h-4 w-4" />
+                          <Coins className="h-3.5 w-3.5" />
+                          Bets
                         </button>
                       </>
                     )}
@@ -636,17 +636,17 @@ export default function TournamentsPage() {
                       <>
                         <button
                           onClick={() => openBracketModal(t)}
-                          className="h-8 w-8 rounded-lg flex items-center justify-center text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
-                          title="View bracket"
+                          className="h-7 px-2.5 rounded-md flex items-center gap-1.5 text-[11px] font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 transition-all"
                         >
-                          <Trophy className="h-4 w-4" />
+                          <Trophy className="h-3.5 w-3.5" />
+                          Results
                         </button>
                         <button
                           onClick={() => setBetsModal(t)}
-                          className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-300 hover:bg-white/5 transition-all"
-                          title="View bets"
+                          className="h-7 px-2.5 rounded-md flex items-center gap-1.5 text-[11px] font-medium text-slate-400 bg-white/5 hover:bg-white/10 transition-all"
                         >
-                          <Coins className="h-4 w-4" />
+                          <Coins className="h-3.5 w-3.5" />
+                          Bets
                         </button>
                       </>
                     )}
@@ -656,20 +656,19 @@ export default function TournamentsPage() {
                       <button
                         onClick={() => handleStatusChange(t.id, "join_open")}
                         disabled={!canModify}
-                        className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-blue-400 hover:bg-blue-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                        title="Open join"
+                        className="h-7 px-2.5 rounded-md flex items-center gap-1.5 text-[11px] font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 transition-all disabled:opacity-50 disabled:pointer-events-none"
                       >
-                        <Users className="h-4 w-4" />
+                        <Users className="h-3.5 w-3.5" />
+                        Open Join
                       </button>
                     )}
 
                     <button
                       onClick={() => handleDelete(t.id)}
                       disabled={!canModify}
-                      className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                      title="Delete"
+                      className="h-7 px-2 rounded-md flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 </div>
