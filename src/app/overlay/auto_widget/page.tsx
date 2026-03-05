@@ -47,7 +47,7 @@ function WagerWidget({ session, sym }: { session: WagerSession; sym: string }) {
       style={{
         minWidth: "380px",
         padding: "10px 14px",
-        background: "linear-gradient(135deg, rgba(12,16,24,0.75) 0%, rgba(17,24,39,0.75) 50%, rgba(12,16,24,0.75) 100%)",
+        background: "linear-gradient(135deg, rgba(12,16,24,0.92) 0%, rgba(17,24,39,0.92) 50%, rgba(12,16,24,0.92) 100%)",
         border: "1px solid rgba(239,68,68,0.15)",
         boxShadow: "0 4px 24px rgba(0,0,0,0.25), 0 0 20px rgba(239,68,68,0.06)",
       }}
@@ -127,7 +127,7 @@ function BonushuntWidget({
       className="rounded-lg overflow-hidden flex items-center"
       style={{
         minWidth: "340px",
-        background: "linear-gradient(135deg, rgba(12,16,24,0.75) 0%, rgba(17,24,39,0.75) 50%, rgba(12,16,24,0.75) 100%)",
+        background: "linear-gradient(135deg, rgba(12,16,24,0.92) 0%, rgba(17,24,39,0.92) 50%, rgba(12,16,24,0.92) 100%)",
         border: "1px solid rgba(239,68,68,0.15)",
         boxShadow: "0 4px 24px rgba(0,0,0,0.25), 0 0 20px rgba(239,68,68,0.06)",
       }}
@@ -186,7 +186,7 @@ function TournamentWidget({ tournament }: { tournament: TournamentRow }) {
       className="rounded-xl overflow-hidden"
       style={{
         minWidth: "280px",
-        background: "linear-gradient(135deg, rgba(12,16,24,0.75) 0%, rgba(17,24,39,0.75) 50%, rgba(12,16,24,0.75) 100%)",
+        background: "linear-gradient(135deg, rgba(12,16,24,0.92) 0%, rgba(17,24,39,0.92) 50%, rgba(12,16,24,0.92) 100%)",
         border: "1px solid rgba(245,158,11,0.2)",
         boxShadow: "0 4px 24px rgba(0,0,0,0.25), 0 0 20px rgba(245,158,11,0.06)",
       }}
@@ -242,7 +242,7 @@ function NowPlayingWidget({ game }: { game: GameRow }) {
       className="rounded-lg overflow-hidden flex items-center"
       style={{
         minWidth: "260px",
-        background: "linear-gradient(135deg, rgba(12,16,24,0.75) 0%, rgba(17,24,39,0.75) 50%, rgba(12,16,24,0.75) 100%)",
+        background: "linear-gradient(135deg, rgba(12,16,24,0.92) 0%, rgba(17,24,39,0.92) 50%, rgba(12,16,24,0.92) 100%)",
         border: "1px solid rgba(59,130,246,0.15)",
         boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
       }}
@@ -280,7 +280,7 @@ function IdleWidget() {
       style={{
         minWidth: "220px",
         padding: "10px 16px",
-        background: "linear-gradient(135deg, rgba(12,16,24,0.75) 0%, rgba(17,24,39,0.75) 50%, rgba(12,16,24,0.75) 100%)",
+        background: "linear-gradient(135deg, rgba(12,16,24,0.92) 0%, rgba(17,24,39,0.92) 50%, rgba(12,16,24,0.92) 100%)",
         border: "1px solid rgba(255,255,255,0.06)",
       }}
     >

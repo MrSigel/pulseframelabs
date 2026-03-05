@@ -275,7 +275,7 @@ function SpinnerOverlayContent() {
         <div
           className="animate-fade-in-up rounded-xl px-8 py-4 text-center"
           style={{
-            background: "rgba(12, 16, 24, 0.70)",
+            background: "rgba(12, 16, 24, 0.92)",
             border: "1px solid rgba(16, 185, 129, 0.25)",
             boxShadow: "0 4px 24px rgba(0,0,0,0.25), 0 0 30px rgba(16, 185, 129, 0.08)",
           }}
