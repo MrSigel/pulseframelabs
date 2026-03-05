@@ -373,8 +373,8 @@ function TournamentBracketContent() {
                     background: isFinal
                       ? `color-mix(in srgb, var(--overlay-highlight, #f59e0b) 6%, transparent)`
                       : hasWinner
-                        ? "color-mix(in srgb, rgba(16,185,129,0.04), var(--overlay-bg-dark, rgba(12,14,18,0.75)))"
-                        : "var(--overlay-bg-dark, rgba(12,14,18,0.75))",
+                        ? "color-mix(in srgb, rgba(16,185,129,0.04), var(--overlay-bg-dark, rgba(12,14,18,0.92)))"
+                        : "var(--overlay-bg-dark, rgba(12,14,18,0.92))",
                     border: isFinal
                       ? `1px solid color-mix(in srgb, var(--overlay-highlight, #f59e0b) 15%, transparent)`
                       : hasWinner
