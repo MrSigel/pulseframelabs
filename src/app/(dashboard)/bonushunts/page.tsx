@@ -73,6 +73,7 @@ export default function BonushuntsPage() {
         name: huntName.trim(),
         start_balance: parseFloat(startBalance) || 0,
         currency,
+        status: "active",
       });
       setCreateOpen(false);
       setHuntName("");

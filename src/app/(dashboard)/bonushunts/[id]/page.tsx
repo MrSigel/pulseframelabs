@@ -358,14 +358,14 @@ export default function BonushuntDetailPage() {
 
           {/* Legend */}
           <div className="mt-4 rounded-lg px-4 py-3 space-y-2" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-            <p className="text-[10px] text-slate-600 uppercase tracking-wider font-semibold mb-2">Legende</p>
+            <p className="text-[10px] text-slate-600 uppercase tracking-wider font-semibold mb-2">Legend</p>
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-sm bg-emerald-500/30 border border-emerald-500/50 shrink-0" />
-              <span className="text-xs text-slate-400">≥ 2.0x (gut)</span>
+              <span className="text-xs text-slate-400">≥ 2.0x (Good)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-sm bg-red-500/30 border border-red-500/50 shrink-0" />
-              <span className="text-xs text-slate-400">&lt; 2.0x (schlecht)</span>
+              <span className="text-xs text-slate-400">&lt; 2.0x (Bad)</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="h-3 w-3 rounded-sm bg-white/[0.04] border border-white/[0.1] shrink-0" />

@@ -149,7 +149,7 @@ export const casinos = {
 // ============================================================
 export const bonushunts = {
   list: () => selectByUser<Bonushunt>("bonushunts", "created_at", false),
-  create: (data: { name: string; description?: string; start_balance?: number; currency?: string }) =>
+  create: (data: { name: string; description?: string; start_balance?: number; currency?: string; status?: "active" | "paused" | "finished" }) =>
     insertRow<Bonushunt>("bonushunts", data),
   update: (id: string, updates: Partial<Bonushunt>) => updateRow<Bonushunt>("bonushunts", id, updates),
   remove: (id: string) => deleteRow("bonushunts", id),

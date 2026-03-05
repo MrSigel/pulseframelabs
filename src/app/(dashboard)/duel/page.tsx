@@ -125,13 +125,33 @@ export default function DuelPage() {
           raffle_pool: rafflePool,
           status: "active" as const,
         });
+        // Update existing player data
+        if (dbPlayers) {
+          for (let i = 0; i < Math.min(players.length, dbPlayers.length); i++) {
+            await duelSessions.players.update(dbPlayers[i].id, {
+              name: players[i].name,
+              game: players[i].game,
+              buy_in: players[i].buyIn,
+              result: players[i].result,
+              rank: players[i].rank,
+            });
+          }
+        }
       } else {
-        await duelSessions.create({ max_players: Number(maxPlayers), raffle_pool: rafflePool, status: "active" as const });
-      }
-      // Save all player data
-      if (activeSession && dbPlayers) {
-        for (let i = 0; i < Math.min(players.length, dbPlayers.length); i++) {
-          await duelSessions.players.update(dbPlayers[i].id, {
+        // Create new session and all players from scratch
+        const newSession = await duelSessions.create({ max_players: Number(maxPlayers), raffle_pool: rafflePool, status: "active" as const });
+        for (let i = 0; i < players.length; i++) {
+          const p = players[i];
+          await duelSessions.players.create({
+            session_id: newSession.id,
+            name: p.name,
+            position: i,
+          });
+        }
+        // Now update the freshly created players with full data
+        const freshPlayers = await duelSessions.players.list(newSession.id);
+        for (let i = 0; i < Math.min(players.length, freshPlayers.length); i++) {
+          await duelSessions.players.update(freshPlayers[i].id, {
             name: players[i].name,
             game: players[i].game,
             buy_in: players[i].buyIn,
