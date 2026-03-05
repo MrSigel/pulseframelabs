@@ -358,6 +358,17 @@ export const tournaments = {
         // Badge lookup is non-critical — continue without badge
       }
 
+      // Fallback: fetch Twitch profile image if no store badge
+      if (!badgeImageUrl) {
+        try {
+          const avatarRes = await fetch(`/api/twitch/avatar?username=${encodeURIComponent(viewerUsername)}`);
+          if (avatarRes.ok) {
+            const { profile_image_url } = await avatarRes.json();
+            if (profile_image_url) badgeImageUrl = profile_image_url;
+          }
+        } catch { /* Twitch avatar lookup non-critical */ }
+      }
+
       const { error } = await supabase
         .from("tournament_participants")
         .upsert(
@@ -370,6 +381,20 @@ export const tournaments = {
           },
           { onConflict: "tournament_id,viewer_username", ignoreDuplicates: false }
         );
+      if (error) throw error;
+    },
+    addBot: async (tournamentId: string, botName: string, gameName: string): Promise<void> => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { error } = await supabase
+        .from("tournament_participants")
+        .insert({
+          user_id: userId,
+          tournament_id: tournamentId,
+          viewer_username: botName,
+          game_name: gameName,
+          badge_image_url: null,
+        });
       if (error) throw error;
     },
     clear: async (tournamentId: string): Promise<void> => {

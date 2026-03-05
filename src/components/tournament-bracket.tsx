@@ -18,6 +18,11 @@ export default function TournamentBracket({
   const [editingGame, setEditingGame] = useState<string | null>(null);
   const [editingWin, setEditingWin] = useState<string | null>(null);
   const [tempValue, setTempValue] = useState("");
+  const [confirmPick, setConfirmPick] = useState<{
+    rIdx: number; mIdx: number; pKey: "player1" | "player2";
+    playerName: string; opponentName: string;
+    playerWin: number; opponentWin: number;
+  } | null>(null);
 
   const id = (r: number, m: number, p: string) => `${r}-${m}-${p}`;
 
@@ -158,7 +163,17 @@ export default function TournamentBracket({
         {/* Winner button */}
         {!readOnly && !matchWinner && !isTBD && !isBYE && (
           <button
-            onClick={() => pickWinner(rIdx, mIdx, pKey)}
+            onClick={() => {
+              const match = bracketData.rounds[rIdx].matchups[mIdx];
+              const opponent = pKey === "player1" ? match.player2 : match.player1;
+              setConfirmPick({
+                rIdx, mIdx, pKey,
+                playerName: player.name,
+                opponentName: opponent.name,
+                playerWin: player.win_amount ?? 0,
+                opponentWin: opponent.win_amount ?? 0,
+              });
+            }}
             className="shrink-0 h-6 w-6 rounded flex items-center justify-center text-slate-600 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all opacity-0 group-hover:opacity-100"
             title="Pick as winner"
           >
@@ -210,6 +225,59 @@ export default function TournamentBracket({
             <Trophy className="h-5 w-5 text-amber-400 mx-auto mb-1" />
             <span className="text-[9px] uppercase tracking-wider text-slate-500 block">Winner</span>
             <span className="text-amber-400 font-bold text-sm">{bracketData.winner}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Winner Confirmation Dialog */}
+      {confirmPick && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setConfirmPick(null)} />
+          <div
+            className="relative z-10 rounded-xl p-6 border border-white/[0.08] max-w-sm"
+            style={{
+              background: "linear-gradient(135deg, #0f1521 0%, #1a2235 50%, #0f1521 100%)",
+              boxShadow: "0 25px 50px rgba(0,0,0,0.5)",
+              animation: "modalSlideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+            }}
+          >
+            <h3 className="text-white font-bold mb-3">Pick Winner</h3>
+            {confirmPick.playerWin < confirmPick.opponentWin && (
+              <div
+                className="text-amber-400 text-xs rounded-lg px-3 py-2 mb-3"
+                style={{
+                  background: "rgba(245,158,11,0.08)",
+                  border: "1px solid rgba(245,158,11,0.15)",
+                }}
+              >
+                Warning: {confirmPick.playerName} has a lower win (${confirmPick.playerWin}) than {confirmPick.opponentName} (${confirmPick.opponentWin}).
+              </div>
+            )}
+            <p className="text-sm text-slate-300 mb-4">
+              Are you sure you want to pick{" "}
+              <span className="text-white font-semibold">{confirmPick.playerName}</span> as the winner?
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setConfirmPick(null)}
+                className="px-3 py-1.5 text-sm rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  pickWinner(confirmPick.rIdx, confirmPick.mIdx, confirmPick.pKey);
+                  setConfirmPick(null);
+                }}
+                className="px-3 py-1.5 text-sm rounded-lg text-emerald-400 transition-colors"
+                style={{
+                  background: "rgba(16,185,129,0.12)",
+                  border: "1px solid rgba(16,185,129,0.2)",
+                }}
+              >
+                Confirm
+              </button>
+            </div>
           </div>
         </div>
       )}

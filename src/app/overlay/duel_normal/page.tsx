@@ -8,8 +8,8 @@ import { useOverlayTheme } from "@/hooks/useOverlayTheme";
 import type { DuelSession, DuelPlayer } from "@/lib/supabase/types";
 
 const fallbackPlayers = [
-  { name: "Player 1", game: "Sweet Bonanza",     buyIn: "100$", result: "---", rank: 1 },
-  { name: "Player 2", game: "Gates of Olympus",  buyIn: "100$", result: "---", rank: 2 },
+  { name: "Player 1", game: "Sweet Bonanza",     result: "---", rank: 1 },
+  { name: "Player 2", game: "Gates of Olympus",  result: "---", rank: 2 },
 ];
 
 const playerColors = ["#ef4444", "#10b981", "#3b82f6", "#f59e0b", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"];
@@ -46,7 +46,6 @@ function DuelContent() {
     ? sessionPlayers.map((p) => ({
         name: p.name,
         game: p.game,
-        buyIn: p.buy_in,
         result: p.result || "---",
         rank: Number(p.rank) || p.position,
       }))
@@ -93,13 +92,12 @@ function DuelContent() {
         <div
           className="grid px-4 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-500"
           style={{
-            gridTemplateColumns: "1fr 1.2fr 0.8fr 0.8fr 0.5fr",
+            gridTemplateColumns: "1fr 1.2fr 0.8fr 0.5fr",
             borderTop: "1px solid rgba(255,255,255,0.06)",
           }}
         >
           <span>Player</span>
           <span>Game</span>
-          <span>Buy-In</span>
           <span>Result</span>
           <span className="text-center">#</span>
         </div>
@@ -113,7 +111,7 @@ function DuelContent() {
                 key={i}
                 className="grid py-2 items-center"
                 style={{
-                  gridTemplateColumns: "1fr 1.2fr 0.8fr 0.8fr 0.5fr",
+                  gridTemplateColumns: "1fr 1.2fr 0.8fr 0.5fr",
                   borderTop: "1px solid rgba(255,255,255,0.04)",
                 }}
               >
@@ -133,7 +131,6 @@ function DuelContent() {
                   <span className="text-white font-semibold text-[10px]">{p.name}</span>
                 </div>
                 <span className="text-slate-400 text-[10px]">{p.game}</span>
-                <span className="text-white text-[10px] font-semibold">{p.buyIn}</span>
                 <span className="text-slate-500 text-[10px]">{p.result}</span>
                 <span className="text-amber-400 text-[10px] font-bold text-center">{p.rank}</span>
               </div>
@@ -141,12 +138,6 @@ function DuelContent() {
           })}
         </div>
 
-        {/* Footer */}
-        <div className="px-4 py-2 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-          <span className="text-[8px] uppercase tracking-widest text-slate-600">
-            !duel GameName to join
-          </span>
-        </div>
       </div>
     </div>
   );

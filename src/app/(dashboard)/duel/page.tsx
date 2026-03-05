@@ -173,7 +173,7 @@ export default function DuelPage() {
             <CardHeader>
               <CardTitle className="text-lg text-white">Duel Players</CardTitle>
               <p className="text-sm text-slate-500">
-                Make changes, then click Update (!duel GameName to join duel)
+                Make changes, then click Update
               </p>
             </CardHeader>
             <CardContent className="flex flex-col h-[calc(100%-5rem)]">
@@ -366,8 +366,8 @@ export default function DuelPage() {
 
 function DuelPreview() {
   const players = [
-    { name: "Player 1", game: "Sweet Bonanza", buyIn: "100$", result: "---", rank: 1 },
-    { name: "Player 2", game: "Gates of Olympus", buyIn: "100$", result: "---", rank: 2 },
+    { name: "Player 1", game: "Sweet Bonanza", result: "---", rank: 1 },
+    { name: "Player 2", game: "Gates of Olympus", result: "---", rank: 2 },
   ];
 
   return (
@@ -413,13 +413,12 @@ function DuelPreview() {
       <div
         className="grid px-3.5 py-1.5 text-[8px] font-bold uppercase tracking-wider text-slate-500"
         style={{
-          gridTemplateColumns: "1fr 1.2fr 0.8fr 0.8fr 0.5fr",
+          gridTemplateColumns: "1fr 1.2fr 0.8fr 0.5fr",
           borderTop: "1px solid rgba(255,255,255,0.06)",
         }}
       >
         <span>Player</span>
         <span>Game</span>
-        <span>Buy-In</span>
         <span>Result</span>
         <span className="text-center">#</span>
       </div>
@@ -431,7 +430,7 @@ function DuelPreview() {
             key={i}
             className="grid py-1.5 items-center"
             style={{
-              gridTemplateColumns: "1fr 1.2fr 0.8fr 0.8fr 0.5fr",
+              gridTemplateColumns: "1fr 1.2fr 0.8fr 0.5fr",
               borderTop: "1px solid rgba(255,255,255,0.04)",
             }}
           >
@@ -451,18 +450,10 @@ function DuelPreview() {
               <span className="text-white font-semibold text-[9px]">{p.name}</span>
             </div>
             <span className="text-slate-400 text-[9px]">{p.game}</span>
-            <span className="text-white text-[9px] font-semibold">{p.buyIn}</span>
             <span className="text-slate-500 text-[9px]">{p.result}</span>
             <span className="text-amber-400 text-[9px] font-bold text-center">{p.rank}</span>
           </div>
         ))}
-      </div>
-
-      {/* Footer */}
-      <div className="px-3.5 py-1.5 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-        <span className="text-[7px] uppercase tracking-widest text-slate-600">
-          !duel GameName to join
-        </span>
       </div>
     </div>
   );

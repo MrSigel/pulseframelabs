@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import {
   Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2,
-  Loader2, Play, CheckCircle, Users, Dices, Eye, Trophy, Coins,
+  Loader2, Play, CheckCircle, Users, Dices, Eye, Trophy, Coins, Bot,
 } from "lucide-react";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { tournaments as tournamentsDb } from "@/lib/supabase/db";
@@ -349,6 +349,35 @@ export default function TournamentsPage() {
     }
   }
 
+  const botGames = [
+    "Sweet Bonanza", "Gates of Olympus", "Big Bass Bonanza", "Sugar Rush",
+    "Starlight Princess", "Dog House", "Razor Shark", "Book of Dead",
+    "Fruit Party", "Wanted Dead or a Wild", "Mental", "Fire in the Hole",
+  ];
+
+  async function handleAddBots(tournament: Tournament) {
+    const currentCount = participantsList?.length ?? 0;
+    const remaining = tournament.participant_count - currentCount;
+    if (remaining <= 0) return;
+
+    const existingNames = new Set((participantsList ?? []).map((p) => p.viewer_username.toLowerCase()));
+    let botNum = 1;
+
+    try {
+      for (let i = 0; i < remaining; i++) {
+        while (existingNames.has(`bot_${botNum}`)) botNum++;
+        const botName = `Bot_${botNum}`;
+        const game = botGames[Math.floor(Math.random() * botGames.length)];
+        await tournamentsDb.participants.addBot(tournament.id, botName, game);
+        existingNames.add(botName.toLowerCase());
+        botNum++;
+      }
+      await refetchParticipants();
+    } catch (err) {
+      console.error("Failed to add bots:", err);
+    }
+  }
+
   function handleDrawAll() {
     if (!drawModal || !participantsList) return;
     const count = drawModal.participant_count;
@@ -498,8 +527,8 @@ export default function TournamentsPage() {
             <span>Tournament</span>
             <span>Phase</span>
             <span>Player</span>
-            <span>Erstellt</span>
-            <span className="text-right">Aktionen</span>
+            <span>Created</span>
+            <span className="text-right">Actions</span>
           </div>
 
           {/* Data rows */}
@@ -638,7 +667,7 @@ export default function TournamentsPage() {
                       onClick={() => handleDelete(t.id)}
                       disabled={!canModify}
                       className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-50 disabled:pointer-events-none"
-                      title="Loeschen"
+                      title="Delete"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -771,7 +800,7 @@ export default function TournamentsPage() {
                 <p className="text-[11px] text-slate-500 mt-1.5">Tournament will be created with open join phase. Bot announces in chat.</p>
               </div>
               <div>
-                <Label className="text-sm font-semibold text-white mb-2 block">Beschreibung</Label>
+                <Label className="text-sm font-semibold text-white mb-2 block">Description</Label>
                 <textarea
                   placeholder="Enter tournament description"
                   value={desc}
@@ -868,8 +897,18 @@ export default function TournamentsPage() {
             <div className="px-6 py-4 border-t border-white/[0.06] flex items-center justify-between">
               <span className="text-xs text-slate-500">{participantsList?.length ?? 0} Participants</span>
               <div className="flex gap-2">
+                <Button
+                  variant="warning"
+                  size="sm"
+                  className="gap-1"
+                  onClick={() => handleAddBots(participantsModal)}
+                  disabled={(participantsList?.length ?? 0) >= participantsModal.participant_count}
+                >
+                  <Bot className="h-3.5 w-3.5" />
+                  Add Bots
+                </Button>
                 <Button variant="destructive" size="sm" onClick={() => handleClearParticipants(participantsModal.id)}>
-                  Liste leeren
+                  Clear List
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setParticipantsModal(null)}>Close</Button>
               </div>
@@ -938,8 +977,8 @@ export default function TournamentsPage() {
                       className="flex flex-col items-center gap-2 px-4 py-5 rounded-xl border border-white/[0.06] hover:border-purple-500/30 hover:bg-purple-500/5 transition-all disabled:opacity-30 disabled:pointer-events-none"
                     >
                       <Dices className="h-6 w-6 text-purple-400" />
-                      <span className="text-sm font-semibold text-white">Alle auf einmal</span>
-                      <span className="text-[10px] text-slate-500">Sofort ziehen</span>
+                      <span className="text-sm font-semibold text-white">Draw all at once</span>
+                      <span className="text-[10px] text-slate-500">Draw instantly</span>
                     </button>
                     <button
                       onClick={startSingleRaffle}
@@ -947,8 +986,8 @@ export default function TournamentsPage() {
                       className="flex flex-col items-center gap-2 px-4 py-5 rounded-xl border border-white/[0.06] hover:border-purple-500/30 hover:bg-purple-500/5 transition-all disabled:opacity-30 disabled:pointer-events-none"
                     >
                       <Users className="h-6 w-6 text-purple-400" />
-                      <span className="text-sm font-semibold text-white">Einzeln ziehen</span>
-                      <span className="text-[10px] text-slate-500">Mit Animation</span>
+                      <span className="text-sm font-semibold text-white">Draw one by one</span>
+                      <span className="text-[10px] text-slate-500">With animation</span>
                     </button>
                   </div>
                 </div>
@@ -965,7 +1004,7 @@ export default function TournamentsPage() {
                     }}
                   >
                     <span className="text-[10px] uppercase tracking-wider text-slate-500 block mb-2">
-                      Ziehung {drawnPlayers.length + 1} von {drawModal.participant_count}
+                      Drawing {drawnPlayers.length + 1} of {drawModal.participant_count}
                     </span>
                     <span
                       className="text-2xl font-black text-white block"
@@ -979,7 +1018,7 @@ export default function TournamentsPage() {
 
                   {drawnPlayers.length > 0 && (
                     <div className="space-y-1">
-                      <span className="text-[10px] uppercase tracking-wider text-slate-600 font-semibold">Gezogen:</span>
+                      <span className="text-[10px] uppercase tracking-wider text-slate-600 font-semibold">Drawn:</span>
                       <div className="flex flex-wrap gap-1.5">
                         {drawnPlayers.map((p, i) => (
                           <span key={p.id} className="text-xs px-2 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/15">
@@ -996,7 +1035,7 @@ export default function TournamentsPage() {
                       onClick={startSingleRaffle}
                     >
                       <Dices className="h-4 w-4" />
-                      Naechsten ziehen
+                      Draw next
                     </Button>
                   )}
                 </div>
@@ -1037,7 +1076,7 @@ export default function TournamentsPage() {
                       setRaffleDisplay("");
                     }}
                   >
-                    Neu ziehen
+                    Redraw
                   </Button>
                   <Button
                     variant="success"
@@ -1053,7 +1092,7 @@ export default function TournamentsPage() {
               ) : (
                 <div className="ml-auto">
                   <Button variant="outline" size="sm" onClick={() => { if (!raffleAnimating) setDrawModal(null); }} disabled={raffleAnimating}>
-                    Abbrechen
+                    Cancel
                   </Button>
                 </div>
               )}
@@ -1141,7 +1180,7 @@ export default function TournamentsPage() {
                     ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                     : "bg-red-500/10 text-red-400 border border-red-500/20"
                 }`}>
-                  {betsModal.status === "draw" ? "Offen" : "Geschlossen"}
+                  {betsModal.status === "draw" ? "Open" : "Closed"}
                 </span>
               </div>
               <button onClick={() => setBetsModal(null)} className="h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all">
@@ -1151,7 +1190,7 @@ export default function TournamentsPage() {
             <div className="px-6 pt-4 pb-2">
               <p className="text-xs text-slate-400">
                 {betsModal.status === "draw"
-                  ? <>Viewers bet with <span className="text-amber-400 font-semibold">!tbet PlayerName Punkte</span> in chat.</>
+                  ? <>Viewers bet with <span className="text-amber-400 font-semibold">!tbet PlayerName Points</span> in chat.</>
                   : "Overview of all placed bets."}
               </p>
             </div>
@@ -1182,7 +1221,7 @@ export default function TournamentsPage() {
                     <div key={b.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[0.03] transition-colors">
                       <div className="flex-1 min-w-0">
                         <span className="text-sm text-white font-medium block truncate">{b.viewer_username}</span>
-                        <span className="text-[10px] text-slate-500">wettet auf {b.bet_on_player}</span>
+                        <span className="text-[10px] text-slate-500">bet on {b.bet_on_player}</span>
                       </div>
                       <span className="text-xs font-bold text-amber-400 shrink-0">{b.amount.toLocaleString()} P</span>
                       {b.resolved && (
@@ -1240,7 +1279,7 @@ function NormalPreview() {
               animation: "shimmer 3s ease-in-out infinite",
             }}
           >
-            TURNIER
+            TOURNAMENT
           </span>
         </div>
         <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">PHASE 1 — JOIN</span>
