@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import {
   Monitor, Plus, Search, ChevronLeft, ChevronRight, Inbox, X, Trash2,
-  Loader2, Play, CheckCircle, Users, Dices, Eye, Trophy, Coins, Bot,
+  Loader2, Play, CheckCircle, Users, Dices, Eye, Trophy, Coins, Bot, Pencil, Check,
 } from "lucide-react";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { tournaments as tournamentsDb } from "@/lib/supabase/db";
@@ -194,6 +194,10 @@ export default function TournamentsPage() {
   const [bracketModal, setBracketModal] = useState<Tournament | null>(null);
   const [betsModal, setBetsModal] = useState<Tournament | null>(null);
 
+  /* ---- Participant editing state ---- */
+  const [editingParticipant, setEditingParticipant] = useState<string | null>(null);
+  const [editGameValue, setEditGameValue] = useState("");
+
   /* ---- Form state ---- */
   const [activeTab, setActiveTab] = useState<OverlayTab>("normal");
   const [name, setName] = useState("");
@@ -346,6 +350,21 @@ export default function TournamentsPage() {
       await refetchParticipants();
     } catch (err) {
       console.error("Failed to clear participants:", err);
+    }
+  }
+
+  async function handleSaveParticipantGame(participantId: string) {
+    const trimmed = editGameValue.trim();
+    const isDuplicate = (participantsList ?? []).some(
+      (p) => p.id !== participantId && trimmed !== "" && p.game_name.toLowerCase() === trimmed.toLowerCase()
+    );
+    if (isDuplicate) return;
+    try {
+      await tournamentsDb.participants.update(participantId, { game_name: trimmed });
+      setEditingParticipant(null);
+      await refetchParticipants();
+    } catch (err) {
+      console.error("Failed to update game:", err);
     }
   }
 
@@ -873,23 +892,61 @@ export default function TournamentsPage() {
                 </div>
               ) : (
                 <div className="space-y-1">
-                  {participantsList.map((p, i) => (
-                    <div key={p.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[0.03] transition-colors">
-                      <span className="text-[10px] text-slate-600 w-5 text-right shrink-0">{i + 1}</span>
-                      {p.badge_image_url && (
-                        <img src={p.badge_image_url} alt="" className="h-4 w-4 rounded shrink-0" />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <span className="text-sm text-white font-medium block truncate">{p.viewer_username}</span>
-                        {p.game_name && (
-                          <span className="text-[10px] text-slate-500">{p.game_name}</span>
+                  {participantsList.map((p, i) => {
+                    const isEditing = editingParticipant === p.id;
+                    const isDuplicate = isEditing && editGameValue.trim() !== "" && (participantsList ?? []).some(
+                      (o) => o.id !== p.id && o.game_name.toLowerCase() === editGameValue.trim().toLowerCase()
+                    );
+                    return (
+                      <div key={p.id} className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/[0.03] transition-colors group">
+                        <span className="text-[10px] text-slate-600 w-5 text-right shrink-0">{i + 1}</span>
+                        {p.badge_image_url && (
+                          <img src={p.badge_image_url} alt="" className="h-4 w-4 rounded shrink-0" />
                         )}
+                        <div className="flex-1 min-w-0">
+                          <span className="text-sm text-white font-medium block truncate">{p.viewer_username}</span>
+                          {isEditing ? (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <input
+                                className={`text-xs bg-transparent outline-none w-32 px-1 py-0.5 rounded border ${isDuplicate ? "border-red-500/60 text-red-400" : "border-blue-500/40 text-slate-300"}`}
+                                value={editGameValue}
+                                onChange={(e) => setEditGameValue(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" && !isDuplicate) handleSaveParticipantGame(p.id);
+                                  if (e.key === "Escape") setEditingParticipant(null);
+                                }}
+                                autoFocus
+                                placeholder="Game name"
+                              />
+                              <button
+                                onClick={() => !isDuplicate && handleSaveParticipantGame(p.id)}
+                                disabled={isDuplicate}
+                                className={`shrink-0 ${isDuplicate ? "text-slate-600 cursor-not-allowed" : "text-emerald-400 hover:text-emerald-300"}`}
+                              >
+                                <Check className="h-3 w-3" />
+                              </button>
+                              {isDuplicate && (
+                                <span className="text-[9px] text-red-400">Duplicate</span>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-[10px] text-slate-500">{p.game_name || "—"}</span>
+                              <button
+                                onClick={() => { setEditingParticipant(p.id); setEditGameValue(p.game_name); }}
+                                className="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-blue-400 transition-opacity"
+                              >
+                                <Pencil className="h-2.5 w-2.5" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-slate-600 shrink-0">
+                          {new Date(p.joined_at).toLocaleTimeString()}
+                        </span>
                       </div>
-                      <span className="text-[10px] text-slate-600 shrink-0">
-                        {new Date(p.joined_at).toLocaleTimeString()}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

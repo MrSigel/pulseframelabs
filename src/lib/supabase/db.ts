@@ -397,6 +397,16 @@ export const tournaments = {
         });
       if (error) throw error;
     },
+    update: async (participantId: string, updates: { game_name?: string }): Promise<void> => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { error } = await supabase
+        .from("tournament_participants")
+        .update(updates)
+        .eq("id", participantId)
+        .eq("user_id", userId);
+      if (error) throw error;
+    },
     clear: async (tournamentId: string): Promise<void> => {
       const supabase = getSupabase();
       const userId = await getUserId();
