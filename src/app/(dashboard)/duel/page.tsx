@@ -123,9 +123,10 @@ export default function DuelPage() {
         await duelSessions.update(activeSession.id, {
           max_players: Number(maxPlayers),
           raffle_pool: rafflePool,
+          status: "active" as const,
         });
       } else {
-        await duelSessions.create({ max_players: Number(maxPlayers), raffle_pool: rafflePool });
+        await duelSessions.create({ max_players: Number(maxPlayers), raffle_pool: rafflePool, status: "active" as const });
       }
       // Save all player data
       if (activeSession && dbPlayers) {

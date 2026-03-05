@@ -78,7 +78,7 @@ function BonushuntLargeContent() {
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 py-3"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
         >
           <div className="flex items-center gap-2.5">
             <div
@@ -135,7 +135,7 @@ function BonushuntLargeContent() {
         {/* Stats Row */}
         <div
           className="grid grid-cols-4 gap-px"
-          style={{ background: "rgba(255,255,255,0.04)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+          style={{ background: "rgba(255,255,255,0.08)", borderBottom: "1px solid rgba(255,255,255,0.08)" }}
         >
           {[
             { icon: "grid", value: buyin, color: "var(--overlay-highlight, #ef4444)" },
@@ -170,7 +170,7 @@ function BonushuntLargeContent() {
         <div className="px-4 py-3 space-y-1.5">
           <div
             className="flex items-center gap-2 px-3 py-2 rounded-lg"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.04)" }}
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="none">
               <path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7L2 9.4h7.6z" />
@@ -179,7 +179,7 @@ function BonushuntLargeContent() {
           </div>
           <div
             className="flex items-center gap-2 px-3 py-2 rounded-lg"
-            style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.04)" }}
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.08)" }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" stroke="none" style={{ fill: "var(--overlay-highlight, #ef4444)" }}>
               <path d="M12 2C8 6 4 9.5 4 13a8 8 0 0016 0c0-3.5-4-7-8-11z" />

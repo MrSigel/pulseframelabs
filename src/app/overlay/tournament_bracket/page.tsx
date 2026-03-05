@@ -121,7 +121,7 @@ function PlayerSlot({
               className="font-semibold truncate leading-tight"
               style={{
                 fontSize,
-                color: isTBD || isBYE ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.9)",
+                color: isTBD || isBYE ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.95)",
                 fontStyle: isBYE ? "italic" : undefined,
               }}
             >
@@ -133,7 +133,7 @@ function PlayerSlot({
               className="truncate leading-tight"
               style={{
                 fontSize: Math.max(fontSize - 2, 7),
-                color: "rgba(255,255,255,0.4)",
+                color: "rgba(255,255,255,0.55)",
               }}
             >
               {game}
@@ -145,7 +145,7 @@ function PlayerSlot({
             className="shrink-0 font-bold"
             style={{
               fontSize: Math.max(fontSize - 1, 8),
-              color: isWinner ? "#10b981" : "rgba(255,255,255,0.35)",
+              color: isWinner ? "#10b981" : "rgba(255,255,255,0.5)",
             }}
           >
             ${winAmount}
@@ -293,7 +293,7 @@ function TournamentBracketContent() {
         >
           {title}
         </span>
-        <span className="text-[10px] font-semibold text-white/35 uppercase tracking-wider">
+        <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
           {participants} Players · {totalRounds} Rounds
         </span>
       </div>
@@ -303,7 +303,7 @@ function TournamentBracketContent() {
         {roundsData.map((round, i) => (
           <div
             key={i}
-            className="text-[9px] font-bold uppercase tracking-wider text-white/25 text-center shrink-0"
+            className="text-[9px] font-bold uppercase tracking-wider text-white/40 text-center shrink-0"
             style={{ width: matchW, marginRight: hGap }}
           >
             {round.name}
@@ -311,7 +311,7 @@ function TournamentBracketContent() {
         ))}
         <div
           className="text-[9px] font-bold uppercase tracking-wider text-center shrink-0"
-          style={{ width: 94, color: "var(--overlay-highlight, rgba(245,158,11,0.4))", opacity: 0.6 }}
+          style={{ width: 94, color: "var(--overlay-highlight, rgba(245,158,11,0.7))", opacity: 0.8 }}
         >
           Champion
         </div>
@@ -332,7 +332,7 @@ function TournamentBracketContent() {
               const topY = top.y + matchH / 2;
               const botY = bot.y + matchH / 2;
               const tgtY = pos.y + matchH / 2;
-              const c = "rgba(255,255,255,0.1)";
+              const c = "rgba(255,255,255,0.2)";
 
               return (
                 <g key={`c-${rIdx}-${mIdx}`}>
@@ -350,7 +350,7 @@ function TournamentBracketContent() {
             y1={finalPos.y + matchH / 2}
             x2={winnerBoxX}
             y2={finalPos.y + matchH / 2}
-            stroke="rgba(245,158,11,0.2)"
+            stroke="rgba(245,158,11,0.4)"
             strokeWidth="1.5"
           />
         </svg>
@@ -371,15 +371,15 @@ function TournamentBracketContent() {
                   className="h-full rounded-md overflow-hidden"
                   style={{
                     background: isFinal
-                      ? `color-mix(in srgb, var(--overlay-highlight, #f59e0b) 6%, transparent)`
+                      ? `color-mix(in srgb, var(--overlay-highlight, #f59e0b) 10%, var(--overlay-bg-dark, rgba(12,14,18,0.97)))`
                       : hasWinner
-                        ? "color-mix(in srgb, rgba(16,185,129,0.04), var(--overlay-bg-dark, rgba(12,14,18,0.92)))"
-                        : "var(--overlay-bg-dark, rgba(12,14,18,0.92))",
+                        ? "color-mix(in srgb, rgba(16,185,129,0.06), var(--overlay-bg-dark, rgba(12,14,18,0.97)))"
+                        : "var(--overlay-bg-dark, rgba(12,14,18,0.97))",
                     border: isFinal
                       ? `1px solid color-mix(in srgb, var(--overlay-highlight, #f59e0b) 15%, transparent)`
                       : hasWinner
-                        ? "1px solid rgba(16,185,129,0.12)"
-                        : "1px solid var(--overlay-border, rgba(255,255,255,0.07))",
+                        ? "1px solid rgba(16,185,129,0.2)"
+                        : "1px solid var(--overlay-border, rgba(255,255,255,0.12))",
                     boxShadow: "var(--overlay-shadow-sm, 0 2px 8px rgba(0,0,0,0.25))",
                     borderRadius: "var(--overlay-border-radius, 6px)",
                   }}
@@ -413,17 +413,17 @@ function TournamentBracketContent() {
             style={{
               background: winner
                 ? `linear-gradient(135deg, color-mix(in srgb, var(--overlay-highlight, #f59e0b) 12%, transparent), color-mix(in srgb, var(--overlay-icon-color, #ef4444) 8%, transparent))`
-                : "rgba(255,255,255,0.02)",
+                : "var(--overlay-bg-dark, rgba(12,14,18,0.97))",
               border: winner
-                ? `1px solid color-mix(in srgb, var(--overlay-highlight, #f59e0b) 20%, transparent)`
-                : "1px solid rgba(255,255,255,0.06)",
+                ? `1px solid color-mix(in srgb, var(--overlay-highlight, #f59e0b) 25%, transparent)`
+                : "1px solid rgba(255,255,255,0.1)",
               boxShadow: winner ? `0 0 24px color-mix(in srgb, var(--overlay-highlight, #f59e0b) 8%, transparent)` : "none",
             }}
           >
-            <TrophyIcon size={16} color={winner ? "var(--overlay-highlight, #f59e0b)" : "rgba(255,255,255,0.15)"} />
+            <TrophyIcon size={16} color={winner ? "var(--overlay-highlight, #f59e0b)" : "rgba(255,255,255,0.3)"} />
             <div
               className="font-bold text-[11px] mt-1"
-              style={{ color: winner ? "var(--overlay-highlight, #fbbf24)" : "rgba(255,255,255,0.2)" }}
+              style={{ color: winner ? "var(--overlay-highlight, #fbbf24)" : "rgba(255,255,255,0.35)" }}
             >
               {winner || "TBD"}
             </div>

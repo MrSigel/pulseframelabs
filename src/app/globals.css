@@ -499,9 +499,9 @@
    ══════════════════════════════════════════════ */
 
 :root {
-  --overlay-bg-dark:   rgba(12, 16, 24, 0.92);
-  --overlay-bg-mid:    rgba(17, 24, 39, 0.92);
-  --overlay-border:    rgba(59, 130, 246, 0.10);
+  --overlay-bg-dark:   rgba(12, 16, 24, 0.97);
+  --overlay-bg-mid:    rgba(17, 24, 39, 0.97);
+  --overlay-border:    rgba(59, 130, 246, 0.15);
   --overlay-shadow-sm: 0 2px 16px rgba(0, 0, 0, 0.25);
   --overlay-shadow-md: 0 4px 24px rgba(0, 0, 0, 0.30);
   --overlay-shadow-lg: 0 4px 32px rgba(0, 0, 0, 0.35);
@@ -537,7 +537,7 @@
 
 /* Inner stat cell (bonushunt_large) */
 .overlay-stat-cell {
-  background: linear-gradient(180deg, rgba(15, 21, 33, 0.90) 0%, rgba(12, 16, 24, 0.92) 100%);
+  background: linear-gradient(180deg, rgba(15, 21, 33, 0.97) 0%, rgba(12, 16, 24, 0.97) 100%);
 }
 
 /* Image-to-card edge fade (now_playing_normal) */

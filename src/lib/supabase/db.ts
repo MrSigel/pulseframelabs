@@ -222,7 +222,7 @@ export const duelSessions = {
     if (error) throw error;
     return data as DuelSession | null;
   },
-  create: (data: { max_players?: number; raffle_pool?: boolean }) =>
+  create: (data: { max_players?: number; raffle_pool?: boolean; status?: "active" | "finished" }) =>
     insertRow<DuelSession>("duel_sessions", data),
   update: (id: string, updates: Partial<DuelSession>) => updateRow<DuelSession>("duel_sessions", id, updates),
   players: {

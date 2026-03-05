@@ -114,7 +114,7 @@ function TournamentNormalContent() {
         {/* Participants List */}
         {participants.length > 0 && (
           <div className="px-5 pb-3 space-y-1.5">
-            <div className="text-[10px] font-bold uppercase tracking-wider text-white/25 mb-2">
+            <div className="text-[10px] font-bold uppercase tracking-wider text-white/40 mb-2">
               Participants ({participants.length})
             </div>
             <div className="max-h-[280px] overflow-y-auto space-y-1.5 pr-1">
@@ -123,8 +123,8 @@ function TournamentNormalContent() {
                   key={p.viewer_username}
                   className="relative flex items-center gap-2.5 px-3 py-2 rounded-lg overflow-hidden"
                   style={{
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.1)",
                   }}
                 >
                   {/* Badge background */}
@@ -141,7 +141,7 @@ function TournamentNormalContent() {
                       {p.viewer_username}
                     </span>
                     {p.game_name && (
-                      <span className="text-[10px] text-white/40 truncate block">
+                      <span className="text-[10px] text-white/55 truncate block">
                         {p.game_name}
                       </span>
                     )}
@@ -205,7 +205,7 @@ function TournamentNormalContent() {
         {winner && (
           <div
             className="px-5 py-3 text-center"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
+            style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
           >
             <span
               className="text-sm font-black tracking-wider"
