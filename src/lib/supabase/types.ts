@@ -577,6 +577,101 @@ export interface GiveawayParticipant {
   joined_at: string;
 }
 
+// ── Join Sessions ──
+export interface JoinSession {
+  id: string;
+  user_id: string;
+  status: 'open' | 'closed' | 'finished';
+  winner: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface JoinParticipant {
+  id: string;
+  user_id: string;
+  session_id: string;
+  username: string;
+  joined_at: string;
+}
+
+// ── Guess Sessions (Chat Tippspiel) ──
+export interface GuessSession {
+  id: string;
+  user_id: string;
+  status: 'open' | 'closed' | 'finished';
+  target_number: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GuessEntry {
+  id: string;
+  user_id: string;
+  session_id: string;
+  username: string;
+  guess: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Tippspiel Sessions (Website) ──
+export interface TippspielSession {
+  id: string;
+  user_id: string;
+  status: 'open' | 'closed' | 'finished';
+  target_number: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TippspielEntry {
+  id: string;
+  user_id: string;
+  session_id: string;
+  username: string;
+  guess: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Bossfight Sessions ──
+export interface BossfightSession {
+  id: string;
+  user_id: string;
+  status: 'join_open' | 'draw' | 'betting' | 'live' | 'finished';
+  boss_name: string | null;
+  boss_game: string | null;
+  boss_lives: number;
+  boss_max_lives: number;
+  current_player_index: number;
+  winner_side: 'boss' | 'players' | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BossfightPlayer {
+  id: string;
+  user_id: string;
+  session_id: string;
+  username: string;
+  game: string;
+  is_boss: boolean;
+  is_eliminated: boolean;
+  position: number;
+  created_at: string;
+}
+
+export interface BossfightBet {
+  id: string;
+  user_id: string;
+  session_id: string;
+  username: string;
+  team: 'boss' | 'players';
+  amount: number;
+  placed_at: string;
+}
+
 export interface Wallet {
   id: string;
   user_id: string;
@@ -769,6 +864,15 @@ export interface Database {
       payment_requests: TableDef<PaymentRequest>;
       admin_audit_logs: TableDef<AdminAuditLog>;
       bot_custom_commands: TableDef<BotCustomCommand>;
+      join_sessions: TableDef<JoinSession>;
+      join_participants: TableDef<JoinParticipant>;
+      guess_sessions: TableDef<GuessSession>;
+      guess_entries: TableDef<GuessEntry>;
+      tippspiel_sessions: TableDef<TippspielSession>;
+      tippspiel_entries: TableDef<TippspielEntry>;
+      bossfight_sessions: TableDef<BossfightSession>;
+      bossfight_players: TableDef<BossfightPlayer>;
+      bossfight_bets: TableDef<BossfightBet>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

@@ -9,3 +9,7 @@ export { createTournamentJoinHandler } from "./tournament-join-handler";
 export { createCustomResponseHandler } from "./custom-response-handler";
 export { createViewerJoinHandler } from "./viewer-join-handler";
 export { createTournamentBetHandler } from "./tournament-bet-handler";
+export { createJoinHandler } from "./join-handler";
+export { createGuessHandler } from "./guess-handler";
+export { createBossfightJoinHandler } from "./bossfight-join-handler";
+export { createBossfightBetHandler } from "./bossfight-bet-handler";

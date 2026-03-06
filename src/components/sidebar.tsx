@@ -28,6 +28,10 @@ import {
   BarChart3,
   Coins,
   FileSpreadsheet,
+  Ticket,
+  Hash,
+  Calculator,
+  Shield,
   type LucideIcon,
 } from "lucide-react";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
@@ -48,6 +52,10 @@ const overlayApps: NavItem[] = [
   { name: "Spinner", href: "/spinner", icon: Dice5 },
   { name: "Bonushunts", href: "/bonushunts", icon: Gift },
   { name: "Tournaments", href: "/tournaments", icon: Swords },
+  { name: "Bossfight", href: "/bossfight", icon: Shield },
+  { name: "Join", href: "/join", icon: Ticket },
+  { name: "Chat Tippspiel", href: "/chat-tippspiel", icon: Hash },
+  { name: "Tippspiel", href: "/tippspiel", icon: Calculator },
   { name: "Chat", href: "/chat", icon: MessageCircle },
   { name: "Theme Settings", href: "/theme-settings", icon: Paintbrush },
 ];

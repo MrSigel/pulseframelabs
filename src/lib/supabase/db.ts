@@ -3,7 +3,10 @@ import type {
   BotCustomCommand, Bonushunt, BonushuntEntry, BalanceProfile, Casino, CasinoDeal, ChatMessage,
   DashboardStat, DuelSession, DuelPlayer, Game, GiveawayHistoryEntry,
   GiveawaySession, GiveawayParticipant,
-  HotwordSettings, HotwordEntry, LoyaltyPreset, Moderator,
+  HotwordSettings, HotwordEntry, JoinSession, JoinParticipant,
+  GuessSession, GuessEntry, TippspielSession, TippspielEntry,
+  BossfightSession, BossfightPlayer, BossfightBet,
+  LoyaltyPreset, Moderator,
   Package, PaymentRequest,
   PersonalBest, PointsBattleBet, PointsBattlePreset, PointsBattleSession,
   PointsTransaction, Promotion, QuickGuessSettings, QuickGuessSession,
@@ -1081,5 +1084,318 @@ export const casinoDeals = {
       .order("sort_order", { ascending: true });
     if (error) throw error;
     return (data ?? []) as CasinoDeal[];
+  },
+};
+
+// ============================================================
+// Join Sessions & Participants
+// ============================================================
+export const joinSessions = {
+  getActive: async () => {
+    const supabase = getSupabase();
+    const userId = await getUserId();
+    const { data, error } = await supabase
+      .from("join_sessions")
+      .select("*")
+      .eq("user_id", userId)
+      .in("status", ["open", "closed"])
+      .order("created_at", { ascending: false })
+      .maybeSingle();
+    if (error) throw error;
+    return data as JoinSession | null;
+  },
+  getOpen: async (streamerId: string) => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("join_sessions")
+      .select("*")
+      .eq("user_id", streamerId)
+      .eq("status", "open")
+      .maybeSingle();
+    if (error) throw error;
+    return data as JoinSession | null;
+  },
+  create: (data: { status?: string }) =>
+    insertRow<JoinSession>("join_sessions", data),
+  update: (id: string, updates: Partial<JoinSession>) =>
+    updateRow<JoinSession>("join_sessions", id, updates),
+  participants: {
+    list: async (sessionId: string) => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { data, error } = await supabase
+        .from("join_participants")
+        .select("*")
+        .eq("session_id", sessionId)
+        .eq("user_id", userId)
+        .order("joined_at");
+      if (error) throw error;
+      return (data ?? []) as JoinParticipant[];
+    },
+    add: async (sessionId: string, username: string, streamerId: string) => {
+      const supabase = getSupabase();
+      const { error } = await supabase
+        .from("join_participants")
+        .upsert(
+          { user_id: streamerId, session_id: sessionId, username },
+          { onConflict: "session_id,username", ignoreDuplicates: true }
+        );
+      if (error) throw error;
+    },
+    count: async (sessionId: string) => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { count, error } = await supabase
+        .from("join_participants")
+        .select("*", { count: "exact", head: true })
+        .eq("session_id", sessionId)
+        .eq("user_id", userId);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  },
+};
+
+// ============================================================
+// Guess Sessions (Chat Tippspiel) & Entries
+// ============================================================
+export const guessSessions = {
+  getActive: async () => {
+    const supabase = getSupabase();
+    const userId = await getUserId();
+    const { data, error } = await supabase
+      .from("guess_sessions")
+      .select("*")
+      .eq("user_id", userId)
+      .in("status", ["open", "closed"])
+      .order("created_at", { ascending: false })
+      .maybeSingle();
+    if (error) throw error;
+    return data as GuessSession | null;
+  },
+  getOpen: async (streamerId: string) => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("guess_sessions")
+      .select("*")
+      .eq("user_id", streamerId)
+      .eq("status", "open")
+      .maybeSingle();
+    if (error) throw error;
+    return data as GuessSession | null;
+  },
+  create: (data: { status?: string }) =>
+    insertRow<GuessSession>("guess_sessions", data),
+  update: (id: string, updates: Partial<GuessSession>) =>
+    updateRow<GuessSession>("guess_sessions", id, updates),
+  entries: {
+    list: async (sessionId: string) => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { data, error } = await supabase
+        .from("guess_entries")
+        .select("*")
+        .eq("session_id", sessionId)
+        .eq("user_id", userId)
+        .order("created_at");
+      if (error) throw error;
+      return (data ?? []) as GuessEntry[];
+    },
+    upsert: async (sessionId: string, username: string, guess: number, streamerId: string) => {
+      const supabase = getSupabase();
+      const { error } = await supabase
+        .from("guess_entries")
+        .upsert(
+          { user_id: streamerId, session_id: sessionId, username, guess },
+          { onConflict: "session_id,username" }
+        );
+      if (error) throw error;
+    },
+    getByNumber: async (sessionId: string, guess: number, streamerId: string) => {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from("guess_entries")
+        .select("username")
+        .eq("session_id", sessionId)
+        .eq("user_id", streamerId)
+        .eq("guess", guess)
+        .maybeSingle();
+      if (error) throw error;
+      return data as { username: string } | null;
+    },
+  },
+};
+
+// ============================================================
+// Tippspiel Sessions (Website) & Entries
+// ============================================================
+export const tippspielSessions = {
+  getActive: async () => {
+    const supabase = getSupabase();
+    const userId = await getUserId();
+    const { data, error } = await supabase
+      .from("tippspiel_sessions")
+      .select("*")
+      .eq("user_id", userId)
+      .in("status", ["open", "closed"])
+      .order("created_at", { ascending: false })
+      .maybeSingle();
+    if (error) throw error;
+    return data as TippspielSession | null;
+  },
+  getOpenByStreamer: async (streamerId: string) => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("tippspiel_sessions")
+      .select("*")
+      .eq("user_id", streamerId)
+      .eq("status", "open")
+      .maybeSingle();
+    if (error) throw error;
+    return data as TippspielSession | null;
+  },
+  create: (data: { status?: string }) =>
+    insertRow<TippspielSession>("tippspiel_sessions", data),
+  update: (id: string, updates: Partial<TippspielSession>) =>
+    updateRow<TippspielSession>("tippspiel_sessions", id, updates),
+  entries: {
+    list: async (sessionId: string) => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { data, error } = await supabase
+        .from("tippspiel_entries")
+        .select("*")
+        .eq("session_id", sessionId)
+        .eq("user_id", userId)
+        .order("created_at");
+      if (error) throw error;
+      return (data ?? []) as TippspielEntry[];
+    },
+    upsert: async (sessionId: string, username: string, guess: number, streamerId: string) => {
+      const supabase = getSupabase();
+      const { error } = await supabase
+        .from("tippspiel_entries")
+        .upsert(
+          { user_id: streamerId, session_id: sessionId, username, guess },
+          { onConflict: "session_id,username" }
+        );
+      if (error) throw error;
+    },
+  },
+};
+
+// ============================================================
+// Bossfight Sessions, Players & Bets
+// ============================================================
+export const bossfightSessions = {
+  getActive: async () => {
+    const supabase = getSupabase();
+    const userId = await getUserId();
+    const { data, error } = await supabase
+      .from("bossfight_sessions")
+      .select("*")
+      .eq("user_id", userId)
+      .neq("status", "finished")
+      .order("created_at", { ascending: false })
+      .maybeSingle();
+    if (error) throw error;
+    return data as BossfightSession | null;
+  },
+  getJoinOpen: async (streamerId: string) => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("bossfight_sessions")
+      .select("*")
+      .eq("user_id", streamerId)
+      .eq("status", "join_open")
+      .maybeSingle();
+    if (error) throw error;
+    return data as BossfightSession | null;
+  },
+  getBetting: async (streamerId: string) => {
+    const supabase = getSupabase();
+    const { data, error } = await supabase
+      .from("bossfight_sessions")
+      .select("*")
+      .eq("user_id", streamerId)
+      .eq("status", "betting")
+      .maybeSingle();
+    if (error) throw error;
+    return data as BossfightSession | null;
+  },
+  create: (data: { status?: string; boss_max_lives?: number }) =>
+    insertRow<BossfightSession>("bossfight_sessions", data),
+  update: (id: string, updates: Partial<BossfightSession>) =>
+    updateRow<BossfightSession>("bossfight_sessions", id, updates),
+  players: {
+    list: async (sessionId: string) => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { data, error } = await supabase
+        .from("bossfight_players")
+        .select("*")
+        .eq("session_id", sessionId)
+        .eq("user_id", userId)
+        .order("position");
+      if (error) throw error;
+      return (data ?? []) as BossfightPlayer[];
+    },
+    listByStreamer: async (sessionId: string, streamerId: string) => {
+      const supabase = getSupabase();
+      const { data, error } = await supabase
+        .from("bossfight_players")
+        .select("*")
+        .eq("session_id", sessionId)
+        .eq("user_id", streamerId)
+        .order("position");
+      if (error) throw error;
+      return (data ?? []) as BossfightPlayer[];
+    },
+    add: async (sessionId: string, username: string, game: string, streamerId: string, isBoss: boolean, position: number) => {
+      const supabase = getSupabase();
+      const { error } = await supabase
+        .from("bossfight_players")
+        .upsert(
+          { user_id: streamerId, session_id: sessionId, username, game, is_boss: isBoss, is_eliminated: false, position },
+          { onConflict: "session_id,username" }
+        );
+      if (error) throw error;
+    },
+    update: (id: string, updates: Partial<BossfightPlayer>) =>
+      updateRow<BossfightPlayer>("bossfight_players", id, updates),
+    clear: async (sessionId: string) => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { error } = await supabase
+        .from("bossfight_players")
+        .delete()
+        .eq("session_id", sessionId)
+        .eq("user_id", userId);
+      if (error) throw error;
+    },
+  },
+  bets: {
+    list: async (sessionId: string) => {
+      const supabase = getSupabase();
+      const userId = await getUserId();
+      const { data, error } = await supabase
+        .from("bossfight_bets")
+        .select("*")
+        .eq("session_id", sessionId)
+        .eq("user_id", userId)
+        .order("placed_at");
+      if (error) throw error;
+      return (data ?? []) as BossfightBet[];
+    },
+    place: async (sessionId: string, username: string, team: 'boss' | 'players', amount: number, streamerId: string) => {
+      const supabase = getSupabase();
+      const { error } = await supabase
+        .from("bossfight_bets")
+        .upsert(
+          { user_id: streamerId, session_id: sessionId, username, team, amount },
+          { onConflict: "session_id,username" }
+        );
+      if (error) throw error;
+    },
   },
 };

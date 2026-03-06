@@ -19,6 +19,10 @@ import {
   createTournamentJoinHandler,
   createCustomResponseHandler,
   createViewerJoinHandler,
+  createJoinHandler,
+  createGuessHandler,
+  createBossfightJoinHandler,
+  createBossfightBetHandler,
 } from "@/lib/twitch/handlers";
 import type { MessageHandler } from "@/lib/twitch/types";
 import type { BotCustomCommand } from "@/lib/supabase/types";
@@ -198,6 +202,32 @@ export function TwitchBotProvider({ children }: { children: ReactNode }) {
     } else if (!enabledFeatures["tournament-join"] && handlersRef.current.has("tournament-join")) {
       handlersRef.current.delete("tournament-join");
       twitchBot.removeHandler("tournament-join");
+    }
+
+    // Join draw handler (always enabled — uses session status for gating)
+    if (!handlersRef.current.has("join-draw")) {
+      const handler = createJoinHandler();
+      handlersRef.current.set("join-draw", handler);
+      twitchBot.addHandler(handler);
+    }
+
+    // Guess handler for Chat Tippspiel (always enabled — uses session status for gating)
+    if (!handlersRef.current.has("guess")) {
+      const handler = createGuessHandler();
+      handlersRef.current.set("guess", handler);
+      twitchBot.addHandler(handler);
+    }
+
+    // Bossfight handlers (always enabled — uses session status for gating)
+    if (!handlersRef.current.has("bossfight-join")) {
+      const handler = createBossfightJoinHandler();
+      handlersRef.current.set("bossfight-join", handler);
+      twitchBot.addHandler(handler);
+    }
+    if (!handlersRef.current.has("bossfight-bet")) {
+      const handler = createBossfightBetHandler();
+      handlersRef.current.set("bossfight-bet", handler);
+      twitchBot.addHandler(handler);
     }
   }, [enabledFeatures]);
 
