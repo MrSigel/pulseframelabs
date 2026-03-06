@@ -123,8 +123,8 @@ function TournamentNormalContent() {
                   key={p.viewer_username}
                   className="relative flex items-center gap-2.5 px-3 py-2 rounded-lg overflow-hidden"
                   style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: "rgba(255,255,255,0.15)",
+                    border: "1px solid rgba(255,255,255,0.15)",
                   }}
                 >
                   {/* Badge background */}
@@ -205,7 +205,7 @@ function TournamentNormalContent() {
         {winner && (
           <div
             className="px-5 py-3 text-center"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
+            style={{ borderTop: "1px solid rgba(255,255,255,0.12)" }}
           >
             <span
               className="text-sm font-black tracking-wider"

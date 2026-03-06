@@ -53,7 +53,7 @@ function BonushuntSmallContent() {
       >
         <div
           className="h-[52px] w-[52px] shrink-0 flex items-center justify-center"
-          style={{ background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 8%, transparent)", borderRight: "1px solid rgba(255,255,255,0.04)" }}
+          style={{ background: "color-mix(in srgb, var(--overlay-highlight, #ef4444) 8%, transparent)", borderRight: "1px solid rgba(255,255,255,0.12)" }}
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: "var(--overlay-highlight, #ef4444)" }}>
             <circle cx="12" cy="12" r="10" />

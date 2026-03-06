@@ -50,7 +50,7 @@ function SlotRequestsOverlayContent() {
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 py-3"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.15)" }}
         >
           <div className="flex items-center gap-2">
             <div
@@ -109,8 +109,8 @@ function SlotRequestsOverlayContent() {
                   key={req.id || i}
                   className="flex items-center justify-between px-3 py-2 rounded-lg"
                   style={{
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    background: "rgba(255,255,255,0.15)",
+                    border: "1px solid rgba(255,255,255,0.12)",
                   }}
                 >
                   <div className="flex items-center gap-2">

@@ -157,7 +157,7 @@ function WagerBarSmallView({
         {/* Progress bar */}
         <div
           className="h-1 rounded-full mb-3 overflow-hidden"
-          style={{ background: "rgba(255,255,255,0.06)" }}
+          style={{ background: "rgba(255,255,255,0.15)" }}
         >
           <div
             className="h-full rounded-full animate-progress-shimmer"
@@ -198,7 +198,7 @@ function WagerBarSmallView({
         </div>
 
         {/* Stats row */}
-        <div className="flex items-center gap-4 mt-2 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex items-center gap-4 mt-2 pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
           <span className="text-xs font-semibold" style={{ color: "var(--overlay-highlight, #ef4444)" }}>
             {currency}{bonus.toLocaleString()}
           </span>

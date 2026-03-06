@@ -50,7 +50,7 @@ function BonushuntTopWorseContent() {
         {/* Header */}
         <div
           className="flex items-center justify-between px-4 py-3"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.1)" }}
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.15)" }}
         >
           <span
             className="font-bold text-sm"
@@ -68,7 +68,7 @@ function BonushuntTopWorseContent() {
         </div>
 
         {/* Top Section */}
-        <div className="px-4 py-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="px-4 py-2.5" style={{ borderBottom: "1px solid rgba(255,255,255,0.12)" }}>
           <div className="flex items-center gap-2 mb-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="none">
               <path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6L5.7 21l2.3-7L2 9.4h7.6z" />
@@ -80,7 +80,7 @@ function BonushuntTopWorseContent() {
               <div
                 key={n}
                 className="flex items-center justify-between px-3 py-1.5 rounded-md"
-                style={{ background: "rgba(255,255,255,0.06)" }}
+                style={{ background: "rgba(255,255,255,0.15)" }}
               >
                 <span className="text-slate-500 text-[10px] font-semibold">#{n + 1}</span>
                 <span className="text-slate-600 text-[10px]">
@@ -104,7 +104,7 @@ function BonushuntTopWorseContent() {
               <div
                 key={n}
                 className="flex items-center justify-between px-3 py-1.5 rounded-md"
-                style={{ background: "rgba(255,255,255,0.06)" }}
+                style={{ background: "rgba(255,255,255,0.15)" }}
               >
                 <span className="text-slate-500 text-[10px] font-semibold">#{n + 1}</span>
                 <span className="text-slate-600 text-[10px]">

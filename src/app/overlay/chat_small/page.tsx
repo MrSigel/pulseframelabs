@@ -43,7 +43,7 @@ function ChatSmallContent() {
           maxWidth: "300px",
         }}
       >
-        <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="flex items-center gap-2 px-3 py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: "var(--overlay-highlight, #3b82f6)" }}>
             <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
           </svg>

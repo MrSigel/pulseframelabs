@@ -87,6 +87,8 @@ export function useOverlayData<T>({
       }
 
       if (single) {
+        // When fetching a single row, always order by created_at desc to get the latest
+        if (!orderBy) query = query.order("created_at", { ascending: false });
         const { data: row, error: err } = await query.limit(1).maybeSingle();
         if (err) throw err;
         setData(row as T);

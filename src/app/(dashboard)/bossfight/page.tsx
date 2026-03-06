@@ -12,7 +12,7 @@ import { twitchBot } from "@/lib/twitch/bot";
 import type { BossfightSession, BossfightPlayer, BossfightBet } from "@/lib/supabase/types";
 import {
   Monitor, X, Users, Play, Square, Trophy, Loader2, RefreshCw,
-  Shield, Swords, Heart, Skull, Crown, Dices,
+  Shield, Swords, Heart, Skull, Crown, Dices, Plus, Bot,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 
@@ -21,6 +21,8 @@ export default function BossfightPage() {
   const uid = useAuthUid();
 
   const [overlayOpen, setOverlayOpen] = useState(false);
+  const [botName, setBotName] = useState("");
+  const [botGame, setBotGame] = useState("");
 
   const { data: activeSession, refetch: refetchSession } = useDbQuery<BossfightSession | null>(
     () => bossfightSessions.getActive(),
@@ -69,6 +71,20 @@ export default function BossfightPage() {
       twitchBot.say("BOSSFIGHT is now open! Type !join GameName to enter!");
     } catch (err) {
       console.error("Failed to create bossfight:", err);
+    }
+  }
+
+  async function handleAddBot() {
+    if (!activeSession || !botName.trim() || !uid) return;
+    try {
+      await bossfightSessions.players.add(
+        activeSession.id, botName.trim(), botGame.trim(), uid, false, -1
+      );
+      setBotName("");
+      setBotGame("");
+      await refetchPlayers();
+    } catch (err) {
+      console.error("Failed to add player:", err);
     }
   }
 
@@ -236,6 +252,33 @@ export default function BossfightPage() {
                     <Users className="h-4 w-4" />
                     <span>{joinPool.length} in pool</span>
                   </div>
+
+                  {/* Manual add player/bot */}
+                  <div className="space-y-2 pt-2 border-t border-white/[0.06]">
+                    <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold flex items-center gap-1">
+                      <Bot className="h-3 w-3" /> Add Player Manually
+                    </span>
+                    <div className="flex gap-2">
+                      <input
+                        className="flex-1 text-xs px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-600 outline-none focus:border-blue-500/40"
+                        placeholder="Name"
+                        value={botName}
+                        onChange={(e) => setBotName(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleAddBot()}
+                      />
+                      <input
+                        className="w-24 text-xs px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-slate-600 outline-none focus:border-blue-500/40"
+                        placeholder="Game"
+                        value={botGame}
+                        onChange={(e) => setBotGame(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleAddBot()}
+                      />
+                      <Button size="sm" onClick={handleAddBot} disabled={!botName.trim()}>
+                        <Plus className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+
                   <Button
                     variant="accent"
                     className="w-full gap-2"
@@ -363,10 +406,22 @@ export default function BossfightPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {drawnPlayers.length === 0 ? (
+              {drawnPlayers.length === 0 && joinPool.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-500">
                   <Swords className="h-8 w-8 mb-2 text-slate-600" />
-                  <p className="text-sm">No fighters drawn yet</p>
+                  <p className="text-sm">No fighters yet</p>
+                </div>
+              ) : drawnPlayers.length === 0 && joinPool.length > 0 ? (
+                <div className="space-y-2">
+                  <span className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Join Pool ({joinPool.length})</span>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-96 overflow-y-auto">
+                    {joinPool.map((p) => (
+                      <div key={p.id} className="px-3 py-2 rounded-lg bg-white/[0.03] border border-white/[0.06] text-sm">
+                        <span className="text-white font-medium block truncate">{p.username}</span>
+                        {p.game && <span className="text-slate-500 text-[10px]">{p.game}</span>}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-2">

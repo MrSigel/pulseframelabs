@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Check, Trophy } from "lucide-react";
+import { Pencil, Check, Trophy, Undo2 } from "lucide-react";
 import type { BracketData, BracketPlayer } from "@/lib/supabase/types";
 
 interface TournamentBracketProps {
@@ -58,6 +58,41 @@ export default function TournamentBracket({
     // Check if final is decided
     const fm = d.rounds[d.rounds.length - 1].matchups[0];
     if (fm?.winner) d.winner = fm.winner;
+
+    onUpdate(d);
+  }
+
+  function undoWinner(rIdx: number, mIdx: number) {
+    const d = structuredClone(bracketData);
+    const match = d.rounds[rIdx].matchups[mIdx];
+    if (!match.winner) return;
+
+    // Clear winner
+    match.winner = undefined;
+
+    // Revert next round slot to TBD
+    if (rIdx + 1 < d.rounds.length) {
+      const nm = Math.floor(mIdx / 2);
+      const ns: "player1" | "player2" = mIdx % 2 === 0 ? "player1" : "player2";
+      const nextMatch = d.rounds[rIdx + 1].matchups[nm];
+
+      // Also clear next match winner if it was set (cascade)
+      if (nextMatch.winner) {
+        // Recursively undo the next match too
+        nextMatch.winner = undefined;
+        // Clear further rounds
+        if (rIdx + 2 < d.rounds.length) {
+          const nnm = Math.floor(nm / 2);
+          const nns: "player1" | "player2" = nm % 2 === 0 ? "player1" : "player2";
+          d.rounds[rIdx + 2].matchups[nnm][nns] = { name: "TBD", game: "" };
+        }
+      }
+
+      nextMatch[ns] = { name: "TBD", game: "" };
+    }
+
+    // Clear overall winner if affected
+    d.winner = undefined;
 
     onUpdate(d);
   }
@@ -205,7 +240,17 @@ export default function TournamentBracket({
                 }}
               >
                 <PlayerSlot rIdx={rIdx} mIdx={mIdx} pKey="player1" player={match.player1} matchWinner={match.winner} />
-                <div style={{ height: "1px", background: "rgba(255,255,255,0.04)" }} />
+                <div className="relative" style={{ height: "1px", background: "rgba(255,255,255,0.04)" }}>
+                  {!readOnly && match.winner && (
+                    <button
+                      onClick={() => undoWinner(rIdx, mIdx)}
+                      className="absolute -top-2.5 right-1 h-5 w-5 rounded flex items-center justify-center text-slate-600 hover:text-amber-400 hover:bg-amber-500/10 transition-all z-10"
+                      title="Undo winner"
+                    >
+                      <Undo2 className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
                 <PlayerSlot rIdx={rIdx} mIdx={mIdx} pKey="player2" player={match.player2} matchWinner={match.winner} />
               </div>
             ))}

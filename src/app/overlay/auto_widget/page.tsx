@@ -74,7 +74,7 @@ function WagerWidget({ session, sym }: { session: WagerSession; sym: string }) {
           </span>
         </div>
       </div>
-      <div className="h-1 rounded-full mb-2 overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+      <div className="h-1 rounded-full mb-2 overflow-hidden" style={{ background: "rgba(255,255,255,0.15)" }}>
         <div
           className="h-full rounded-full"
           style={{
@@ -134,7 +134,7 @@ function BonushuntWidget({
     >
       <div
         className="h-[60px] w-[60px] shrink-0 flex items-center justify-center"
-        style={{ background: "rgba(239,68,68,0.08)", borderRight: "1px solid rgba(255,255,255,0.04)" }}
+        style={{ background: "rgba(239,68,68,0.08)", borderRight: "1px solid rgba(255,255,255,0.12)" }}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
@@ -251,7 +251,7 @@ function NowPlayingWidget({ game }: { game: GameRow }) {
         className="h-[52px] w-[52px] shrink-0 flex items-center justify-center"
         style={{
           background: "linear-gradient(135deg, #1a73e833, #1a73e811)",
-          borderRight: "1px solid rgba(255,255,255,0.04)",
+          borderRight: "1px solid rgba(255,255,255,0.12)",
         }}
       >
         <span className="text-[8px] font-bold text-white/50 text-center px-1">{game.name}</span>
@@ -281,7 +281,7 @@ function IdleWidget() {
         minWidth: "220px",
         padding: "10px 16px",
         background: "linear-gradient(135deg, rgba(12,16,24,0.92) 0%, rgba(17,24,39,0.92) 50%, rgba(12,16,24,0.92) 100%)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        border: "1px solid rgba(255,255,255,0.15)",
       }}
     >
       <div className="h-2 w-2 rounded-full bg-slate-600 animate-pulse" />

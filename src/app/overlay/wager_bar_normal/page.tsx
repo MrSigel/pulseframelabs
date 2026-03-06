@@ -170,7 +170,7 @@ function WagerBarNormalView({
             {/* Progress bar */}
             <div
               className="h-2 rounded-full overflow-hidden"
-              style={{ background: "rgba(255,255,255,0.1)" }}
+              style={{ background: "rgba(255,255,255,0.15)" }}
             >
               <div
                 className="h-full rounded-full relative"
@@ -195,8 +195,8 @@ function WagerBarNormalView({
           <div
             className="rounded-lg p-3 space-y-1.5"
             style={{
-              background: "rgba(255,255,255,0.06)",
-              border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.15)",
+              border: "1px solid rgba(255,255,255,0.15)",
             }}
           >
             <div className="flex items-center justify-between text-xs">

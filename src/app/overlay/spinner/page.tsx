@@ -18,13 +18,13 @@ function PokerChipOverlay({ size = 60 }: { size?: number }) {
     <svg viewBox="0 0 48 48" width={size} height={size} className="animate-spin-chip">
       <circle cx="24" cy="24" r="23" fill="rgba(10,15,26,0.85)" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
       <circle cx="24" cy="24" r="20.5" fill="none" stroke="rgba(239,68,68,0.5)" strokeWidth="3.5" strokeDasharray="5.5 7.6" strokeLinecap="round" />
-      <circle cx="24" cy="24" r="17.5" fill="rgba(12,18,32,0.85)" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
+      <circle cx="24" cy="24" r="17.5" fill="rgba(12,18,32,0.85)" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
       <circle cx="24" cy="24" r="13" fill="none" stroke="rgba(239,68,68,0.35)" strokeWidth="0.8" strokeDasharray="3 3" />
       <circle cx="24" cy="24" r="10" fill="rgba(13,19,34,0.85)" stroke="rgba(239,68,68,0.3)" strokeWidth="0.8" />
       <path d="M24 16 L30 24 L24 32 L18 24 Z" fill="rgba(239,68,68,0.12)" stroke="rgba(239,68,68,0.5)" strokeWidth="0.6" />
       <circle cx="24" cy="24" r="2.5" fill="#ef4444" opacity="0.7" />
       <circle cx="24" cy="24" r="1.2" fill="#fff" opacity="0.6" />
-      <ellipse cx="20" cy="18" rx="5" ry="3" fill="rgba(255,255,255,0.04)" transform="rotate(-30 20 18)" />
+      <ellipse cx="20" cy="18" rx="5" ry="3" fill="rgba(255,255,255,0.12)" transform="rotate(-30 20 18)" />
     </svg>
   );
 }
@@ -170,8 +170,8 @@ function SpinnerOverlayContent() {
         <div
           className="absolute inset-0 rounded-full"
           style={{
-            background: "conic-gradient(from 0deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.04) 100%)",
-            border: "2px solid rgba(255,255,255,0.04)",
+            background: "conic-gradient(from 0deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.01) 25%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.12) 100%)",
+            border: "2px solid rgba(255,255,255,0.12)",
             boxShadow: "0 0 40px rgba(0,0,0,0.2)",
           }}
         />
@@ -210,7 +210,7 @@ function SpinnerOverlayContent() {
             background: `conic-gradient(${conicStops})`,
             transform: `rotate(${rotation}deg)`,
             transition: phase === "spinning" ? "transform 4.5s cubic-bezier(0.17, 0.67, 0.12, 0.99)" : "none",
-            border: "2px solid rgba(255,255,255,0.08)",
+            border: "2px solid rgba(255,255,255,0.12)",
             boxShadow: "0 0 20px rgba(0,0,0,0.2), inset 0 0 25px rgba(0,0,0,0.1)",
           }}
         >
@@ -220,7 +220,7 @@ function SpinnerOverlayContent() {
               <line key={i} x1={wheelCenter} y1={wheelCenter} x2={line.x2} y2={line.y2} stroke="rgba(0,0,0,0.25)" strokeWidth="1.5" />
             ))}
             {segmentLines.map((line, i) => (
-              <line key={`w${i}`} x1={wheelCenter} y1={wheelCenter} x2={line.x2} y2={line.y2} stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
+              <line key={`w${i}`} x1={wheelCenter} y1={wheelCenter} x2={line.x2} y2={line.y2} stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
             ))}
           </svg>
 

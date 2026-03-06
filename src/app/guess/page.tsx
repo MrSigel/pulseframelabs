@@ -15,11 +15,23 @@ function TippspielContent() {
 
   const [session, setSession] = useState<TippspielSession | null>(null);
   const [username, setUsername] = useState("");
+  const [usernameLocked, setUsernameLocked] = useState(false);
   const [guess, setGuess] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // Restore locked username from localStorage
+  useEffect(() => {
+    if (!uid) return;
+    const key = `tippspiel-username-${uid}`;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      setUsername(saved);
+      setUsernameLocked(true);
+    }
+  }, [uid]);
 
   const fetchSession = useCallback(async () => {
     if (!uid) return;
@@ -74,6 +86,9 @@ function TippspielContent() {
         );
       if (upsertError) throw upsertError;
       setSubmitted(true);
+      // Lock username in localStorage so the same browser can't use different names
+      localStorage.setItem(`tippspiel-username-${uid}`, username.trim());
+      setUsernameLocked(true);
     } catch (err) {
       setError("Failed to submit guess. Try again.");
       console.error(err);
@@ -135,10 +150,13 @@ function TippspielContent() {
                 <input
                   type="text"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => !usernameLocked && setUsername(e.target.value)}
                   placeholder="Twitch username"
                   required
-                  className="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/25"
+                  readOnly={usernameLocked}
+                  className={`w-full px-3 py-2.5 rounded-lg border text-white text-sm placeholder-slate-600 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/25 ${
+                    usernameLocked ? "bg-white/3 border-white/5 text-slate-400 cursor-not-allowed" : "bg-white/5 border-white/10"
+                  }`}
                 />
               </div>
               <div>

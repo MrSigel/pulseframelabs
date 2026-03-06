@@ -410,7 +410,12 @@ export default function TournamentsPage() {
     if (!drawModal || !participantsList) return;
     const count = drawModal.participant_count;
     const remaining = participantsList.filter((p) => !drawnPlayers.find((d) => d.id === p.id));
-    if (remaining.length === 0 || drawnPlayers.length >= count) return;
+
+    // All real participants drawn (even if fewer than bracket size — BYEs fill the rest)
+    if (remaining.length === 0 || drawnPlayers.length >= count) {
+      setDrawStep("done");
+      return;
+    }
 
     const winnerIdx = Math.floor(Math.random() * remaining.length);
     const winner = remaining[winnerIdx];
@@ -430,7 +435,9 @@ export default function TournamentsPage() {
         setRaffleAnimating(false);
         setDrawnPlayers((prev) => {
           const next = [...prev, winner];
-          if (next.length >= count) setDrawStep("done");
+          // Check if all real participants are drawn or bracket is full
+          const stillRemaining = participantsList!.filter((p) => !next.find((d) => d.id === p.id));
+          if (next.length >= count || stillRemaining.length === 0) setDrawStep("done");
           return next;
         });
         return;

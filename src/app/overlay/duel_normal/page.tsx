@@ -158,7 +158,7 @@ function DuelContent() {
           className="grid px-4 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-500"
           style={{
             gridTemplateColumns: "1fr 1.2fr 0.8fr 0.5fr",
-            borderTop: "1px solid rgba(255,255,255,0.1)",
+            borderTop: "1px solid rgba(255,255,255,0.15)",
           }}
         >
           <span>Player</span>
@@ -177,7 +177,7 @@ function DuelContent() {
                 className="grid py-2 items-center"
                 style={{
                   gridTemplateColumns: "1fr 1.2fr 0.8fr 0.5fr",
-                  borderTop: "1px solid rgba(255,255,255,0.08)",
+                  borderTop: "1px solid rgba(255,255,255,0.12)",
                 }}
               >
                 <div className="flex items-center gap-2">

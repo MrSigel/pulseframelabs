@@ -94,7 +94,7 @@ function BossfightContent() {
             </div>
             <div className="flex gap-1">
               {Array.from({ length: session.boss_max_lives }).map((_, i) => (
-                <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < session.boss_lives ? "#ef4444" : "rgba(255,255,255,0.08)"} stroke="none">
+                <svg key={i} width="14" height="14" viewBox="0 0 24 24" fill={i < session.boss_lives ? "#ef4444" : "rgba(255,255,255,0.15)"} stroke="none">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
               ))}
@@ -121,10 +121,10 @@ function BossfightContent() {
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
                 style={{
                   background: p.is_eliminated
-                    ? "rgba(255,255,255,0.02)"
+                    ? "rgba(255,255,255,0.15)"
                     : isCurrent
                       ? "rgba(59,130,246,0.08)"
-                      : "rgba(255,255,255,0.04)",
+                      : "rgba(255,255,255,0.15)",
                   border: isCurrent ? "1px solid rgba(59,130,246,0.15)" : "1px solid transparent",
                   opacity: p.is_eliminated ? 0.35 : 1,
                 }}

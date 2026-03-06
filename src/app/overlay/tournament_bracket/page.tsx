@@ -58,9 +58,9 @@ function getRoundName(roundIndex: number, totalRounds: number): string {
 }
 
 function getLayout(p: number) {
-  if (p <= 8) return { matchH: 54, matchW: 150, vGap: 20, hGap: 40, fs: 11 };
-  if (p <= 16) return { matchH: 46, matchW: 140, vGap: 12, hGap: 34, fs: 10 };
-  return { matchH: 40, matchW: 130, vGap: 6, hGap: 28, fs: 9 };
+  if (p <= 8) return { matchH: 80, matchW: 220, vGap: 24, hGap: 50, fs: 14 };
+  if (p <= 16) return { matchH: 68, matchW: 200, vGap: 16, hGap: 42, fs: 13 };
+  return { matchH: 56, matchW: 180, vGap: 10, hGap: 36, fs: 11 };
 }
 
 /** Normalize player data — handles both old string format and new object format */
@@ -99,7 +99,7 @@ function PlayerSlot({
       className="relative flex items-center px-2.5 overflow-hidden"
       style={{
         height: "50%",
-        borderBottom: isTop ? "1px solid rgba(255,255,255,0.04)" : undefined,
+        borderBottom: isTop ? "1px solid rgba(255,255,255,0.12)" : undefined,
         background: isWinner ? "rgba(16,185,129,0.08)" : "transparent",
         opacity: isLoser ? 0.4 : 1,
       }}
@@ -265,7 +265,7 @@ function TournamentBracketContent() {
       all.push(curr);
     }
 
-    const w = totalRounds * matchW + (totalRounds - 1) * hGap + hGap + 94;
+    const w = totalRounds * matchW + (totalRounds - 1) * hGap + hGap + 130;
     const h = all[0][all[0].length - 1].y + matchH;
     return { positions: all, totalW: w, totalH: h };
   }, [roundsData, totalRounds, matchH, matchW, vGap, hGap]);
@@ -276,15 +276,15 @@ function TournamentBracketContent() {
 
   const winnerBoxX = (totalRounds - 1) * (matchW + hGap) + matchW + hGap;
   const finalPos = positions[positions.length - 1][0];
-  const winnerBoxY = finalPos.y + matchH / 2 - 26;
+  const winnerBoxY = finalPos.y + matchH / 2 - 32;
 
   return (
     <div className="inline-block" style={cssVars}>
       {/* ── Header ── */}
       <div className="flex items-center gap-2.5 mb-4">
-        <TrophyIcon size={20} color="var(--overlay-icon-color, #f59e0b)" />
+        <TrophyIcon size={24} color="var(--overlay-icon-color, #f59e0b)" />
         <span
-          className="font-bold text-[15px] tracking-wide"
+          className="font-bold text-lg tracking-wide"
           style={{
             background: `linear-gradient(90deg, var(--overlay-highlight, #f59e0b), var(--overlay-icon-color, #ef4444))`,
             WebkitBackgroundClip: "text",
@@ -293,7 +293,7 @@ function TournamentBracketContent() {
         >
           {title}
         </span>
-        <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">
+        <span className="text-xs font-semibold text-white/50 uppercase tracking-wider">
           {participants} Players · {totalRounds} Rounds
         </span>
       </div>
@@ -303,15 +303,15 @@ function TournamentBracketContent() {
         {roundsData.map((round, i) => (
           <div
             key={i}
-            className="text-[9px] font-bold uppercase tracking-wider text-white/40 text-center shrink-0"
+            className="text-[11px] font-bold uppercase tracking-wider text-white/40 text-center shrink-0"
             style={{ width: matchW, marginRight: hGap }}
           >
             {round.name}
           </div>
         ))}
         <div
-          className="text-[9px] font-bold uppercase tracking-wider text-center shrink-0"
-          style={{ width: 94, color: "var(--overlay-highlight, rgba(245,158,11,0.7))", opacity: 0.8 }}
+          className="text-[11px] font-bold uppercase tracking-wider text-center shrink-0"
+          style={{ width: 130, color: "var(--overlay-highlight, rgba(245,158,11,0.7))", opacity: 0.8 }}
         >
           Champion
         </div>
@@ -371,10 +371,10 @@ function TournamentBracketContent() {
                   className="h-full rounded-md overflow-hidden"
                   style={{
                     background: isFinal
-                      ? `color-mix(in srgb, var(--overlay-highlight, #f59e0b) 10%, var(--overlay-bg-dark, rgba(12,14,18,0.97)))`
+                      ? `color-mix(in srgb, var(--overlay-highlight, #f59e0b) 10%, var(--overlay-bg-dark, rgba(12,14,18,0.92)))`
                       : hasWinner
-                        ? "color-mix(in srgb, rgba(16,185,129,0.06), var(--overlay-bg-dark, rgba(12,14,18,0.97)))"
-                        : "var(--overlay-bg-dark, rgba(12,14,18,0.97))",
+                        ? "color-mix(in srgb, rgba(16,185,129,0.06), var(--overlay-bg-dark, rgba(12,14,18,0.92)))"
+                        : "var(--overlay-bg-dark, rgba(12,14,18,0.92))",
                     border: isFinal
                       ? `1px solid color-mix(in srgb, var(--overlay-highlight, #f59e0b) 15%, transparent)`
                       : hasWinner
@@ -407,22 +407,22 @@ function TournamentBracketContent() {
         )}
 
         {/* Winner box */}
-        <div className="absolute" style={{ left: winnerBoxX, top: winnerBoxY, width: 94 }}>
+        <div className="absolute" style={{ left: winnerBoxX, top: winnerBoxY, width: 130 }}>
           <div
             className="rounded-lg px-3 py-3 text-center"
             style={{
               background: winner
                 ? `linear-gradient(135deg, color-mix(in srgb, var(--overlay-highlight, #f59e0b) 12%, transparent), color-mix(in srgb, var(--overlay-icon-color, #ef4444) 8%, transparent))`
-                : "var(--overlay-bg-dark, rgba(12,14,18,0.97))",
+                : "var(--overlay-bg-dark, rgba(12,14,18,0.92))",
               border: winner
                 ? `1px solid color-mix(in srgb, var(--overlay-highlight, #f59e0b) 25%, transparent)`
-                : "1px solid rgba(255,255,255,0.1)",
+                : "1px solid rgba(255,255,255,0.15)",
               boxShadow: winner ? `0 0 24px color-mix(in srgb, var(--overlay-highlight, #f59e0b) 8%, transparent)` : "none",
             }}
           >
             <TrophyIcon size={16} color={winner ? "var(--overlay-highlight, #f59e0b)" : "rgba(255,255,255,0.3)"} />
             <div
-              className="font-bold text-[11px] mt-1"
+              className="font-bold text-sm mt-1"
               style={{ color: winner ? "var(--overlay-highlight, #fbbf24)" : "rgba(255,255,255,0.35)" }}
             >
               {winner || "TBD"}

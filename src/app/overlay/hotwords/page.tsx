@@ -49,7 +49,7 @@ function HotwordsOverlayContent() {
         }}
       >
         {/* Header */}
-        <div className="mb-3 pb-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div className="mb-3 pb-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
           <span
             className="font-bold text-sm tracking-widest"
             style={{

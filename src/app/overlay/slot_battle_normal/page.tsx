@@ -197,8 +197,8 @@ function SlotBattleContent() {
               key={i}
               className="flex items-center justify-between py-2 px-3"
               style={{
-                borderTop: i === 0 ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(255,255,255,0.06)",
-                background: row.highlight ? "rgba(255,255,255,0.06)" : "transparent",
+                borderTop: i === 0 ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(255,255,255,0.15)",
+                background: row.highlight ? "rgba(255,255,255,0.15)" : "transparent",
               }}
             >
               <span className={`text-xs font-bold ${row.highlight ? "text-blue-400" : "text-white"}`}>{row.left}</span>
@@ -209,7 +209,7 @@ function SlotBattleContent() {
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="px-4 py-2 text-center" style={{ borderTop: "1px solid rgba(255,255,255,0.12)" }}>
           <span className="text-[8px] uppercase tracking-widest text-slate-600">
             SCORE = OVERALL PAYBACK / (BUY AMOUNT x COST)
           </span>
