@@ -5,12 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { OverlayLink } from "@/components/overlay-link";
 import { bossfightSessions } from "@/lib/supabase/db";
-import { tournaments as tournamentsDb } from "@/lib/supabase/db";
 import { useDbQuery } from "@/hooks/useDbQuery";
 import { useAuthUid } from "@/hooks/useAuthUid";
 import { useFeatureGate } from "@/hooks/useFeatureGate";
 import { twitchBot } from "@/lib/twitch/bot";
-import type { BossfightSession, BossfightPlayer, BossfightBet, TournamentParticipant } from "@/lib/supabase/types";
+import type { BossfightSession, BossfightPlayer, BossfightBet } from "@/lib/supabase/types";
 import {
   Monitor, X, Users, Play, Square, Trophy, Loader2, RefreshCw,
   Shield, Swords, Heart, Skull, Crown, Dices,
@@ -38,23 +37,25 @@ export default function BossfightPage() {
     [activeSession?.id],
   );
 
-  // Use tournament_participants as join pool (reuse !join command)
-  const { data: joinPool, refetch: refetchJoinPool } = useDbQuery<TournamentParticipant[]>(
-    () => {
-      if (!activeSession) return Promise.resolve([]);
-      // We reuse tournament participants table for bossfight join pool
-      return tournamentsDb.participants.list(activeSession.id);
-    },
-    [activeSession?.id],
-  );
+  // Join pool = bossfight_players with position = -1 (not yet drawn)
+  const joinPool = useMemo(() => {
+    if (!players) return [];
+    return players.filter((p) => p.position === -1);
+  }, [players]);
+
+  // Drawn players = bossfight_players with position >= 0
+  const drawnPlayers = useMemo(() => {
+    if (!players) return [];
+    return players.filter((p) => p.position >= 0);
+  }, [players]);
 
   const overlayUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
     return `${window.location.origin}/overlay/bossfight?uid=${uid || ""}`;
   }, [uid]);
 
-  const boss = players?.find((p) => p.is_boss) ?? null;
-  const fighters = players?.filter((p) => !p.is_boss) ?? [];
+  const boss = drawnPlayers.find((p) => p.is_boss) ?? null;
+  const fighters = drawnPlayers.filter((p) => !p.is_boss);
   const aliveFighters = fighters.filter((p) => !p.is_eliminated);
   const currentFighterIdx = activeSession?.current_player_index ?? 0;
   const currentFighter = aliveFighters[currentFighterIdx % aliveFighters.length] ?? null;
@@ -72,26 +73,29 @@ export default function BossfightPage() {
   }
 
   async function handleDraw() {
-    if (!activeSession || !joinPool || joinPool.length < 2) return;
+    if (!activeSession || joinPool.length < 2) return;
     try {
       // Shuffle and pick 9 players (or less if not enough)
       const shuffled = [...joinPool].sort(() => Math.random() - 0.5);
       const selected = shuffled.slice(0, Math.min(9, shuffled.length));
+      const notSelected = shuffled.slice(Math.min(9, shuffled.length));
 
-      // Add selected as fighters
+      // Assign positions to selected players (promotes them from join pool)
       for (let i = 0; i < selected.length; i++) {
-        await bossfightSessions.players.add(
-          activeSession.id, selected[i].viewer_username, selected[i].game_name,
-          uid!, false, i
-        );
+        await bossfightSessions.players.update(selected[i].id, { position: i });
+      }
+
+      // Remove non-selected players from the pool
+      for (const p of notSelected) {
+        await bossfightSessions.players.update(p.id, { is_eliminated: true, position: -2 });
       }
 
       await bossfightSessions.update(activeSession.id, { status: "draw" });
       await refetchSession();
       await refetchPlayers();
 
-      const names = selected.map((p) => p.viewer_username).join(", ");
-      twitchBot.say(`9 fighters drawn: ${names}! Now select the Boss!`);
+      const names = selected.map((p) => p.username).join(", ");
+      twitchBot.say(`${selected.length} fighters drawn: ${names}! Now select the Boss!`);
     } catch (err) {
       console.error("Failed to draw:", err);
     }
@@ -101,7 +105,7 @@ export default function BossfightPage() {
     if (!activeSession) return;
     try {
       // Find the player and set as boss
-      const player = players?.find((p) => p.username === username);
+      const player = drawnPlayers.find((p) => p.username === username);
       if (player) {
         await bossfightSessions.players.update(player.id, { is_boss: true });
       }
@@ -230,13 +234,13 @@ export default function BossfightPage() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-slate-400">
                     <Users className="h-4 w-4" />
-                    <span>{joinPool?.length ?? 0} in pool</span>
+                    <span>{joinPool.length} in pool</span>
                   </div>
                   <Button
                     variant="accent"
                     className="w-full gap-2"
                     onClick={handleDraw}
-                    disabled={!joinPool || joinPool.length < 2}
+                    disabled={joinPool.length < 2}
                   >
                     <Dices className="h-4 w-4" />
                     Draw 9 Players
@@ -352,14 +356,14 @@ export default function BossfightPage() {
             <CardHeader>
               <CardTitle className="text-lg text-white flex items-center justify-between">
                 <span>Fighters</span>
-                <Button size="sm" className="gap-1" onClick={() => { refetchSession(); refetchPlayers(); refetchJoinPool(); refetchBets(); }}>
+                <Button size="sm" className="gap-1" onClick={() => { refetchSession(); refetchPlayers(); refetchBets(); }}>
                   <RefreshCw className="h-3.5 w-3.5" />
                   Reload
                 </Button>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {!players || players.length === 0 ? (
+              {drawnPlayers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-slate-500">
                   <Swords className="h-8 w-8 mb-2 text-slate-600" />
                   <p className="text-sm">No fighters drawn yet</p>

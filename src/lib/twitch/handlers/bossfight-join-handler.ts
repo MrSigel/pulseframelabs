@@ -1,6 +1,6 @@
 import type { ChatUserstate } from "tmi.js";
 import type { MessageHandler, HandlerContext } from "../types";
-import { bossfightSessions, tournaments } from "@/lib/supabase/db";
+import { bossfightSessions } from "@/lib/supabase/db";
 
 export function createBossfightJoinHandler(): MessageHandler {
   return {
@@ -18,10 +18,12 @@ export function createBossfightJoinHandler(): MessageHandler {
       try {
         // Check if bossfight is in join_open phase
         const session = await bossfightSessions.getJoinOpen(context.userId);
-        if (!session) return; // No open bossfight — let tournament handler handle it
+        if (!session) return; // No open bossfight — let other handlers handle it
 
-        // Add to tournament_participants (reuse the same pool)
-        await tournaments.participants.add(session.id, username, context.userId, gameName);
+        // Add directly to bossfight_players as join pool (position = -1 means not yet drawn)
+        await bossfightSessions.players.add(
+          session.id, username, gameName, context.userId, false, -1
+        );
         const gameInfo = gameName ? ` (${gameName})` : "";
         context.say(`@${username} joined the Bossfight${gameInfo}! ✅`);
       } catch {

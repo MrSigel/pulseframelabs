@@ -52,7 +52,7 @@ function BossfightContent() {
 
   const players = useMemo(() => {
     if (!Array.isArray(allPlayers) || !session) return [];
-    return allPlayers.filter((p) => p.session_id === session.id);
+    return allPlayers.filter((p) => p.session_id === session.id && p.position >= 0);
   }, [allPlayers, session]);
 
   const boss = players.find((p) => p.is_boss) ?? null;
