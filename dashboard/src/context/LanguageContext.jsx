@@ -188,6 +188,13 @@ const i18n = {
       usernameRequired: 'Username is required',
       emailRequired: 'Email is required',
       pwRequirements: 'Password does not meet requirements',
+      emailSent: 'Confirmation email sent!',
+      emailSentDesc: 'We sent a confirmation link to your email address. Please check your inbox and click the link to activate your account.',
+      checkSpam: 'Not received? Check your spam folder.',
+      resend: 'Resend email',
+      resent: 'Email resent!',
+      emailNotConfirmed: 'Your email address has not been confirmed yet. Please check your inbox.',
+      backToLogin: 'Back to Sign In',
     },
 
     // ── Sidebar ───────────────────────────────────────────────────────
@@ -648,6 +655,13 @@ const i18n = {
       usernameRequired: 'Benutzername ist erforderlich',
       emailRequired: 'E-Mail ist erforderlich',
       pwRequirements: 'Passwort erfüllt nicht die Anforderungen',
+      emailSent: 'Bestätigungsmail gesendet!',
+      emailSentDesc: 'Wir haben einen Bestätigungslink an deine E-Mail-Adresse gesendet. Bitte prüfe deinen Posteingang und klicke auf den Link um dein Konto zu aktivieren.',
+      checkSpam: 'Nicht erhalten? Prüfe deinen Spam-Ordner.',
+      resend: 'E-Mail erneut senden',
+      resent: 'E-Mail erneut gesendet!',
+      emailNotConfirmed: 'Deine E-Mail-Adresse wurde noch nicht bestätigt. Bitte prüfe deinen Posteingang.',
+      backToLogin: 'Zurück zur Anmeldung',
     },
 
     // ── Sidebar ───────────────────────────────────────────────────────

@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useLang } from '../context/LanguageContext'
 import { useNavigate } from 'react-router-dom'
-import { LogIn, UserPlus, Eye, EyeOff, Check, X, Play, Mail, User, Lock, ArrowRight, Sun, Moon } from 'lucide-react'
+import { LogIn, UserPlus, Eye, EyeOff, Check, X, Play, Mail, User, Lock, ArrowRight, Sun, Moon, MailCheck, RefreshCw } from 'lucide-react'
 
 const gold = '#d4af37'
 
@@ -88,7 +88,7 @@ function PasswordStrength({ password, labels }) {
 
 // ── Main ─────────────────────────────────────────────────────────────────
 export default function Login() {
-  const { signIn, signUp } = useAuth()
+  const { signIn, signUp, resendConfirmation } = useAuth()
   const { theme: th, mode, toggle: toggleTheme } = useTheme()
   const { lang, toggle: toggleLang, t: translations } = useLang()
   const tl = translations.login
@@ -102,11 +102,28 @@ export default function Login() {
   const [regEmail, setRegEmail] = useState('')
   const [regPass, setRegPass] = useState('')
   const [regPass2, setRegPass2] = useState('')
+  const [emailSent, setEmailSent] = useState(false)
+  const [sentEmail, setSentEmail] = useState('')
+  const [resending, setResending] = useState(false)
+  const [resent, setResent] = useState(false)
 
   const switchTab = (tb) => { setTab(tb); setError(''); document.title = `Pulseframelabs - ${tb === 'login' ? tl.signIn : tl.register}` }
   if (typeof document !== 'undefined') document.title = `Pulseframelabs - ${tab === 'login' ? tl.signIn : tl.register}`
 
-  const handleLogin = async (e) => { e.preventDefault(); setError(''); const r = await signIn(loginEmail, loginPass); if (r?.error) setError(r.error.message); else navigate('/') }
+  const handleLogin = async (e) => {
+    e.preventDefault(); setError('')
+    const r = await signIn(loginEmail, loginPass)
+    if (r?.error) {
+      if (r.error.message === 'EMAIL_NOT_CONFIRMED') {
+        setError(tl.emailNotConfirmed)
+        setSentEmail(loginEmail)
+      } else {
+        setError(r.error.message)
+      }
+    } else {
+      navigate('/')
+    }
+  }
   const handleRegister = async (e) => {
     e.preventDefault(); setError('')
     if (!regUser.trim()) { setError(tl.usernameRequired); return }
@@ -115,7 +132,20 @@ export default function Login() {
     if (!v.length || !v.uppercase || !v.special) { setError(tl.pwRequirements); return }
     if (regPass !== regPass2) { setError(tl.pwNoMatch); return }
     const r = await signUp(regUser.trim(), regEmail.trim(), regPass)
-    if (r?.error) setError(r.error.message); else navigate('/')
+    if (r?.error) { setError(r.error.message); return }
+    if (r?.confirmEmail) {
+      setSentEmail(regEmail.trim())
+      setEmailSent(true)
+    } else {
+      navigate('/')
+    }
+  }
+  const handleResend = async () => {
+    if (!sentEmail || resending) return
+    setResending(true); setResent(false)
+    await resendConfirmation(sentEmail)
+    setResending(false); setResent(true)
+    setTimeout(() => setResent(false), 4000)
   }
 
   const pwValid = validatePassword(regPass)
@@ -219,12 +249,74 @@ export default function Login() {
             </span>
           </div>
           <h1 style={{ fontSize:26, fontWeight:800, color: isDark ? '#fff' : '#1a1714', margin:'0 0 6px', lineHeight:1.2 }}>
-            {tab === 'login' ? tl.welcomeBack : tl.getStarted}
+            {emailSent ? tl.emailSent : tab === 'login' ? tl.welcomeBack : tl.getStarted}
           </h1>
           <p style={{ fontSize:13, color:subtitleColor, margin:0, lineHeight:1.5 }}>
-            {tab === 'login' ? tl.signInSub : tl.registerSub}
+            {emailSent ? '' : tab === 'login' ? tl.signInSub : tl.registerSub}
           </p>
         </div>
+
+        {/* ── Email Confirmation Screen ─────────────────────────── */}
+        {emailSent ? (
+          <div style={{ animation:'lp-slide-up 0.5s ease-out 0.1s both' }}>
+            {/* Success icon */}
+            <div style={{ display:'flex', justifyContent:'center', marginBottom:24 }}>
+              <div style={{
+                width:72, height:72, borderRadius:'50%',
+                background:`rgba(212,175,55,0.08)`, border:`2px solid rgba(212,175,55,0.25)`,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                animation:'lp-float 3s ease-in-out infinite',
+              }}>
+                <MailCheck size={32} style={{ color:gold }} />
+              </div>
+            </div>
+
+            {/* Email info */}
+            <div style={{
+              padding:'16px 20px', borderRadius:12, marginBottom:16,
+              background: isDark ? 'rgba(212,175,55,0.06)' : 'rgba(139,109,31,0.06)',
+              border:`1px solid ${isDark ? 'rgba(212,175,55,0.15)' : 'rgba(139,109,31,0.15)'}`,
+            }}>
+              <p style={{ fontSize:13, color: isDark ? '#e8e2d4' : '#1a1714', lineHeight:1.7, margin:'0 0 8px', textAlign:'center' }}>
+                {tl.emailSentDesc}
+              </p>
+              <p style={{ fontSize:12, fontWeight:600, color:gold, textAlign:'center', margin:0, wordBreak:'break-all' }}>
+                {sentEmail}
+              </p>
+            </div>
+
+            {/* Spam hint */}
+            <p style={{ fontSize:11, color:dimColor, textAlign:'center', marginBottom:20 }}>
+              {tl.checkSpam}
+            </p>
+
+            {/* Resend button */}
+            <button onClick={handleResend} disabled={resending} style={{
+              display:'flex', alignItems:'center', justifyContent:'center', gap:8, width:'100%',
+              padding:'12px 20px', borderRadius:12, fontSize:13, fontWeight:600,
+              background:'none', cursor: resending ? 'not-allowed' : 'pointer',
+              border:`1px solid ${isDark ? 'rgba(212,175,55,0.2)' : 'rgba(139,109,31,0.2)'}`,
+              color: resent ? '#34d399' : gold, transition:'all 0.25s',
+            }}
+              onMouseEnter={e => { if (!resending) { e.currentTarget.style.borderColor = `${gold}50`; e.currentTarget.style.background = `${gold}08` }}}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = isDark ? 'rgba(212,175,55,0.2)' : 'rgba(139,109,31,0.2)'; e.currentTarget.style.background = 'none' }}>
+              <RefreshCw size={14} style={{ animation: resending ? 'spin 1s linear infinite' : 'none' }} />
+              {resent ? tl.resent : tl.resend}
+            </button>
+
+            {/* Back to login */}
+            <button onClick={() => { setEmailSent(false); setError(''); switchTab('login') }} style={{
+              display:'flex', alignItems:'center', justifyContent:'center', gap:6, width:'100%',
+              padding:'12px 20px', marginTop:10, borderRadius:12, fontSize:13, fontWeight:600,
+              background:`linear-gradient(135deg, ${gold}, #b8962e)`,
+              border:'none', color:'#000', cursor:'pointer', transition:'all 0.25s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 0 28px rgba(212,175,55,0.3)`; e.currentTarget.style.transform = 'translateY(-2px)' }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}>
+              <ArrowRight size={14} /> {tl.backToLogin}
+            </button>
+          </div>
+        ) : (<>
 
         {/* Tabs */}
         <div style={{
@@ -252,7 +344,24 @@ export default function Login() {
           <form onSubmit={handleLogin} key="login" style={{ display:'flex', flexDirection:'column', gap:14 }}>
             {renderInput(<Mail size={10} style={{ color:dimColor }} />, tl.email, 'email', loginEmail, e => setLoginEmail(e.target.value), tl.emailPlaceholder, 'email', null, 0.05)}
             {renderInput(<Lock size={10} style={{ color:dimColor }} />, tl.password, showPass ? 'text' : 'password', loginPass, e => setLoginPass(e.target.value), tl.passwordPlaceholder, 'current-password', eyeBtn, 0.1)}
-            {error && <div style={{ fontSize:12, color:'#f87171', background:'rgba(248,113,113,0.08)', border:'1px solid rgba(248,113,113,0.15)', borderRadius:10, padding:'10px 14px', display:'flex', alignItems:'center', gap:8, animation:'lp-fade-in 0.2s ease-out' }}><X size={13} /> {error}</div>}
+            {error && (
+              <div style={{ animation:'lp-fade-in 0.2s ease-out' }}>
+                <div style={{ fontSize:12, color:'#f87171', background:'rgba(248,113,113,0.08)', border:'1px solid rgba(248,113,113,0.15)', borderRadius:10, padding:'10px 14px', display:'flex', alignItems:'center', gap:8 }}>
+                  <X size={13} /> {error}
+                </div>
+                {sentEmail && error === tl.emailNotConfirmed && (
+                  <button type="button" onClick={handleResend} disabled={resending} style={{
+                    display:'flex', alignItems:'center', justifyContent:'center', gap:6, width:'100%',
+                    padding:'10px', marginTop:8, borderRadius:10, fontSize:12, fontWeight:600,
+                    background:'none', border:`1px solid ${isDark ? 'rgba(212,175,55,0.2)' : 'rgba(139,109,31,0.2)'}`,
+                    color: resent ? '#34d399' : gold, cursor: resending ? 'not-allowed' : 'pointer', transition:'all 0.2s',
+                  }}>
+                    <RefreshCw size={12} style={{ animation: resending ? 'spin 1s linear infinite' : 'none' }} />
+                    {resent ? tl.resent : tl.resend}
+                  </button>
+                )}
+              </div>
+            )}
             <div style={{ animation:'lp-fade-in 0.4s ease-out 0.15s both' }}>{submitBtn(<>{tl.signInBtn} <ArrowRight size={14} /></>)}</div>
             <p style={{ fontSize:11, color:dimColor, textAlign:'center', marginTop:4 }}>
               {tl.noAccount} <span onClick={() => switchTab('register')} style={{ color:gold, cursor:'pointer', fontWeight:600 }}>{tl.register}</span>
@@ -276,6 +385,8 @@ export default function Login() {
             </p>
           </form>
         )}
+
+        </>)}
 
         <div style={{ position:'absolute', bottom:20, left:44, right:44, textAlign:'center' }}>
           <p style={{ fontSize:9, color:dimColor }}>{tl.terms}</p>

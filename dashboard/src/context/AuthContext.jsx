@@ -8,13 +8,11 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       setLoading(false)
     })
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       setLoading(false)
@@ -25,16 +23,32 @@ export function AuthProvider({ children }) {
 
   const signIn = async (email, password) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) return { error: { message: error.message } }
+    if (error) {
+      // Map Supabase error messages
+      if (error.message === 'Email not confirmed') {
+        return { error: { message: 'EMAIL_NOT_CONFIRMED' } }
+      }
+      return { error: { message: error.message } }
+    }
     return { error: null }
   }
 
   const signUp = async (username, email, password) => {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { username } },
     })
+    if (error) return { error: { message: error.message } }
+    // If session is null, email confirmation is required
+    if (data?.user && !data?.session) {
+      return { error: null, confirmEmail: true }
+    }
+    return { error: null, confirmEmail: false }
+  }
+
+  const resendConfirmation = async (email) => {
+    const { error } = await supabase.auth.resend({ type: 'signup', email })
     if (error) return { error: { message: error.message } }
     return { error: null }
   }
@@ -45,7 +59,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, resendConfirmation }}>
       {children}
     </AuthContext.Provider>
   )
