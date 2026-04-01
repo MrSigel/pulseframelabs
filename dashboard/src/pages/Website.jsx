@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getOne, setOne } from '../lib/store'
+import { supabase } from '../lib/supabase'
 import { Globe, ChevronRight, ChevronLeft, Check, Palette, Type, Layout, Image, Link2, Eye, RotateCcw, ExternalLink, Info, Upload, Gamepad2, Zap, Crown, Star, Diamond, Flame, Trophy } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
@@ -548,11 +549,23 @@ export default function Website() {
     await setOne('website_config', config)
     setWebsite(config)
     setShowWizard(false)
+    // Save slug → user_id mapping for public access
+    if (config.title && user?.id) {
+      const slug = config.title.toLowerCase().replace(/\s+/g, '')
+      await supabase.from('public_pages').upsert(
+        { user_id: user.id, slug, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      )
+    }
   }
 
   const deleteWebsite = async () => {
     await setOne('website_config', null)
     setWebsite(null)
+    // Remove slug mapping
+    if (user?.id) {
+      await supabase.from('public_pages').delete().eq('user_id', user.id)
+    }
   }
 
   if (showWizard) {
@@ -626,10 +639,10 @@ export default function Website() {
             }}>
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: gold, flexShrink: 0, animation: 'glow-pulse 2s ease-in-out infinite' }} />
               <span style={{ fontSize: 11, color: 'var(--input-text)', fontFamily: 'monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {window.location.origin}/s/{website.title.toLowerCase().replace(/\s+/g, '')}?uid={user?.id}
+                {window.location.origin}/s/{website.title.toLowerCase().replace(/\s+/g, '')}
               </span>
               <button onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/s/${website.title.toLowerCase().replace(/\s+/g, '')}?uid=${user?.id || ''}`)
+                navigator.clipboard.writeText(`${window.location.origin}/s/${website.title.toLowerCase().replace(/\s+/g, '')}`)
               }} style={{
                 fontSize: 10, fontWeight: 600, color: gold, background: 'rgba(212,175,55,0.1)',
                 border: '1px solid rgba(212,175,55,0.25)', borderRadius: 6, padding: '4px 10px',
@@ -639,7 +652,7 @@ export default function Website() {
                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(212,175,55,0.1)'}>
                 {tw.copy}
               </button>
-              <button onClick={() => window.open(`/s/${website.title.toLowerCase().replace(/\s+/g, '')}?uid=${user?.id || ''}`, '_blank')} style={{
+              <button onClick={() => window.open(`/s/${website.title.toLowerCase().replace(/\s+/g, '')}`, '_blank')} style={{
                 fontSize: 10, fontWeight: 600, color: gold, background: 'none',
                 border: '1px solid rgba(212,175,55,0.2)', borderRadius: 6, padding: '4px 10px',
                 cursor: 'pointer', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4,

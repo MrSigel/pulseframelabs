@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { getOnePublic, getAllPublic, insert } from '../lib/store'
+import { supabase } from '../lib/supabase'
 import { Globe, ExternalLink, ShoppingBag, Gift, Coins } from 'lucide-react'
 
 // ── Particle Canvas ──────────────────────────────────────────────────────
@@ -95,7 +96,7 @@ if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
 // ── Main Page ────────────────────────────────────────────────────────────
 export default function StreamerPage() {
   const { name } = useParams()
-  const uid = new URLSearchParams(window.location.search).get('uid')
+  const [uid, setUid] = useState(null)
   const [config, setConfig] = useState(null)
   const [notFound, setNotFound] = useState(false)
   const [activeSection, setActiveSection] = useState('deals')
@@ -104,13 +105,28 @@ export default function StreamerPage() {
   const [twitchName, setTwitchName] = useState('')
   const [buySuccess, setBuySuccess] = useState(false)
 
+  // Look up slug → user_id
   useEffect(() => {
-    if (!uid) { setNotFound(true); return }
+    if (!name) { setNotFound(true); return }
+    supabase.from('public_pages').select('user_id').eq('slug', name.toLowerCase()).maybeSingle()
+      .then(({ data }) => {
+        if (data?.user_id) {
+          setUid(data.user_id)
+        } else {
+          setNotFound(true)
+          document.title = 'Not Found'
+        }
+      })
+  }, [name])
+
+  // Load website data once uid is resolved
+  useEffect(() => {
+    if (!uid) return
     getAllPublic('store_items', uid).then(items => {
       setStoreItems((items || []).filter(i => i.visible !== false))
     })
     getOnePublic('website_config', uid).then(site => {
-      if (site && site.title && site.title.toLowerCase().replace(/\s+/g, '') === (name || '').toLowerCase()) {
+      if (site) {
         setConfig(site)
         const secs = site.sections || []
         setActiveSection(secs.includes('deals') ? 'deals' : secs[0] || null)
@@ -123,7 +139,7 @@ export default function StreamerPage() {
       }
       document.body.style.margin = '0'
     })
-  }, [name, uid])
+  }, [uid])
 
   if (notFound) {
     return (
