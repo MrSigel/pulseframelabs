@@ -1,0 +1,21 @@
+{
+  "sidebarLinks": [],
+  "allLinks": [
+    {
+      "href": "https://pulseframelabs.com/login#main-content",
+      "text": "Skip to main content"
+    },
+    {
+      "href": "https://pulseframelabs.com/",
+      "text": "Pulseframelabs"
+    },
+    {
+      "href": "https://pulseframelabs.com/forgot-password",
+      "text": "Forgot password?"
+    },
+    {
+      "href": "https://pulseframelabs.com/",
+      "text": "← BACK TO HOMEPAGE"
+    }
+  ]
+}

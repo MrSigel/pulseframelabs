@@ -569,7 +569,7 @@ export default function Website() {
         <HoverBtn onClick={() => setShowWizard(true)}
           style={{ background: `linear-gradient(135deg, ${gold}, #b8962e)`, borderColor: 'rgba(212,175,55,0.4)', color: '#fff', boxShadow: '0 0 14px rgba(212,175,55,0.2)' }}
           hoverStyle={{ background: `linear-gradient(135deg, #e8c84a, ${gold})`, boxShadow: '0 0 22px rgba(212,175,55,0.35)', transform: 'translateY(-1px)' }}>
-          <Globe size={14} /> {website ? tw.editWebsite : tw.newWebsite}
+          {website ? tw.editWebsite : tw.newWebsite}
         </HoverBtn>
 
         {website && (
