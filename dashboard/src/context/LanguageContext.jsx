@@ -400,6 +400,8 @@ const i18n = {
       noCommands: 'No commands yet.',
       liveFeed: 'Live Feed', clear: 'Clear',
       connectToSee: 'Connect the bot to see live chat.',
+      connectTwitch: 'Connect with Twitch',
+      twitchConnected: 'Twitch connected successfully',
     },
 
     // ── Points Battle ─────────────────────────────────────────────────
@@ -873,6 +875,8 @@ const i18n = {
       noCommands: 'Noch keine Befehle.',
       liveFeed: 'Live-Feed', clear: 'Leeren',
       connectToSee: 'Verbinde den Bot um den Live-Chat zu sehen.',
+      connectTwitch: 'Mit Twitch verbinden',
+      twitchConnected: 'Twitch erfolgreich verbunden',
     },
 
     // ── Points Battle ─────────────────────────────────────────────────

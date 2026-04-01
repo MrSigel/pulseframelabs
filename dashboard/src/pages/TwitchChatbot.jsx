@@ -1,7 +1,10 @@
 import { useEffect, useState, useRef } from 'react'
 import { getAll, insert, update, remove, getOne, setOne } from '../lib/store'
-import { Plus, Trash2, Save, ToggleLeft, ToggleRight, Bot, ChevronRight, ChevronLeft, Check, ExternalLink, Twitch, Info } from 'lucide-react'
+import { Plus, Trash2, Save, ToggleLeft, ToggleRight, Bot, ChevronRight, ChevronLeft, Check, ExternalLink, Info, LogIn } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
+
+const TWITCH_CLIENT_ID = 'nmme6edyptxv453swqfx76nju93ruo'
+const TWITCH_REDIRECT_URI = `${window.location.origin}/auth/twitch/callback`
 
 const getFeatures = (tb) => [
   { key: 'chat_relay',    label: tb.chatRelay,           desc: tb.chatRelayDesc },
@@ -20,11 +23,16 @@ const S = {
   label: { display: 'block', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--label-color)', marginBottom: 6 },
 }
 
+// ── Twitch OAuth ────────────────────────────────────────────────────────────
+function startTwitchOAuth() {
+  const scopes = 'chat:read+chat:edit+channel:moderate'
+  const url = `https://id.twitch.tv/oauth2/authorize?client_id=${TWITCH_CLIENT_ID}&redirect_uri=${encodeURIComponent(TWITCH_REDIRECT_URI)}&response_type=token&scope=${scopes}`
+  window.location.href = url
+}
+
 // ── Setup Wizard ────────────────────────────────────────────────────────────
-function SetupWizard({ onDone, onCancel, tb, tc }) {
-  const [step, setStep]     = useState(1)
-  const [form, setForm]     = useState({ channel_name: '', bot_username: '' })
-  const [token, setToken]   = useState('')
+function SetupWizard({ onDone, onCancel, tb, tc, autoToken }) {
+  const [form, setForm] = useState({ channel_name: '', bot_username: '' })
 
   const finish = async () => {
     if (!form.channel_name) return
@@ -34,129 +42,60 @@ function SetupWizard({ onDone, onCancel, tb, tc }) {
       feature_toggles: {},
     }
     await setOne('twitch_connection', conn)
-    onDone(conn, token)
+    onDone(conn, autoToken || '')
   }
 
   return (
     <div style={{ maxWidth: 520, margin: '0 auto', animation: 'fade-up 0.2s ease-out' }}>
 
-      {/* Progress */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 28 }}>
-        {[1, 2].map((n, i) => (
-          <div key={n} style={{ display: 'flex', alignItems: 'center', flex: i < 1 ? 1 : 0 }}>
-            <div style={{
-              width: 28, height: 28, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 12, fontWeight: 700, flexShrink: 0,
-              background: step >= n ? 'linear-gradient(135deg,#d4af37,#b8962e)' : 'var(--card-border)',
-              border: `1px solid ${step >= n ? 'rgba(212,175,55,0.5)' : 'rgba(34,34,74,0.8)'}`,
-              color: step >= n ? '#fff' : '#3a3a6a',
-              boxShadow: step >= n ? '0 0 12px rgba(212,175,55,0.3)' : 'none',
-              transition: 'all 0.2s',
-            }}>
-              {step > n ? <Check size={13} /> : n}
-            </div>
-            {i < 1 && (
-              <div style={{ flex: 1, height: 1, background: step > 1 ? 'rgba(212,175,55,0.4)' : 'var(--card-border)', margin: '0 8px', transition: 'background 0.3s' }} />
-            )}
-          </div>
-        ))}
-        <div style={{ marginLeft: 12, fontSize: 11, color: '#5a5548' }}>
-          {step === 1 ? tb.setupChannel : tb.oauthSetup}
-        </div>
-      </div>
-
       <div style={{ ...S.card, padding: 28 }}>
-
-        {step === 1 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Bot size={16} style={{ color: '#d4af37' }} />
-                </div>
-                <div>
-                  <p style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0', margin: 0 }}>{tb.twitchChannel}</p>
-                  <p style={{ fontSize: 11, color: '#4a4842', margin: 0 }}>{tb.enterChannel}</p>
-                </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Bot size={16} style={{ color: '#d4af37' }} />
               </div>
-            </div>
-
-            <div>
-              <label style={S.label}>{tb.channelName}</label>
-              <input className="input" placeholder={tb.channelPlaceholder}
-                value={form.channel_name} onChange={e => setForm(p => ({ ...p, channel_name: e.target.value }))}
-                onKeyDown={e => e.key === 'Enter' && form.channel_name && setStep(2)} />
-            </div>
-
-            <div>
-              <label style={S.label}>{tb.botUsername}</label>
-              <input className="input" placeholder={tb.botPlaceholder}
-                value={form.bot_username} onChange={e => setForm(p => ({ ...p, bot_username: e.target.value }))} />
-              <p style={{ fontSize: 10, color: '#2e2e5a', marginTop: 5 }}>
-                {tb.botHint}
-              </p>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-              <button onClick={onCancel} style={{ fontSize: 12, color: '#4a4842', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                {tc.cancel}
-              </button>
-              <button onClick={() => setStep(2)} disabled={!form.channel_name} style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                background: form.channel_name ? 'linear-gradient(135deg,#d4af37,#b8962e)' : 'rgba(50,50,80,0.5)',
-                border: `1px solid ${form.channel_name ? 'rgba(212,175,55,0.4)' : 'rgba(50,50,80,0.3)'}`,
-                borderRadius: 10, padding: '9px 18px', color: form.channel_name ? '#fff' : '#3a3a6a',
-                fontSize: 13, fontWeight: 600, cursor: form.channel_name ? 'pointer' : 'not-allowed',
-                boxShadow: form.channel_name ? '0 0 14px rgba(212,175,55,0.25)' : 'none',
-                transition: 'all 0.15s',
-              }}>
-                {tb.next} <ChevronRight size={14} />
-              </button>
+              <div>
+                <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--input-text)', margin: 0 }}>{tb.twitchChannel}</p>
+                <p style={{ fontSize: 11, color: '#4a4842', margin: 0 }}>{tb.enterChannel}</p>
+              </div>
             </div>
           </div>
-        )}
 
-        {step === 2 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Bot size={16} style={{ color: '#d4af37' }} />
-                </div>
-                <div>
-                  <p style={{ fontSize: 15, fontWeight: 700, color: '#e2e8f0', margin: 0 }}>{tb.oauthToken}</p>
-                  <p style={{ fontSize: 11, color: '#4a4842', margin: 0 }}>{tb.oauthSetup}</p>
-                </div>
-              </div>
+          {autoToken && (
+            <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', borderRadius:10, background:'rgba(52,211,153,0.08)', border:'1px solid rgba(52,211,153,0.25)' }}>
+              <Check size={14} style={{ color:'#34d399' }} />
+              <span style={{ fontSize:12, fontWeight:600, color:'#34d399' }}>{tb.twitchConnected}</span>
             </div>
+          )}
 
-            {/* Info box */}
-            <div style={{ background: 'rgba(212,175,55,0.07)', border: '1px solid rgba(212,175,55,0.12)', borderRadius: 10, padding: '12px 14px', fontSize: 12, color: '#8a8478', lineHeight: 1.6 }}>
-              {tb.oauthInfo}
-            </div>
+          <div>
+            <label style={S.label}>{tb.channelName}</label>
+            <input className="input" placeholder={tb.channelPlaceholder}
+              value={form.channel_name} onChange={e => setForm(p => ({ ...p, channel_name: e.target.value }))}
+              onKeyDown={e => e.key === 'Enter' && form.channel_name && finish()} />
+          </div>
 
-            <div>
-              <label style={S.label}>{tb.oauthToken}</label>
-              <input className="input" type="password" placeholder={tb.oauthPlaceholder}
-                value={token} onChange={e => setToken(e.target.value)} />
-              <p style={{ fontSize: 10, color: '#2e2e5a', marginTop: 5 }}>
-                {tb.oauthLocal}
-              </p>
-            </div>
+          <div>
+            <label style={S.label}>{tb.botUsername}</label>
+            <input className="input" placeholder={tb.botPlaceholder}
+              value={form.bot_username} onChange={e => setForm(p => ({ ...p, bot_username: e.target.value }))} />
+            <p style={{ fontSize: 10, color: '#4a4842', marginTop: 5 }}>{tb.botHint}</p>
+          </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-              <button onClick={() => setStep(1)} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#4a4842', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                <ChevronLeft size={13} /> {tb.back}
-              </button>
-              <button onClick={finish} style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                background: 'linear-gradient(135deg,#d4af37,#b8962e)',
-                border: '1px solid rgba(212,175,55,0.4)',
-                borderRadius: 10, padding: '9px 18px', color: '#fff',
-                fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                boxShadow: '0 0 14px rgba(212,175,55,0.25)',
-                transition: 'all 0.15s',
-              }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
+            <button onClick={onCancel} style={{ fontSize: 12, color: '#4a4842', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+              {tc.cancel}
+            </button>
+            <button onClick={finish} disabled={!form.channel_name || !autoToken} style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: (form.channel_name && autoToken) ? 'linear-gradient(135deg,#d4af37,#b8962e)' : 'rgba(50,50,80,0.5)',
+              border: `1px solid ${(form.channel_name && autoToken) ? 'rgba(212,175,55,0.4)' : 'rgba(50,50,80,0.3)'}`,
+              borderRadius: 10, padding: '9px 18px', color: (form.channel_name && autoToken) ? '#fff' : '#3a3a6a',
+              fontSize: 13, fontWeight: 600, cursor: (form.channel_name && autoToken) ? 'pointer' : 'not-allowed',
+              boxShadow: (form.channel_name && autoToken) ? '0 0 14px rgba(212,175,55,0.25)' : 'none',
+              transition: 'all 0.15s',
+            }}>
                 <Check size={14} /> {tb.completeSetup}
               </button>
             </div>
@@ -185,6 +124,21 @@ export default function TwitchChatbot() {
   const [oauthToken, setOauthToken] = useState('')
   const wsRef    = useRef(null)
   const bottomRef = useRef(null)
+
+  // Check for Twitch OAuth callback token in URL hash
+  useEffect(() => {
+    const hash = window.location.hash
+    if (hash.includes('access_token')) {
+      const params = new URLSearchParams(hash.slice(1))
+      const token = params.get('access_token')
+      if (token) {
+        setOauthToken(token)
+        setShowWizard(true)
+        // Clean URL
+        window.history.replaceState(null, '', window.location.pathname)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     Promise.all([getOne('twitch_connection'), getAll('bot_commands')]).then(([conn, cmds]) => {
@@ -422,16 +376,16 @@ export default function TwitchChatbot() {
     return (
       <div>
         <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:16 }}>
-          <button onClick={() => setShowWizard(true)} style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            background: 'linear-gradient(135deg,#d4af37,#b8962e)',
-            border: '1px solid rgba(212,175,55,0.4)', borderRadius: 10,
-            padding: '8px 14px', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+          <button onClick={startTwitchOAuth} style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            background: 'linear-gradient(135deg, #9146FF, #772CE8)',
+            border: '1px solid rgba(145,70,255,0.4)', borderRadius: 10,
+            padding: '10px 18px', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
             boxShadow: '0 0 14px rgba(212,175,55,0.25)', transition: 'all 0.15s',
           }}
-            onMouseEnter={e => { e.currentTarget.style.boxShadow='0 0 22px rgba(212,175,55,0.45)'; e.currentTarget.style.transform='translateY(-1px)' }}
-            onMouseLeave={e => { e.currentTarget.style.boxShadow='0 0 14px rgba(212,175,55,0.25)'; e.currentTarget.style.transform='none' }}>
-            <Plus size={14} /> {tb.newBot}
+            onMouseEnter={e => { e.currentTarget.style.boxShadow='0 0 22px rgba(145,70,255,0.45)'; e.currentTarget.style.transform='translateY(-1px)' }}
+            onMouseLeave={e => { e.currentTarget.style.boxShadow='none'; e.currentTarget.style.transform='none' }}>
+            <LogIn size={14} /> {tb.connectTwitch}
           </button>
         </div>
         <div style={{ textAlign:'center', padding:'60px 0', color:'#4a4842', fontSize:13 }}>
@@ -445,7 +399,7 @@ export default function TwitchChatbot() {
   if (showWizard) {
     return (
       <SetupWizard
-        tb={tb} tc={tc}
+        tb={tb} tc={tc} autoToken={oauthToken}
         onCancel={() => setShowWizard(false)}
         onDone={(conn, token) => {
           setConnection(conn)
@@ -505,16 +459,29 @@ export default function TwitchChatbot() {
             <p style={{ fontSize: 13, fontWeight: 600, color: '#c8cde8' }}>#{connection.channel_name}</p>
           </div>
 
-          <div style={{ marginBottom: 12 }}>
-            <label style={S.label}>{tb.oauthToken}</label>
-            <input className="input" type="password" placeholder={tb.oauthPlaceholder} value={oauthToken} onChange={e => setOauthToken(e.target.value)} />
-            <p style={{ fontSize: 10, color: '#2e2e5a', marginTop: 4 }}>twitchapps.com/tmi</p>
-          </div>
+          {/* Twitch auth status */}
+          {oauthToken ? (
+            <div style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 14px', marginBottom:12, borderRadius:10, background:'rgba(52,211,153,0.08)', border:'1px solid rgba(52,211,153,0.25)' }}>
+              <Check size={14} style={{ color:'#34d399' }} />
+              <span style={{ fontSize:12, fontWeight:600, color:'#34d399', flex:1 }}>{tb.twitchConnected}</span>
+            </div>
+          ) : (
+            <button onClick={startTwitchOAuth} style={{
+              display:'flex', alignItems:'center', gap:8, width:'100%', justifyContent:'center',
+              padding:'11px 18px', marginBottom:12, borderRadius:10, fontSize:13, fontWeight:700,
+              background:'linear-gradient(135deg, #9146FF, #772CE8)', border:'1px solid rgba(145,70,255,0.4)',
+              color:'#fff', cursor:'pointer', transition:'all 0.2s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.boxShadow='0 0 20px rgba(145,70,255,0.4)'; e.currentTarget.style.transform='translateY(-1px)' }}
+              onMouseLeave={e => { e.currentTarget.style.boxShadow='none'; e.currentTarget.style.transform='none' }}>
+              <LogIn size={14} /> {tb.connectTwitch}
+            </button>
+          )}
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button onClick={() => connectIRC()} disabled={wsStatus === 'connected' || !oauthToken} className="btn-primary">{tb.connect}</button>
             <button onClick={disconnectIRC} disabled={wsStatus === 'disconnected'} className="btn-ghost">{tb.disconnect}</button>
-            <button onClick={async () => { await setOne('twitch_connection', null); setConnection(null); wsRef.current?.close() }} className="btn-ghost" style={{ color: '#4a4842' }}>{tc.reset}</button>
+            <button onClick={async () => { await setOne('twitch_connection', null); setConnection(null); setOauthToken(''); wsRef.current?.close() }} className="btn-ghost" style={{ color: '#4a4842' }}>{tc.reset}</button>
           </div>
         </div>
 

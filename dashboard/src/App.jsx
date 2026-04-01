@@ -57,6 +57,12 @@ function ProtectedLayout() {
 export default function App() {
   const { user, loading } = useAuth()
 
+  // Twitch OAuth callback — redirect to chatbot page with hash
+  if (window.location.pathname === '/auth/twitch/callback' && window.location.hash.includes('access_token')) {
+    window.location.replace('/twitch-chatbot' + window.location.hash)
+    return null
+  }
+
   // Public routes — no auth required
   const isOverlay = window.location.pathname.startsWith('/overlay/')
   const isStreamerPage = window.location.pathname.startsWith('/s/')
