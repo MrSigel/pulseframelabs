@@ -419,8 +419,8 @@ function WebsiteWizard({ initial, onSave, onCancel }) {
                   </div>
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#e8e2d4', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deal.title || tw.untitledDeal}</div>
-                  <div style={{ fontSize: 10, color: '#5a5548', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deal.link || tw.noLink}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--input-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deal.title || tw.untitledDeal}</div>
+                  <div style={{ fontSize: 10, color: 'var(--label-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deal.link || tw.noLink}</div>
                 </div>
                 <button onClick={() => set('deals', (config.deals || []).filter((_, j) => j !== i))}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4a4842', padding: 0, transition: 'color 0.15s', flexShrink: 0 }}
@@ -439,14 +439,14 @@ function WebsiteWizard({ initial, onSave, onCancel }) {
               <p style={{ ...S.label, marginBottom: 12 }}>{tw.addDeal}</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <div>
-                  <span style={{ fontSize: 10, color: '#4a4842', display: 'block', marginBottom: 4 }}>{tw.casinoLogo}</span>
+                  <span style={{ fontSize: 10, color: 'var(--label-color)', display: 'block', marginBottom: 4 }}>{tw.casinoLogo}</span>
                   <label style={{
                     display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px',
                     borderRadius: 8, cursor: 'pointer',
-                    background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
+                    background: 'var(--input-bg)', border: '1px solid var(--input-border)',
                   }}>
-                    <Upload size={13} style={{ color: '#5a5548' }} />
-                    <span style={{ fontSize: 11, color: '#5a5548' }} id="deal-file-label">{tw.chooseImage}</span>
+                    <Upload size={13} style={{ color: 'var(--label-color)' }} />
+                    <span style={{ fontSize: 11, color: 'var(--label-color)' }} id="deal-file-label">{tw.chooseImage}</span>
                     <input type="file" accept="image/*" style={{ display: 'none' }} id="deal-image-input"
                       onChange={e => {
                         const file = e.target.files?.[0]
