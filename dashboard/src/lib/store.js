@@ -73,16 +73,15 @@ export async function clearTable(table) {
 export async function getOne(key) {
   const userId = await getUserId()
   if (!userId) return null
-  const { data, error } = await supabase.from('user_settings')
-    .select('value').eq('user_id', userId).eq('key', key).single()
-  if (error && error.code !== 'PGRST116') console.error('getOne error:', key, error)
+  const { data } = await supabase.from('user_settings')
+    .select('value').eq('user_id', userId).eq('key', key).maybeSingle()
   return data?.value ?? null
 }
 
 export async function getOnePublic(key, userId) {
   if (!userId) return null
   const { data } = await supabase.from('user_settings')
-    .select('value').eq('user_id', userId).eq('key', key).single()
+    .select('value').eq('user_id', userId).eq('key', key).maybeSingle()
   return data?.value ?? null
 }
 
