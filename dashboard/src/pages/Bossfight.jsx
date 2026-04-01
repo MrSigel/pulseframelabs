@@ -723,6 +723,7 @@ export default function Bossfight() {
 
   const deleteSession = async () => {
     if (!selectedId) return
+    setShowTheme(false); setShowInfo(false)
     await remove('bossfights', selectedId)
     setSessions(prev => { const next = prev.filter(s => s.id !== selectedId); setSelectedId(next[0]?.id || null); return next })
   }

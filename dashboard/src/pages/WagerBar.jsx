@@ -225,7 +225,7 @@ export default function WagerBar() {
   const completeSession = async () => {
     if (!selectedId) return
     await remove('wager_sessions', selectedId)
-    setSessions(prev => { const next = prev.filter(s => s.id !== selectedId); setSelectedId(next[0]?.id || null); return next })
+    setShowTheme(false); setShowInfo(false); setSessions(prev => { const next = prev.filter(s => s.id !== selectedId); setSelectedId(next[0]?.id || null); return next })
   }
 
   const copyUrl = () => { navigator.clipboard.writeText(obsUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }

@@ -200,7 +200,7 @@ export default function SlotRequests() {
   }
 
   const clearAll = async () => {
-    await clearTable('slot_requests')
+    setShowTheme(false); setShowInfo(false); await clearTable('slot_requests')
     await saveConfig({ ...config, selected_id: null })
     setRequests([])
   }

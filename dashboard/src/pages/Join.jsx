@@ -258,6 +258,7 @@ export default function Join() {
   }
 
   const newRound = async () => {
+    setShowTheme(false); setShowInfo(false)
     // Remove old session and participants
     if (session) {
       const oldParticipants = (await getAll('join_participants')).filter(p => p.session_id === session.id)

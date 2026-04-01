@@ -198,7 +198,7 @@ export default function Hotwords() {
   }, [])
 
   const handleThemeChange = async (next) => { setTheme(next); await setOne('hotwords_theme', next) }
-  const clearHotwords     = async () => { await clearTable('hotword_entries'); setEntries([]) }
+  const clearHotwords = async () => { setShowTheme(false); setShowInfo(false); await clearTable('hotword_entries'); setEntries([]) }
   const deleteEntry       = async (id) => { await remove('hotword_entries', id); setEntries(prev => prev.filter(e => e.id !== id)) }
   const copyUrl           = () => { navigator.clipboard.writeText(obsUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 

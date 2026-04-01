@@ -227,7 +227,7 @@ export default function Bonushunts() {
     if (!selectedId) return
     await removeWhere('bonushunt_entries', 'bonushunt_id', selectedId)
     await remove('bonushunts', selectedId)
-    setHunts(prev => { const next = prev.filter(h => h.id !== selectedId); setSelectedId(next[0]?.id || null); return next })
+    setShowTheme(false); setShowInfo(false); setHunts(prev => { const next = prev.filter(h => h.id !== selectedId); setSelectedId(next[0]?.id || null); return next })
   }
 
   const copyUrl = () => { navigator.clipboard.writeText(obsUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }

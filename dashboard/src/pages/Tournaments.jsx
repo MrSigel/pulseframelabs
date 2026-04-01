@@ -337,6 +337,7 @@ export default function Tournaments() {
 
   const completeTournament = async () => {
     if (!selectedId) return
+    setShowTheme(false); setShowInfo(false)
     await remove('tournaments', selectedId)
     setTournaments(prev => { const next = prev.filter(t => t.id !== selectedId); setSelectedId(next[0]?.id || null); return next })
   }
