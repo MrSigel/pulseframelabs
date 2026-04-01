@@ -144,6 +144,7 @@ function ThemePanel({ theme, onChange, tc, tch }) {
             <Slider label={tch.maxMessages} value={theme.maxMessages} min={4} max={20} onChange={v => set('maxMessages', v)} />
             <Toggle value={theme.showBorder} onChange={v => set('showBorder', v)} label={tc.showBorder} />
             <Toggle value={theme.glow}       onChange={v => set('glow', v)}       label={tc.glowEffect} />
+            <Slider label={tc.overlayScale} value={Math.round((theme.overlayScale || 1) * 100)} min={50} max={200} format={v => v + '%'} onChange={v => set('overlayScale', v / 100)} />
           </div>
         </div>
 

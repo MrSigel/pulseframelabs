@@ -158,6 +158,7 @@ function ThemePanel({ theme, onChange, tc, tb }) {
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             <Toggle value={theme.showBorder}  onChange={v => set('showBorder', v)}  label={tc.showBorder} />
             <Toggle value={theme.glow}        onChange={v => set('glow', v)}        label={tc.glowEffect} />
+            <Slider label={tc.overlayScale} value={Math.round((theme.overlayScale || 1) * 100)} min={50} max={200} format={v => v + '%'} onChange={v => set('overlayScale', v / 100)} />
             <Toggle value={theme.showHeader}  onChange={v => set('showHeader', v)}  label={tb.showTitle} />
             <Toggle value={theme.showProfit}  onChange={v => set('showProfit', v)}  label={tb.showProfit} />
             <Toggle value={theme.showTotalWin} onChange={v => set('showTotalWin', v)} label={tb.showTotalWin} />

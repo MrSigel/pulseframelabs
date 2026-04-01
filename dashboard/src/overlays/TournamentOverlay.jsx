@@ -19,6 +19,7 @@ export const DEFAULT_THEME = {
   fontSize:      1,
   fontFamily:    'monospace',
   glow:          true,
+  overlayScale:   1,
   showPrizePool: true,
   showSlots:     true,
   showStatus:    true,
@@ -405,6 +406,7 @@ export default function TournamentOverlay({ tournamentId, editable = false, show
   const slots      = tournament.max_participants || 8
   const ac         = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
+  const overlayScale = t.overlayScale || 1
 
   const containerStyle = {
     fontFamily:     t.fontFamily,
@@ -414,7 +416,7 @@ export default function TournamentOverlay({ tournamentId, editable = false, show
     backdropFilter: `blur(${t.blur}px)`,
     padding:        t.padding,
     fontSize:       `${t.fontSize}em`,
-    boxShadow:      glowShadow,
+    boxShadow:      glowShadow, transform: overlayScale !== 1 ? `scale(${overlayScale})` : 'none', transformOrigin: 'top left',
     transition:     'all 0.3s',
   }
 

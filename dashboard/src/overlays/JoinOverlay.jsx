@@ -8,6 +8,7 @@ export const DEFAULT_THEME = {
   textSecondary: '#a0a0d0', textMuted: '#44447a',
   borderRadius: 12, borderWidth: 1, showBorder: true,
   padding: 20, fontSize: 1, fontFamily: 'monospace', glow: true,
+  overlayScale:   1,
 }
 
 const Placeholder = ({ text }) => (
@@ -66,6 +67,7 @@ export default function JoinOverlay({ theme: themeProp }) {
 
   const ac         = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
+  const overlayScale = t.overlayScale || 1
 
   const containerStyle = {
     fontFamily:     t.fontFamily,
@@ -75,7 +77,7 @@ export default function JoinOverlay({ theme: themeProp }) {
     backdropFilter: `blur(${t.blur}px)`,
     padding:        t.padding,
     fontSize:       `${t.fontSize}em`,
-    boxShadow:      glowShadow,
+    boxShadow:      glowShadow, transform: overlayScale !== 1 ? `scale(${overlayScale})` : 'none', transformOrigin: 'top left',
     transition:     'all 0.3s',
     minWidth:       320,
   }

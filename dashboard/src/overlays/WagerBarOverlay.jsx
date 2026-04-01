@@ -18,6 +18,7 @@ export const DEFAULT_THEME = {
   fontSize:      1,
   fontFamily:    'monospace',
   glow:          true,
+  overlayScale:   1,
   barHeight:     14,
 }
 
@@ -138,6 +139,8 @@ export default function WagerBarOverlay({ sessionId, editable = false, theme: th
 
   const fmtNum = (n) => Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 0 })
 
+  const overlayScale = t.overlayScale || 1
+
   return (
     <div style={{
       fontFamily:     t.fontFamily,
@@ -148,6 +151,8 @@ export default function WagerBarOverlay({ sessionId, editable = false, theme: th
       padding:        t.padding,
       fontSize:       `${t.fontSize}em`,
       boxShadow:      glowShadow,
+      transform:      overlayScale !== 1 ? `scale(${overlayScale})` : 'none',
+      transformOrigin: 'top left',
       transition:     'all 0.3s',
       minWidth:       340,
     }}>

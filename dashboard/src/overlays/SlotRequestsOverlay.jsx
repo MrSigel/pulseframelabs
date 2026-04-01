@@ -18,6 +18,7 @@ export const DEFAULT_THEME = {
   fontSize:      1,
   fontFamily:    'monospace',
   glow:          true,
+  overlayScale:   1,
   maxEntries:    8,
 }
 
@@ -56,6 +57,7 @@ export default function SlotRequestsOverlay({ theme: themeProp }) {
 
   const ac         = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
+  const overlayScale = t.overlayScale || 1
   const rad        = Math.max(4, t.borderRadius - 4)
   const selectedId = config.selected_id
   const isOpen     = config.open !== false
@@ -72,7 +74,7 @@ export default function SlotRequestsOverlay({ theme: themeProp }) {
       backdropFilter: `blur(${t.blur}px)`,
       padding:        t.padding,
       fontSize:       `${t.fontSize}em`,
-      boxShadow:      glowShadow,
+      boxShadow:      glowShadow, transform: overlayScale !== 1 ? `scale(${overlayScale})` : 'none', transformOrigin: 'top left',
       transition:     'all 0.3s',
       minWidth:       300,
     }}>

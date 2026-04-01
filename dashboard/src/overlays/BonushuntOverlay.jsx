@@ -21,6 +21,7 @@ export const DEFAULT_THEME = {
   fontSize:      1,
   fontFamily:    'monospace',
   glow:          true,
+  overlayScale:   1,
   showHeader:    true,
   showProfit:    true,
   showTotalWin:  true,
@@ -286,6 +287,7 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
 
   const rad   = Math.max(4, t.borderRadius - 4)
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
+  const overlayScale = t.overlayScale || 1
 
   // Helper: determine entry border color
   const entryBorderColor = (e) => {
@@ -304,7 +306,7 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
       padding: t.padding,
       minWidth: 380,
       fontSize: `${t.fontSize}em`,
-      boxShadow: glowShadow,
+      boxShadow: glowShadow, transform: overlayScale !== 1 ? `scale(${overlayScale})` : 'none', transformOrigin: 'top left',
       transition: 'all 0.3s',
     }}>
       {/* Stats */}

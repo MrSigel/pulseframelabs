@@ -18,6 +18,7 @@ export const DEFAULT_THEME = {
   fontSize:      1,
   fontFamily:    'monospace',
   glow:          true,
+  overlayScale:   1,
   maxEntries:    5,
 }
 
@@ -76,6 +77,7 @@ export default function PersonalBestsOverlay({ theme: themeProp }) {
 
   const ac         = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
+  const overlayScale = t.overlayScale || 1
   const top        = bests.slice(0, t.maxEntries || 5)
 
   if (!top.length) {
@@ -84,7 +86,7 @@ export default function PersonalBestsOverlay({ theme: themeProp }) {
         fontFamily: t.fontFamily, background: `rgba(${t.bgColor},${t.bgOpacity})`,
         border: t.showBorder ? `${t.borderWidth}px solid ${ac}0.25)` : 'none',
         borderRadius: t.borderRadius, backdropFilter: `blur(${t.blur}px)`,
-        padding: t.padding, fontSize: `${t.fontSize}em`, boxShadow: glowShadow,
+        padding: t.padding, fontSize: `${t.fontSize}em`, boxShadow: glowShadow, transform: overlayScale !== 1 ? `scale(${overlayScale})` : 'none', transformOrigin: 'top left',
         color: t.textMuted, textAlign: 'center', minWidth: 320,
       }}>
         <span style={{ fontSize: '0.75em' }}>No wins yet</span>
@@ -101,7 +103,7 @@ export default function PersonalBestsOverlay({ theme: themeProp }) {
       backdropFilter: `blur(${t.blur}px)`,
       padding:        t.padding,
       fontSize:       `${t.fontSize}em`,
-      boxShadow:      glowShadow,
+      boxShadow:      glowShadow, transform: overlayScale !== 1 ? `scale(${overlayScale})` : 'none', transformOrigin: 'top left',
       transition:     'all 0.3s',
       minWidth:       340,
     }}>
