@@ -3,6 +3,7 @@ import { getOne, setOne } from '../lib/store'
 import { Globe, ChevronRight, ChevronLeft, Check, Palette, Type, Layout, Image, Link2, Eye, RotateCcw, ExternalLink, Info, Upload, Gamepad2, Zap, Crown, Star, Diamond, Flame, Trophy } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
+import { useAuth } from '../context/AuthContext'
 
 const gold = '#d4af37'
 
@@ -532,6 +533,7 @@ function WebsiteWizard({ initial, onSave, onCancel }) {
 // ── Main Page ────────────────────────────────────────────────────────────
 export default function Website() {
   const { t } = useLang()
+  const { user } = useAuth()
   const tc = t.common
   const tw = t.website
   const [website, setWebsite] = useState(null)
@@ -623,11 +625,11 @@ export default function Website() {
               borderRadius: 10, marginBottom: 12,
             }}>
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: gold, flexShrink: 0, animation: 'glow-pulse 2s ease-in-out infinite' }} />
-              <span style={{ fontSize: 11, color: '#8a8478', fontFamily: 'monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {window.location.origin}/s/{website.title.toLowerCase().replace(/\s+/g, '')}
+              <span style={{ fontSize: 11, color: 'var(--input-text)', fontFamily: 'monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {window.location.origin}/s/{website.title.toLowerCase().replace(/\s+/g, '')}?uid={user?.id}
               </span>
               <button onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/s/${website.title.toLowerCase().replace(/\s+/g, '')}`)
+                navigator.clipboard.writeText(`${window.location.origin}/s/${website.title.toLowerCase().replace(/\s+/g, '')}?uid=${user?.id || ''}`)
               }} style={{
                 fontSize: 10, fontWeight: 600, color: gold, background: 'rgba(212,175,55,0.1)',
                 border: '1px solid rgba(212,175,55,0.25)', borderRadius: 6, padding: '4px 10px',
@@ -637,7 +639,7 @@ export default function Website() {
                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(212,175,55,0.1)'}>
                 {tw.copy}
               </button>
-              <button onClick={() => window.open(`/s/${website.title.toLowerCase().replace(/\s+/g, '')}`, '_blank')} style={{
+              <button onClick={() => window.open(`/s/${website.title.toLowerCase().replace(/\s+/g, '')}?uid=${user?.id || ''}`, '_blank')} style={{
                 fontSize: 10, fontWeight: 600, color: gold, background: 'none',
                 border: '1px solid rgba(212,175,55,0.2)', borderRadius: 6, padding: '4px 10px',
                 cursor: 'pointer', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4,
