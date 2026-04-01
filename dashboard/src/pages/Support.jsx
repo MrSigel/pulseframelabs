@@ -6,7 +6,7 @@ import { supabase } from '../lib/supabase'
 import { Send, MessageCircle, Check, AlertTriangle } from 'lucide-react'
 
 const gold = '#d4af37'
-const TELEGRAM_URL = 'https://t.me/pulseframelabs'
+const TELEGRAM_URL = 'https://t.me/Pulseframelabsbot'
 
 const S = {
   card: { background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: 14 },
