@@ -184,6 +184,24 @@ function GlassCard({ children, style = {}, hover = true }) {
   )
 }
 
+// ── Count-Up Number ─────────────────────────────────────────────────────
+function CountUp({ end, suffix = '', duration = 2000 }) {
+  const [ref, visible] = useReveal()
+  const [val, setVal] = useState(0)
+  useEffect(() => {
+    if (!visible) return
+    const num = parseInt(end) || 0
+    let start = 0, step = Math.max(1, num / (duration / 16))
+    const timer = setInterval(() => {
+      start += step
+      if (start >= num) { setVal(num); clearInterval(timer) }
+      else setVal(Math.floor(start))
+    }, 16)
+    return () => clearInterval(timer)
+  }, [visible, end, duration])
+  return <span ref={ref}>{val}{suffix}</span>
+}
+
 // ── Magnetic Button ──────────────────────────────────────────────────────
 function MagBtn({ children, primary, onClick, style = {} }) {
   const ref = useRef(null)
@@ -257,11 +275,22 @@ function FaqItem({ question, answer, th, gold }) {
 export default function LandingPage() {
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
+  const [activeOverlay, setActiveOverlay] = useState(0)
   const { mode, toggle: toggleTheme } = useTheme()
   const { lang, toggle: toggleLang, t: translations } = useLang()
   const t = translations.landing
 
   const th = themes[mode]
+
+  // Auto-rotate overlay carousel
+  useEffect(() => {
+    const items = t.overlayShowcase?.items
+    if (!items) return
+    const timer = setInterval(() => {
+      setActiveOverlay(prev => (prev + 1) % items.length)
+    }, 4000)
+    return () => clearInterval(timer)
+  }, [t.overlayShowcase])
 
   useEffect(() => {
     document.title = 'Pulseframelabs — Stream Like a High Roller'
@@ -379,6 +408,25 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ═══ TRUST BAR ═══════════════════════════════════════════════ */}
+      <section style={{ position: 'relative', zIndex: 1, padding: '20px 24px', textAlign: 'center' }}>
+        <R>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '6px 0' }}>
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: th.textMuted, marginRight: 12 }}>
+              {t.trustBar.label}:
+            </span>
+            {t.trustBar.items.map((item, i) => (
+              <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 0 }}>
+                <span style={{ fontSize: '0.75rem', color: th.textSub, letterSpacing: '0.02em' }}>{item}</span>
+                {i < t.trustBar.items.length - 1 && (
+                  <span style={{ display: 'inline-block', width: 5, height: 5, background: gold, transform: 'rotate(45deg)', opacity: 0.35, margin: '0 12px', flexShrink: 0 }} />
+                )}
+              </span>
+            ))}
+          </div>
+        </R>
+      </section>
+
       {/* ═══ MARQUEE ════════════════════════════════════════════════════ */}
       <section style={{ position: 'relative', zIndex: 1, borderTop: '1px solid rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.04)', padding: 'clamp(18px, 3vw, 32px) 0', overflow: 'hidden', WebkitMaskImage: 'linear-gradient(90deg, transparent, black 6%, black 94%, transparent)' }}>
         {[false, true].map((reverse, ri) => (
@@ -393,16 +441,22 @@ export default function LandingPage() {
         ))}
       </section>
 
-      {/* ═══ STATS ══════════════════════════════════════════════════════ */}
+      {/* ═══ STATS (Animated Count-Up) ═══════════════════════════════ */}
       <section style={{ position: 'relative', zIndex: 1, padding: 'clamp(60px, 10vw, 100px) 24px' }}>
         <R>
           <div style={{ maxWidth: 800, margin: '0 auto', display: 'flex', justifyContent: 'center', gap: 'clamp(40px, 6vw, 80px)', flexWrap: 'wrap' }}>
-            {t.stats.map((s, i) => (
-              <R key={s.label} delay={i * 0.08} style={{ textAlign: 'center', flex: '1 1 140px' }}>
-                <div style={{ fontFamily: ff, fontSize: 'clamp(2.2rem, 4vw, 3rem)', fontWeight: 700, color: gold, lineHeight: 1, marginBottom: 8 }}>{s.value}</div>
-                <div style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: th.textMuted }}>{s.label}</div>
-              </R>
-            ))}
+            {t.stats.map((s, i) => {
+              const num = parseInt(s.value) || 0
+              const suffix = s.value.replace(/[0-9]/g, '')
+              return (
+                <R key={s.label} delay={i * 0.08} style={{ textAlign: 'center', flex: '1 1 140px' }}>
+                  <div style={{ fontFamily: ff, fontSize: 'clamp(2.2rem, 4vw, 3rem)', fontWeight: 700, color: gold, lineHeight: 1, marginBottom: 8 }}>
+                    <CountUp end={num} suffix={suffix} />
+                  </div>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.12em', color: th.textMuted }}>{s.label}</div>
+                </R>
+              )
+            })}
           </div>
         </R>
       </section>
@@ -438,6 +492,81 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ═══ OVERLAY SHOWCASE CAROUSEL ═══════════════════════════════ */}
+      <section style={{ position: 'relative', zIndex: 1, padding: 'clamp(80px, 12vw, 140px) 24px' }}>
+        <R style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 64px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 14 }}>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, transparent, ${gold}30)` }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: gold }}>{t.overlayShowcase.label}</span>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, ${gold}30, transparent)` }} />
+          </div>
+          <h2 style={{ fontFamily: ff, fontSize: 'clamp(1.8rem, 3.5vw, 2.4rem)', fontWeight: 700, margin: '0 0 12px', letterSpacing: '-0.02em' }}>
+            {t.overlayShowcase.title}
+          </h2>
+          <p style={{ fontSize: '0.9rem', color: th.textSub, maxWidth: 460, margin: '0 auto' }}>{t.overlayShowcase.sub}</p>
+        </R>
+
+        <R>
+          <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+            {/* Left: Overlay tabs */}
+            <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {t.overlayShowcase.items.map((item, i) => {
+                const Icon = FEATURE_ICONS[i] || Sparkles
+                const isActive = activeOverlay === i
+                return (
+                  <button key={i} onClick={() => setActiveOverlay(i)} style={{
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
+                    borderRadius: 8, border: `1px solid ${isActive ? 'rgba(212,175,55,0.25)' : th.border}`,
+                    background: isActive ? 'rgba(212,175,55,0.06)' : 'transparent',
+                    cursor: 'pointer', textAlign: 'left', transition: 'all 0.3s',
+                  }}>
+                    <Icon size={16} style={{ color: isActive ? gold : th.textMuted, flexShrink: 0, transition: 'color 0.3s' }} />
+                    <span style={{ fontSize: '0.82rem', fontWeight: isActive ? 700 : 500, color: isActive ? gold : th.textSub, transition: 'color 0.3s' }}>
+                      {item.name}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Right: Preview card */}
+            <div style={{ flex: '1 1 340px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <GlassCard style={{
+                width: '100%', minHeight: 280, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center',
+                borderLeft: `3px solid ${gold}`,
+                background: `linear-gradient(135deg, rgba(212,175,55,0.04), rgba(212,175,55,0.01))`,
+              }}>
+                {(() => {
+                  const Icon = FEATURE_ICONS[activeOverlay] || Sparkles
+                  const item = t.overlayShowcase.items[activeOverlay]
+                  return (
+                    <>
+                      <div style={{
+                        width: 64, height: 64, borderRadius: 16, marginBottom: 20,
+                        background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <Icon size={28} style={{ color: gold }} />
+                      </div>
+                      <h3 style={{ fontFamily: ff, fontSize: '1.2rem', fontWeight: 700, margin: '0 0 10px', color: gold, textAlign: 'center' }}>
+                        {item.name}
+                      </h3>
+                      <p style={{ fontSize: '0.88rem', color: th.textSub, lineHeight: 1.75, margin: 0, textAlign: 'center', maxWidth: 320 }}>
+                        {item.desc}
+                      </p>
+                      {/* Decorative preview bar */}
+                      <div style={{ marginTop: 24, width: '80%', height: 4, borderRadius: 2, background: th.border, overflow: 'hidden' }}>
+                        <div style={{ width: `${((activeOverlay + 1) / t.overlayShowcase.items.length) * 100}%`, height: '100%', borderRadius: 2, background: `linear-gradient(90deg, ${gold}, ${gold}aa)`, transition: 'width 0.4s ease' }} />
+                      </div>
+                    </>
+                  )
+                })()}
+              </GlassCard>
+            </div>
+          </div>
+        </R>
+      </section>
+
       {/* ═══ WHY PULSEFRAMELABS ═══════════════════════════════════════ */}
       <section style={{ position: 'relative', zIndex: 1, padding: 'clamp(60px, 10vw, 100px) 24px' }}>
         <R style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 56px)' }}>
@@ -464,6 +593,70 @@ export default function LandingPage() {
             </R>
             )
           })}
+        </div>
+      </section>
+
+      {/* ═══ BEFORE VS AFTER ════════════════════════════════════════ */}
+      <section style={{ position: 'relative', zIndex: 1, padding: 'clamp(80px, 12vw, 140px) 24px' }}>
+        <R style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 64px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 14 }}>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, transparent, ${gold}30)` }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: gold }}>{t.beforeAfter.label}</span>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, ${gold}30, transparent)` }} />
+          </div>
+          <h2 style={{ fontFamily: ff, fontSize: 'clamp(1.8rem, 3.5vw, 2.4rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+            {t.beforeAfter.title}
+          </h2>
+        </R>
+
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))', gap: 24 }}>
+          {/* Before column */}
+          <R delay={0}>
+            <GlassCard style={{ borderLeft: '3px solid #ef4444', background: 'rgba(239,68,68,0.03)' }} hover={false}>
+              <h3 style={{ fontFamily: ff, fontSize: '1.1rem', fontWeight: 700, margin: '0 0 20px', color: '#ef4444', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <XIcon size={18} style={{ color: '#ef4444' }} />
+                {t.beforeAfter.before}
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {t.beforeAfter.beforeItems.map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{
+                      width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+                      background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <XIcon size={10} style={{ color: '#ef4444' }} />
+                    </div>
+                    <span style={{ fontSize: '0.85rem', color: th.textSub, lineHeight: 1.5 }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+          </R>
+
+          {/* After column */}
+          <R delay={0.1}>
+            <GlassCard style={{ borderLeft: `3px solid ${gold}`, background: 'rgba(212,175,55,0.03)' }} hover={false}>
+              <h3 style={{ fontFamily: ff, fontSize: '1.1rem', fontWeight: 700, margin: '0 0 20px', color: gold, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Check size={18} style={{ color: gold }} />
+                {t.beforeAfter.after}
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {t.beforeAfter.afterItems.map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{
+                      width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+                      background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Check size={10} style={{ color: gold }} />
+                    </div>
+                    <span style={{ fontSize: '0.85rem', color: th.textSub, lineHeight: 1.5 }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </GlassCard>
+          </R>
         </div>
       </section>
 
@@ -811,6 +1004,60 @@ export default function LandingPage() {
               <FaqItem question={item.q} answer={item.a} th={th} gold={gold} />
             </R>
           ))}
+        </div>
+      </section>
+
+      {/* ═══ ROADMAP ══════════════════════════════════════════════════ */}
+      <section style={{ position: 'relative', zIndex: 1, padding: 'clamp(80px, 12vw, 140px) 24px' }}>
+        <R style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 64px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 14 }}>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, transparent, ${gold}30)` }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: gold }}>{t.roadmap.label}</span>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, ${gold}30, transparent)` }} />
+          </div>
+          <h2 style={{ fontFamily: ff, fontSize: 'clamp(1.8rem, 3.5vw, 2.4rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+            {t.roadmap.title}
+          </h2>
+        </R>
+
+        <div style={{ maxWidth: 600, margin: '0 auto', position: 'relative', paddingLeft: 32 }}>
+          {/* Vertical gold line */}
+          <div style={{ position: 'absolute', left: 10, top: 0, bottom: 0, width: 2, background: `linear-gradient(180deg, ${gold}40, ${gold}15)` }} />
+
+          {t.roadmap.items.map((item, i) => {
+            const isDone = item.status === 'done'
+            const isProgress = item.status === 'progress'
+            const dotColor = isDone ? '#34d399' : isProgress ? gold : th.textMuted
+            const statusLabel = isDone ? t.roadmap.done : isProgress ? t.roadmap.progress : t.roadmap.planned
+            const statusBg = isDone ? 'rgba(52,211,153,0.1)' : isProgress ? 'rgba(212,175,55,0.1)' : (mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)')
+            const statusBorder = isDone ? 'rgba(52,211,153,0.25)' : isProgress ? 'rgba(212,175,55,0.25)' : th.border
+            return (
+              <R key={i} delay={i * 0.05}>
+                <div style={{ position: 'relative', marginBottom: 28, opacity: item.status === 'planned' ? 0.6 : isDone ? 0.75 : 1 }}>
+                  {/* Status dot */}
+                  <div style={{
+                    position: 'absolute', left: -27, top: 4, width: 12, height: 12, borderRadius: '50%',
+                    background: dotColor, border: `2px solid ${mode === 'dark' ? th.bg : th.bg}`,
+                    boxShadow: isProgress ? `0 0 8px ${gold}60` : 'none',
+                    animation: isProgress ? 'lpf-pulse-dot 2s ease-in-out infinite' : 'none',
+                  }} />
+
+                  {/* Content */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
+                    <h4 style={{ fontFamily: ff, fontSize: '0.95rem', fontWeight: 700, margin: 0, color: th.text }}>{item.title}</h4>
+                    <span style={{
+                      fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em',
+                      padding: '2px 8px', borderRadius: 10, color: dotColor,
+                      background: statusBg, border: `1px solid ${statusBorder}`,
+                    }}>
+                      {statusLabel}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.82rem', color: th.textMuted, margin: 0, lineHeight: 1.6 }}>{item.desc}</p>
+                </div>
+              </R>
+            )
+          })}
         </div>
       </section>
 

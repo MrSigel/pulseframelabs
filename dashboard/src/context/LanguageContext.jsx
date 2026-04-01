@@ -156,6 +156,57 @@ const i18n = {
       },
       footer: 'All rights reserved.',
 
+      // Trust Bar
+      trustBar: {
+        label: 'Compatible With',
+        items: ['OBS Studio', 'Streamlabs', 'Twitch', 'Kick', 'YouTube'],
+      },
+
+      // Overlay Showcase
+      overlayShowcase: {
+        label: 'Overlays', title: 'See Your Stream Transform',
+        sub: 'Professional overlays that update in real-time. Click to preview each one.',
+        items: [
+          { name: 'Wager Bar', desc: 'Dynamic progress bar with color shifts and live multiplier tracking.' },
+          { name: 'Bonus Hunt', desc: 'Full tracker with buy-in amounts, multipliers, and Required X calculation.' },
+          { name: 'Tournament Bracket', desc: 'Animated bracket tree for up to 32 players with winner advancement.' },
+          { name: 'Boss Fight', desc: 'Gauntlet-style boss vs challengers with life system and duel history.' },
+          { name: 'Slot Requests', desc: 'Viewer-requested games queue with animated raffle selection.' },
+          { name: 'Live Chat', desc: 'Styled chat overlay with role badges for mods, subs, and viewers.' },
+          { name: 'Predictions', desc: 'Number guessing and A vs B voting with live result overlays.' },
+          { name: 'Hot Words', desc: 'Real-time word frequency cloud from your Twitch chat.' },
+          { name: 'Join Raffle', desc: 'Animated winner reveal when drawing from the participant pool.' },
+          { name: 'Personal Bests', desc: 'Auto-calculated leaderboard of your highest wins per game.' },
+        ],
+      },
+
+      // Before vs After
+      beforeAfter: {
+        label: 'The Difference', title: 'Before vs. After',
+        before: 'Without Pulseframelabs',
+        after: 'With Pulseframelabs',
+        beforeItems: ['5+ different tools for overlays', 'Manual copy-paste between apps', 'Basic or no chat bot', 'No viewer interaction', 'Generic streaming setup', 'Hours of configuration'],
+        afterItems: ['All-in-one dashboard', 'Everything synced automatically', 'Built-in Twitch Bot', 'Tournaments, bets, raffles', 'Professional casino branding', 'Ready in 5 minutes'],
+      },
+
+      // Roadmap
+      roadmap: {
+        label: 'Roadmap', title: "What's Coming Next",
+        items: [
+          { status: 'done', title: 'Core Dashboard & 14+ Overlays', desc: 'Full overlay system with real-time sync' },
+          { status: 'done', title: 'Twitch Bot Integration', desc: 'Chat commands, hot words, predictions' },
+          { status: 'done', title: 'Website Builder & Store', desc: 'Public streamer pages with casino deals' },
+          { status: 'done', title: 'Crypto Payments (CryptAPI)', desc: 'BTC, ETH, LTC, USDT support' },
+          { status: 'progress', title: 'Analytics Dashboard', desc: 'Stream stats, viewer engagement, win tracking' },
+          { status: 'progress', title: 'Multi-Language Overlays', desc: 'Overlays in DE/EN based on streamer setting' },
+          { status: 'planned', title: 'Mobile Dashboard', desc: 'Manage your stream from your phone' },
+          { status: 'planned', title: 'Affiliate System', desc: 'Earn credits by referring streamers' },
+          { status: 'planned', title: 'Kick Integration', desc: 'Full Kick chat bot and overlay support' },
+          { status: 'planned', title: 'Stream Recap & Export', desc: 'Auto-generated session summaries for social media' },
+        ],
+        done: 'Completed', progress: 'In Progress', planned: 'Planned',
+      },
+
       // Testimonials
       testimonials: {
         label: 'Trusted by Streamers', title: 'What Streamers Say',
@@ -783,6 +834,53 @@ const i18n = {
         cta: 'Jetzt kostenlos registrieren',
       },
       footer: 'Alle Rechte vorbehalten.',
+
+      trustBar: {
+        label: 'Kompatibel mit',
+        items: ['OBS Studio', 'Streamlabs', 'Twitch', 'Kick', 'YouTube'],
+      },
+
+      overlayShowcase: {
+        label: 'Overlays', title: 'Sieh wie sich dein Stream verwandelt',
+        sub: 'Professionelle Overlays die sich in Echtzeit aktualisieren. Klicke zum Vorschauen.',
+        items: [
+          { name: 'Wager Bar', desc: 'Dynamischer Fortschrittsbalken mit Farbwechsel und Live-Multiplikator.' },
+          { name: 'Bonus Hunt', desc: 'Kompletter Tracker mit Buy-in, Multiplikatoren und Required X.' },
+          { name: 'Turnier-Bracket', desc: 'Animierter Bracket-Baum für bis zu 32 Spieler mit Gewinner-Aufstieg.' },
+          { name: 'Boss Fight', desc: 'Gauntlet-Modus mit Boss vs. Herausforderer, Lebensystem und Duell-Verlauf.' },
+          { name: 'Slot-Anfragen', desc: 'Zuschauer-Spielwünsche mit animierter Verlosungs-Auswahl.' },
+          { name: 'Live-Chat', desc: 'Gestyltes Chat-Overlay mit Rollen-Badges für Mods, Subs und Viewer.' },
+          { name: 'Vorhersagen', desc: 'Zahlenraten und A vs B Abstimmung mit Live-Ergebnis-Overlays.' },
+          { name: 'Hot Words', desc: 'Echtzeit-Worthäufigkeits-Cloud aus deinem Twitch-Chat.' },
+          { name: 'Verlosung', desc: 'Animierte Gewinner-Enthüllung beim Ziehen aus dem Teilnehmer-Pool.' },
+          { name: 'Bestleistungen', desc: 'Automatisch berechnete Rangliste deiner höchsten Gewinne pro Spiel.' },
+        ],
+      },
+
+      beforeAfter: {
+        label: 'Der Unterschied', title: 'Vorher vs. Nachher',
+        before: 'Ohne Pulseframelabs',
+        after: 'Mit Pulseframelabs',
+        beforeItems: ['5+ verschiedene Tools für Overlays', 'Manuelles Kopieren zwischen Apps', 'Einfacher oder kein Chat-Bot', 'Keine Zuschauer-Interaktion', 'Generisches Streaming-Setup', 'Stunden an Konfiguration'],
+        afterItems: ['Alles-in-einem Dashboard', 'Automatisch synchronisiert', 'Integrierter Twitch-Bot', 'Turniere, Wetten, Verlosungen', 'Professionelles Casino-Branding', 'Fertig in 5 Minuten'],
+      },
+
+      roadmap: {
+        label: 'Roadmap', title: 'Was als Nächstes kommt',
+        items: [
+          { status: 'done', title: 'Dashboard & 14+ Overlays', desc: 'Komplettes Overlay-System mit Echtzeit-Sync' },
+          { status: 'done', title: 'Twitch-Bot Integration', desc: 'Chat-Befehle, Hot Words, Vorhersagen' },
+          { status: 'done', title: 'Website-Builder & Store', desc: 'Öffentliche Streamer-Seiten mit Casino-Deals' },
+          { status: 'done', title: 'Krypto-Zahlungen (CryptAPI)', desc: 'BTC, ETH, LTC, USDT Unterstützung' },
+          { status: 'progress', title: 'Analytics Dashboard', desc: 'Stream-Statistiken, Zuschauer-Engagement' },
+          { status: 'progress', title: 'Mehrsprachige Overlays', desc: 'Overlays in DE/EN basierend auf Streamer-Einstellung' },
+          { status: 'planned', title: 'Mobiles Dashboard', desc: 'Stream vom Handy aus verwalten' },
+          { status: 'planned', title: 'Affiliate-System', desc: 'Credits verdienen durch Streamer-Empfehlungen' },
+          { status: 'planned', title: 'Kick-Integration', desc: 'Kick Chat-Bot und Overlay-Unterstützung' },
+          { status: 'planned', title: 'Stream-Zusammenfassung', desc: 'Automatische Session-Zusammenfassungen für Social Media' },
+        ],
+        done: 'Abgeschlossen', progress: 'In Arbeit', planned: 'Geplant',
+      },
 
       testimonials: {
         label: 'Vertraut von Streamern', title: 'Was Streamer sagen',
