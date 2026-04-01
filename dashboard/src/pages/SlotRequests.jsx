@@ -394,11 +394,6 @@ export default function SlotRequests() {
             <Shuffle size={13} /> {raffleAnim ? ts.rolling : ts.raffle}
           </HoverBtn>
 
-          <HoverBtn onClick={clearAll}
-            style={{ background:'rgba(239,68,68,0.06)', borderColor:'rgba(239,68,68,0.2)', color:'#f87171' }}
-            hoverStyle={{ background:'rgba(239,68,68,0.14)', borderColor:'rgba(239,68,68,0.4)', transform:'translateY(-1px)' }}>
-            <Trash2 size={13} /> {tc.clearAll}
-          </HoverBtn>
         </>}
       </div>
 
@@ -518,6 +513,11 @@ export default function SlotRequests() {
                 hoverStyle={!copied ? { background:'rgba(212,175,55,0.28)', transform:'translateY(-1px)' } : {}}>
                 {copied ? <Check size={11} /> : <Copy size={11} />}
                 {copied ? tc.copied : tc.copyObs}
+              </HoverBtn>
+              <HoverBtn onClick={clearAll}
+                style={{ borderRadius:8, padding:'7px 12px', fontSize:12, fontWeight:600, background:'rgba(239,68,68,0.08)', borderColor:'rgba(239,68,68,0.25)', color:'#f87171' }}
+                hoverStyle={{ background:'rgba(239,68,68,0.18)', borderColor:'rgba(239,68,68,0.5)', boxShadow:'0 0 14px rgba(239,68,68,0.2)', transform:'translateY(-1px)' }}>
+                <Trash2 size={12} /> {tc.complete}
               </HoverBtn>
             </div>
           </div>
