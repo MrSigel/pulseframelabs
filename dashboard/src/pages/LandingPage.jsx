@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import {
   Gauge, Medal, Sparkles, Gem, Trophy, Sword, Flame, Target, Radio,
   MessageSquare, Bot, Globe, Coins, Swords, ArrowRight, ChevronDown,
-  Zap, Crown, Check, Monitor, Shield, Star, Play, Layers, Sun, Moon
+  Zap, Crown, Check, Monitor, Shield, Star, Play, Layers, Sun, Moon,
+  Quote, HelpCircle, Users, X as XIcon
 } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
@@ -215,6 +216,39 @@ function MagBtn({ children, primary, onClick, style = {} }) {
       {primary && <div style={{ position: 'absolute', top: 0, width: 60, height: '100%', background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)', animation: 'lpf-btn-shine 3s ease-in-out infinite' }} />}
       {children}
     </button>
+  )
+}
+
+// ── FAQ Accordion Item ──────────────────────────────────────────────────
+function FaqItem({ question, answer, th, gold }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{
+      borderRadius: 12, overflow: 'hidden',
+      background: open ? th.bgCard : 'transparent',
+      border: `1px solid ${open ? th.borderHover : th.border}`,
+      transition: 'all 0.3s',
+    }}>
+      <button onClick={() => setOpen(!open)} style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
+        padding: '16px 20px', background: 'none', border: 'none', cursor: 'pointer',
+        textAlign: 'left', transition: 'all 0.2s',
+      }}>
+        <span style={{ fontSize: '0.9rem', fontWeight: 600, color: open ? gold : th.text, transition: 'color 0.2s', flex: 1, paddingRight: 16 }}>{question}</span>
+        <ChevronDown size={16} style={{
+          color: open ? gold : th.textMuted, flexShrink: 0,
+          transform: open ? 'rotate(180deg)' : 'none', transition: 'all 0.3s',
+        }} />
+      </button>
+      <div style={{
+        maxHeight: open ? 300 : 0, overflow: 'hidden',
+        transition: 'max-height 0.4s cubic-bezier(0.16,1,0.3,1)',
+      }}>
+        <p style={{ padding: '0 20px 16px', fontSize: '0.85rem', color: th.textSub, lineHeight: 1.8, margin: 0 }}>
+          {answer}
+        </p>
+      </div>
+    </div>
   )
 }
 
@@ -648,6 +682,136 @@ export default function LandingPage() {
             </p>
           </div>
         </R>
+      </section>
+
+      {/* ═══ COMPARISON (Free vs Premium) ═══════════════════════════ */}
+      <section style={{ position: 'relative', zIndex: 1, padding: 'clamp(60px, 10vw, 100px) 24px' }}>
+        <R style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 56px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 14 }}>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, transparent, ${gold}30)` }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: gold }}>{t.comparison.label}</span>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, ${gold}30, transparent)` }} />
+          </div>
+          <h2 style={{ fontFamily: ff, fontSize: 'clamp(1.8rem, 3.5vw, 2.4rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+            {t.comparison.title}
+          </h2>
+        </R>
+        <R>
+          <div style={{ maxWidth: 600, margin: '0 auto', borderRadius: 14, overflow: 'hidden', border: `1px solid ${th.border}`, background: th.bgCard, backdropFilter: 'blur(12px)' }}>
+            {/* Header */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px', padding: '14px 20px', borderBottom: `1px solid ${th.border}`, background: `rgba(212,175,55,0.03)` }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: th.textSub }}></span>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: th.textMuted, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t.comparison.free}</span>
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, color: gold, textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t.comparison.premium}</span>
+            </div>
+            {/* Rows */}
+            {t.comparison.features.map((f, i) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 100px', padding: '10px 20px', borderBottom: i < t.comparison.features.length - 1 ? `1px solid ${th.border}` : 'none' }}>
+                <span style={{ fontSize: '0.82rem', color: th.textSub }}>{f.name}</span>
+                <div style={{ textAlign: 'center' }}>
+                  {f.free ? <Check size={14} style={{ color: '#34d399' }} /> : <XIcon size={14} style={{ color: th.textMuted, opacity: 0.4 }} />}
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <Check size={14} style={{ color: gold }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </R>
+      </section>
+
+      {/* ═══ TESTIMONIALS ═══════════════════════════════════════════ */}
+      <section style={{ position: 'relative', zIndex: 1, padding: 'clamp(60px, 10vw, 100px) 24px' }}>
+        <R style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 56px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 14 }}>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, transparent, ${gold}30)` }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: gold }}>{t.testimonials.label}</span>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, ${gold}30, transparent)` }} />
+          </div>
+          <h2 style={{ fontFamily: ff, fontSize: 'clamp(1.8rem, 3.5vw, 2.4rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+            {t.testimonials.title}
+          </h2>
+        </R>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: 16 }}>
+          {t.testimonials.items.map((item, i) => (
+            <R key={i} delay={i * 0.08}>
+              <GlassCard>
+                <Quote size={18} style={{ color: gold, opacity: 0.4, marginBottom: 12 }} />
+                <p style={{ fontSize: '0.88rem', color: th.textSub, lineHeight: 1.75, margin: '0 0 16px', fontStyle: 'italic' }}>
+                  "{item.text}"
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: `rgba(212,175,55,0.1)`, border: `1px solid rgba(212,175,55,0.2)`,
+                    fontSize: 12, fontWeight: 800, color: gold,
+                  }}>
+                    {item.name[0]}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: th.text }}>{item.name}</div>
+                    <div style={{ fontSize: '0.68rem', color: th.textMuted }}>{item.role}</div>
+                  </div>
+                </div>
+              </GlassCard>
+            </R>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ LIVE COUNTER ═══════════════════════════════════════════ */}
+      <section style={{ position: 'relative', zIndex: 1, padding: 'clamp(60px, 10vw, 100px) 24px' }}>
+        <R style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 56px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 14 }}>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, transparent, ${gold}30)` }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: gold }}>{t.liveCounter.label}</span>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, ${gold}30, transparent)` }} />
+          </div>
+          <h2 style={{ fontFamily: ff, fontSize: 'clamp(1.8rem, 3.5vw, 2.4rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+            {t.liveCounter.title}
+          </h2>
+        </R>
+        <R>
+          <div style={{ maxWidth: 700, margin: '0 auto', display: 'flex', justifyContent: 'center', gap: 'clamp(24px, 5vw, 60px)', flexWrap: 'wrap' }}>
+            {[
+              { icon: Users, value: '50+', label: t.liveCounter.streamers },
+              { icon: Layers, value: '500+', label: t.liveCounter.overlays },
+              { icon: Shield, value: '99.9%', label: t.liveCounter.uptime },
+            ].map((s, i) => (
+              <R key={s.label} delay={i * 0.1} style={{ textAlign: 'center', flex: '0 0 160px' }}>
+                <div style={{
+                  width: 56, height: 56, borderRadius: 16, margin: '0 auto 14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: `rgba(212,175,55,0.08)`, border: `1px solid rgba(212,175,55,0.15)`,
+                }}>
+                  <s.icon size={22} style={{ color: gold }} />
+                </div>
+                <div style={{ fontFamily: ff, fontSize: 'clamp(2rem, 3vw, 2.6rem)', fontWeight: 700, color: gold, lineHeight: 1, marginBottom: 6 }}>{s.value}</div>
+                <div style={{ fontSize: '0.72rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', color: th.textMuted }}>{s.label}</div>
+              </R>
+            ))}
+          </div>
+        </R>
+      </section>
+
+      {/* ═══ FAQ ════════════════════════════════════════════════════ */}
+      <section style={{ position: 'relative', zIndex: 1, padding: 'clamp(80px, 12vw, 140px) 24px' }}>
+        <R style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 64px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 14 }}>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, transparent, ${gold}30)` }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: gold }}>{t.faq.label}</span>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, ${gold}30, transparent)` }} />
+          </div>
+          <h2 style={{ fontFamily: ff, fontSize: 'clamp(1.8rem, 3.5vw, 2.4rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+            {t.faq.title}
+          </h2>
+        </R>
+        <div style={{ maxWidth: 700, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {t.faq.items.map((item, i) => (
+            <R key={i} delay={i * 0.05}>
+              <FaqItem question={item.q} answer={item.a} th={th} gold={gold} />
+            </R>
+          ))}
+        </div>
       </section>
 
       {/* ═══ CTA ════════════════════════════════════════════════════════ */}

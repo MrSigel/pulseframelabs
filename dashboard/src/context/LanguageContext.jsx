@@ -155,6 +155,54 @@ const i18n = {
         cta: 'Register Free Now',
       },
       footer: 'All rights reserved.',
+
+      // Testimonials
+      testimonials: {
+        label: 'Trusted by Streamers', title: 'What Streamers Say',
+        items: [
+          { name: 'CasinoKing', role: 'Casino Streamer', text: 'Pulseframelabs replaced 5 different tools for me. The overlays look insane and the bot just works.' },
+          { name: 'SlotMaster', role: 'Slot Streamer', text: 'The bonus hunt tracker alone is worth it. My viewers love the tournament bracket overlay.' },
+          { name: 'HighRollerTV', role: 'Casino Streamer', text: 'Setup took 5 minutes. The website builder saved me from hiring a developer. Highly recommended.' },
+        ],
+      },
+
+      // FAQ
+      faq: {
+        label: 'FAQ', title: 'Frequently Asked Questions',
+        items: [
+          { q: 'How does the payment work?', a: 'You buy credits with cryptocurrency (BTC, ETH, LTC, USDT). Credits are added instantly after blockchain confirmation. Then you activate a plan with your credits.' },
+          { q: 'Can I cancel anytime?', a: 'There is no recurring subscription. You buy a plan once and it runs until it expires. No auto-renewal, no hidden fees.' },
+          { q: 'Which OBS version is supported?', a: 'Any version of OBS Studio that supports browser sources. Simply copy the overlay URL and add it as a browser source.' },
+          { q: 'Can I try before I buy?', a: 'Yes! Register for free and explore the entire dashboard. Overlay links are unlocked after purchasing a plan.' },
+          { q: 'How many overlays can I use?', a: 'All plans include every overlay and feature. There are no tier restrictions — you get everything.' },
+          { q: 'Is my data private?', a: 'Yes. Every user has isolated data with Row Level Security. No one can see your settings, overlays, or configurations.' },
+        ],
+      },
+
+      // Live Counter
+      liveCounter: {
+        label: 'Community', title: 'Growing Every Day',
+        streamers: 'Registered Streamers',
+        overlays: 'Overlays Created',
+        uptime: 'Uptime',
+      },
+
+      // Comparison
+      comparison: {
+        label: 'Compare', title: 'Free vs. Premium',
+        free: 'Free', premium: 'Premium',
+        features: [
+          { name: 'Dashboard Access', free: true, premium: true },
+          { name: 'All 14+ Stream Tools', free: true, premium: true },
+          { name: 'OBS Overlay Links', free: false, premium: true },
+          { name: 'Twitch Bot Connection', free: false, premium: true },
+          { name: 'Public Streamer Page', free: false, premium: true },
+          { name: 'Website Builder', free: false, premium: true },
+          { name: 'Store / Points System', free: false, premium: true },
+          { name: 'Theme Customization', free: true, premium: true },
+          { name: 'Priority Support', free: false, premium: true },
+        ],
+      },
     },
 
     // ── Login page ────────────────────────────────────────────────────
@@ -684,6 +732,50 @@ const i18n = {
         cta: 'Jetzt kostenlos registrieren',
       },
       footer: 'Alle Rechte vorbehalten.',
+
+      testimonials: {
+        label: 'Vertraut von Streamern', title: 'Was Streamer sagen',
+        items: [
+          { name: 'CasinoKing', role: 'Casino-Streamer', text: 'Pulseframelabs hat 5 verschiedene Tools für mich ersetzt. Die Overlays sehen genial aus und der Bot funktioniert einfach.' },
+          { name: 'SlotMaster', role: 'Slot-Streamer', text: 'Allein der Bonushunt-Tracker ist es wert. Meine Zuschauer lieben das Turnier-Bracket-Overlay.' },
+          { name: 'HighRollerTV', role: 'Casino-Streamer', text: 'Setup hat 5 Minuten gedauert. Der Website-Builder hat mir erspart einen Entwickler zu engagieren. Sehr empfehlenswert.' },
+        ],
+      },
+
+      faq: {
+        label: 'FAQ', title: 'Häufig gestellte Fragen',
+        items: [
+          { q: 'Wie funktioniert die Zahlung?', a: 'Du kaufst Credits mit Kryptowährung (BTC, ETH, LTC, USDT). Credits werden sofort nach Blockchain-Bestätigung gutgeschrieben. Dann aktivierst du einen Plan mit deinen Credits.' },
+          { q: 'Kann ich jederzeit kündigen?', a: 'Es gibt kein wiederkehrendes Abo. Du kaufst einen Plan einmalig und er läuft bis zum Ablauf. Keine automatische Verlängerung, keine versteckten Kosten.' },
+          { q: 'Welche OBS-Version wird unterstützt?', a: 'Jede Version von OBS Studio die Browser-Quellen unterstützt. Einfach die Overlay-URL kopieren und als Browser-Quelle hinzufügen.' },
+          { q: 'Kann ich vor dem Kauf testen?', a: 'Ja! Registriere dich kostenlos und erkunde das gesamte Dashboard. Overlay-Links werden nach dem Kauf eines Plans freigeschaltet.' },
+          { q: 'Wie viele Overlays kann ich nutzen?', a: 'Alle Pläne beinhalten jedes Overlay und Feature. Es gibt keine Stufen-Beschränkungen — du bekommst alles.' },
+          { q: 'Sind meine Daten privat?', a: 'Ja. Jeder Nutzer hat isolierte Daten mit Row Level Security. Niemand kann deine Einstellungen, Overlays oder Konfigurationen sehen.' },
+        ],
+      },
+
+      liveCounter: {
+        label: 'Community', title: 'Wächst jeden Tag',
+        streamers: 'Registrierte Streamer',
+        overlays: 'Erstellte Overlays',
+        uptime: 'Verfügbarkeit',
+      },
+
+      comparison: {
+        label: 'Vergleich', title: 'Kostenlos vs. Premium',
+        free: 'Kostenlos', premium: 'Premium',
+        features: [
+          { name: 'Dashboard-Zugang', free: true, premium: true },
+          { name: 'Alle 14+ Stream-Tools', free: true, premium: true },
+          { name: 'OBS Overlay-Links', free: false, premium: true },
+          { name: 'Twitch-Bot Verbindung', free: false, premium: true },
+          { name: 'Öffentliche Streamer-Seite', free: false, premium: true },
+          { name: 'Website-Builder', free: false, premium: true },
+          { name: 'Store / Punkte-System', free: false, premium: true },
+          { name: 'Theme-Anpassung', free: true, premium: true },
+          { name: 'Prioritäts-Support', free: false, premium: true },
+        ],
+      },
     },
 
     // ── Login page ────────────────────────────────────────────────────
