@@ -84,7 +84,13 @@ function SetupWizard({ onDone, onCancel, tb, tc, autoToken }) {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
-            <button onClick={onCancel} style={{ fontSize: 12, color: '#4a4842', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            <button onClick={onCancel} style={{
+              fontSize: 12, fontWeight: 600, color: '#f87171', background: 'rgba(248,113,113,0.08)',
+              border: '1px solid rgba(248,113,113,0.3)', borderRadius: 8, padding: '6px 14px',
+              cursor: 'pointer', transition: 'all 0.15s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background='rgba(248,113,113,0.15)'; e.currentTarget.style.borderColor='rgba(248,113,113,0.5)' }}
+              onMouseLeave={e => { e.currentTarget.style.background='rgba(248,113,113,0.08)'; e.currentTarget.style.borderColor='rgba(248,113,113,0.3)' }}>
               {tc.cancel}
             </button>
             <button onClick={finish} disabled={!form.channel_name || !autoToken} style={{
@@ -96,12 +102,10 @@ function SetupWizard({ onDone, onCancel, tb, tc, autoToken }) {
               boxShadow: (form.channel_name && autoToken) ? '0 0 14px rgba(212,175,55,0.25)' : 'none',
               transition: 'all 0.15s',
             }}>
-                <Check size={14} /> {tb.completeSetup}
-              </button>
-            </div>
+              <Check size={14} /> {tb.completeSetup}
+            </button>
           </div>
-        )}
-
+        </div>
       </div>
     </div>
   )
