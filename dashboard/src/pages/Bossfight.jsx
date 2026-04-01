@@ -175,6 +175,10 @@ function GauntletPanel({ session, onUpdate }) {
   const [addForm, setAddForm] = useState({ username: '', game: '' })
   const [showBossSelect, setShowBossSelect] = useState(false)
   const [showWheel, setShowWheel] = useState(false)
+  const [showAmountPopup, setShowAmountPopup] = useState(false)
+  const [amount0, setAmount0] = useState('')
+  const [amount1, setAmount1] = useState('')
+  const [amountResult, setAmountResult] = useState(null)
   const BOSSFIGHT_MAX_FIGHTERS = 8
 
   const participants = session.participants || []
@@ -224,13 +228,22 @@ function GauntletPanel({ session, onUpdate }) {
       round: i + 1,
     }))
     await save({
-      status: 'live',
+      status: 'animating',
       boss_lives: challs.length,
       boss_max_lives: challs.length,
       duels: newDuels,
       current_duel: 0,
       winner_side: null,
     })
+    // After animation completes (overlay sets status to 'live' automatically)
+    // Fallback: if overlay doesn't transition, force it after timeout
+    setTimeout(async () => {
+      const data = await getAll('bossfights')
+      const current = data.find(x => x.id === session.id)
+      if (current && current.status === 'animating') {
+        await save({ status: 'live' })
+      }
+    }, 15000)
   }
 
   const handleWheelComplete = async (selectedParticipants) => {
@@ -437,17 +450,12 @@ function GauntletPanel({ session, onUpdate }) {
               </div>
             </div>
 
-            {/* Win buttons */}
+            {/* Amount button */}
             <div style={{ display:'flex', gap:10, justifyContent:'center' }}>
-              <HoverBtn onClick={() => recordWin('boss')}
-                style={{ background:'rgba(239,68,68,0.12)', borderColor:'rgba(239,68,68,0.35)', color:'#f87171' }}
-                hoverStyle={{ background:'rgba(239,68,68,0.25)', borderColor:'rgba(239,68,68,0.6)', boxShadow:'0 0 14px rgba(239,68,68,0.2)', transform:'translateY(-1px)' }}>
-                <Swords size={14} /> {tbf.bossWins}
-              </HoverBtn>
-              <HoverBtn onClick={() => recordWin('challenger')}
-                style={{ background:'rgba(52,211,153,0.12)', borderColor:'rgba(52,211,153,0.35)', color:'#34d399' }}
-                hoverStyle={{ background:'rgba(52,211,153,0.25)', borderColor:'rgba(52,211,153,0.6)', boxShadow:'0 0 14px rgba(52,211,153,0.2)', transform:'translateY(-1px)' }}>
-                <Check size={14} /> {tbf.challengerWins}
+              <HoverBtn onClick={() => { setShowAmountPopup(true); setAmount0(''); setAmount1(''); setAmountResult(null) }}
+                style={{ background:'linear-gradient(135deg,#d4af37,#b8962e)', borderColor:'rgba(212,175,55,0.4)', color:'#000', boxShadow:'0 0 14px rgba(212,175,55,0.2)' }}
+                hoverStyle={{ boxShadow:'0 0 22px rgba(212,175,55,0.35)', transform:'translateY(-1px)' }}>
+                <Trophy size={14} /> Enter Amounts
               </HoverBtn>
             </div>
           </div>
@@ -495,6 +503,90 @@ function GauntletPanel({ session, onUpdate }) {
                   </span>
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Amount Popup */}
+        {showAmountPopup && currentChallenger && (
+          <div style={{
+            position:'fixed', inset:0, zIndex:99999, display:'flex', alignItems:'center', justifyContent:'center',
+            background:'rgba(0,0,0,0.75)', backdropFilter:'blur(6px)',
+          }} onClick={() => setShowAmountPopup(false)}>
+            <div onClick={e => e.stopPropagation()} style={{
+              width:340, padding:24, borderRadius:16,
+              background:'rgba(10,10,22,0.96)', border:'1px solid rgba(212,175,55,0.3)',
+              boxShadow:'0 16px 60px rgba(0,0,0,0.6), 0 0 30px rgba(212,175,55,0.08)',
+            }}>
+              <div style={{ textAlign:'center', marginBottom:20 }}>
+                <Trophy size={20} style={{ color:'#fbbf24', marginBottom:8 }} />
+                <div style={{ fontSize:11, fontWeight:700, color:'#fbbf24', textTransform:'uppercase', letterSpacing:'0.1em' }}>Enter Amounts</div>
+              </div>
+
+              {/* Challenger */}
+              <div style={{
+                display:'flex', alignItems:'center', gap:10, padding:'10px 14px', marginBottom:8, borderRadius:10,
+                background: amountResult === 'challenger' ? 'rgba(52,211,153,0.1)' : amountResult === 'boss' ? 'rgba(239,68,68,0.06)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${amountResult === 'challenger' ? 'rgba(52,211,153,0.3)' : amountResult === 'boss' ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.06)'}`,
+                transition:'all 0.4s',
+              }}>
+                <span style={{ fontSize:12, fontWeight:600, color: amountResult === 'challenger' ? '#34d399' : '#fff', flex:1 }}>{currentChallenger.username}</span>
+                <input type="number" value={amount0} onChange={e => setAmount0(e.target.value)} placeholder="0.00"
+                  disabled={amountResult !== null}
+                  style={{ width:80, padding:'6px 10px', borderRadius:8, fontSize:13, fontWeight:700, textAlign:'right',
+                    background:'rgba(255,255,255,0.05)', border:'1px solid rgba(212,175,55,0.2)', color:'#fff', outline:'none', fontFamily:'monospace' }} />
+              </div>
+
+              <div style={{ textAlign:'center', margin:'4px 0', fontSize:10, fontWeight:800, color:'#fbbf24', letterSpacing:'0.15em' }}>VS</div>
+
+              {/* Boss */}
+              <div style={{
+                display:'flex', alignItems:'center', gap:10, padding:'10px 14px', marginBottom:16, borderRadius:10,
+                background: amountResult === 'boss' ? 'rgba(52,211,153,0.1)' : amountResult === 'challenger' ? 'rgba(239,68,68,0.06)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${amountResult === 'boss' ? 'rgba(52,211,153,0.3)' : amountResult === 'challenger' ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.06)'}`,
+                transition:'all 0.4s',
+              }}>
+                <span style={{ fontSize:12, fontWeight:600, color: amountResult === 'boss' ? '#34d399' : '#fff', flex:1 }}>{session.boss_name}</span>
+                <input type="number" value={amount1} onChange={e => setAmount1(e.target.value)} placeholder="0.00"
+                  disabled={amountResult !== null}
+                  style={{ width:80, padding:'6px 10px', borderRadius:8, fontSize:13, fontWeight:700, textAlign:'right',
+                    background:'rgba(255,255,255,0.05)', border:'1px solid rgba(212,175,55,0.2)', color:'#fff', outline:'none', fontFamily:'monospace' }} />
+              </div>
+
+              {/* Result */}
+              {amountResult === 'tie' && (
+                <div style={{ textAlign:'center', padding:'8px', marginBottom:12, borderRadius:8, background:'rgba(251,191,36,0.1)', border:'1px solid rgba(251,191,36,0.25)', fontSize:11, fontWeight:600, color:'#fbbf24' }}>
+                  Tie — enter new amounts
+                </div>
+              )}
+              {amountResult && amountResult !== 'tie' && (
+                <div style={{ textAlign:'center', padding:'8px', marginBottom:12, borderRadius:8, background:'rgba(52,211,153,0.1)', border:'1px solid rgba(52,211,153,0.25)', fontSize:11, fontWeight:700, color:'#34d399' }}>
+                  {amountResult === 'challenger' ? currentChallenger.username : session.boss_name} wins!
+                </div>
+              )}
+
+              {/* Buttons */}
+              {amountResult === null && (
+                <div style={{ display:'flex', gap:8 }}>
+                  <button onClick={() => setShowAmountPopup(false)} style={{ flex:1, padding:'10px', borderRadius:10, fontSize:12, fontWeight:600, background:'none', border:'1px solid rgba(255,255,255,0.1)', color:'#888', cursor:'pointer' }}>Cancel</button>
+                  <button onClick={() => {
+                    const a0 = Number(amount0) || 0
+                    const a1 = Number(amount1) || 0
+                    if (a0 === 0 && a1 === 0) return
+                    if (a0 > 0 && a1 > 0) {
+                      if (a0 === a1) { setAmountResult('tie'); setTimeout(() => { setAmountResult(null); setAmount0(''); setAmount1('') }, 2000); return }
+                      const winner = a0 > a1 ? 'challenger' : 'boss'
+                      setAmountResult(winner)
+                      setTimeout(() => { recordWin(winner); setShowAmountPopup(false); setAmountResult(null) }, 1200)
+                    }
+                  }} disabled={!(Number(amount0) > 0 && Number(amount1) > 0)} style={{
+                    flex:2, padding:'10px', borderRadius:10, fontSize:12, fontWeight:700,
+                    background: (Number(amount0) > 0 && Number(amount1) > 0) ? 'linear-gradient(135deg,#d4af37,#b8962e)' : '#222',
+                    color: (Number(amount0) > 0 && Number(amount1) > 0) ? '#000' : '#555', border:'none',
+                    cursor: (Number(amount0) > 0 && Number(amount1) > 0) ? 'pointer' : 'not-allowed',
+                  }}>Determine Winner</button>
+                </div>
+              )}
             </div>
           </div>
         )}
