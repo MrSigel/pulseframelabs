@@ -34,7 +34,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
 
   useEffect(() => {
     // uid is optional - fallback to logged-in user
-    getOnePublic('pfl_predictions_theme', uid).then(v => { if (v) setThemeFromStore(v) })
+    getOnePublic('predictions_theme', uid).then(v => { if (v) setThemeFromStore(v) })
     const localMode = localStorage.getItem('pfl_theme_mode'); getOnePublic('pfl_theme_mode', uid).then(v => { const mode = v || localMode;
       if (mode === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
     })
