@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getAll, getOne, setOne, onTableChange } from '../lib/store'
 import PersonalBestsOverlay, { DEFAULT_THEME } from '../overlays/PersonalBestsOverlay'
 import { Info, Palette, Copy, Check, RotateCcw, Medal, Search, Trophy, Gamepad2, BarChart3, TrendingUp } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 
 const S = {
@@ -188,6 +189,7 @@ function ThemePanel({ theme, onChange, tc }) {
 export default function PersonalBests() {
   const { t } = useLang()
   const tc = t.common
+  const { user } = useAuth()
   const tp = t.personalBests
 
   const [bests, setBests]         = useState([])
@@ -199,7 +201,7 @@ export default function PersonalBests() {
   const [search, setSearch]       = useState('')
 
   const baseUrl = window.location.origin
-  const obsUrl  = `${baseUrl}/overlay/personalbests`
+  const obsUrl  = `${baseUrl}/overlay/personalbests?uid=${user?.id || ""}`
 
   const loadData = async () => {
     const entries = await getAll('bonushunt_entries')

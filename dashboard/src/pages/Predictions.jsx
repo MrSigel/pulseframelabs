@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 import { getAll, getOne, setOne, insert, update, remove, clearTable, onTableChange } from '../lib/store'
 import PredictionsOverlay, { DEFAULT_THEME } from '../overlays/PredictionsOverlay'
@@ -159,6 +160,7 @@ function ThemePanel({ theme, onChange, tc }) {
 export default function Predictions() {
   const { t } = useLang()
   const tc = t.common
+  const { user } = useAuth()
   const tp = t.predictions
 
   const [activeTab, setActiveTab]   = useState('tippspiel')
@@ -182,7 +184,7 @@ export default function Predictions() {
   const [optionBInput, setOptionBInput]   = useState('')
 
   const baseUrl = window.location.origin
-  const obsUrl  = `${baseUrl}/overlay/predictions`
+  const obsUrl  = `${baseUrl}/overlay/predictions?uid=${user?.id || ""}`
 
   const loadGuess = async () => {
     const sessions = await getAll('guess_sessions')

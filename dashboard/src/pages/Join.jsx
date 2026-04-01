@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 import { getAll, getOne, setOne, insert, update, remove, clearTable, onTableChange } from '../lib/store'
 import JoinOverlay, { DEFAULT_THEME } from '../overlays/JoinOverlay'
@@ -157,6 +158,7 @@ function ThemePanel({ theme, onChange, tc }) {
 export default function Join() {
   const { t } = useLang()
   const tc = t.common
+  const { user } = useAuth()
   const tj = t.join
 
   const [session, setSession]           = useState(null)
@@ -170,7 +172,7 @@ export default function Join() {
   const [displayName, setDisplayName]   = useState('')
 
   const baseUrl = window.location.origin
-  const obsUrl  = `${baseUrl}/overlay/join`
+  const obsUrl  = `${baseUrl}/overlay/join?uid=${user?.id || ""}`
 
   const reload = async () => {
     const sessions = await getAll('join_sessions')

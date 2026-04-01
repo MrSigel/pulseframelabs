@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getAll, remove, clearTable, getOne, setOne, insert, update, onTableChange } from '../lib/store'
 import HotwordsOverlay, { DEFAULT_THEME } from '../overlays/HotwordsOverlay'
 import { Trash2, Copy, Check, Palette, RotateCcw, Info, Flame, Save } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 
 const S = {
@@ -82,6 +83,7 @@ function Toggle({ value, onChange, label }) {
 function ThemePanel({ theme, onChange }) {
   const { t } = useLang()
   const tc = t.common
+  const { user } = useAuth()
   const th = t.hotwords
   const set = (key, val) => onChange({ ...theme, [key]: val })
 
@@ -163,6 +165,7 @@ function ThemePanel({ theme, onChange }) {
 export default function Hotwords() {
   const { t } = useLang()
   const tc = t.common
+  const { user } = useAuth()
   const th = t.hotwords
   const [entries, setEntries]       = useState([])
   const [settings, setSettings]     = useState(null)
@@ -173,7 +176,7 @@ export default function Hotwords() {
   const [excludedInput, setExcludedInput] = useState('')
 
   const baseUrl = window.location.origin
-  const obsUrl  = `${baseUrl}/overlay/hotwords`
+  const obsUrl  = `${baseUrl}/overlay/hotwords?uid=${user?.id || ""}`
 
   const loadData = async () => {
     const e = await getAll('hotword_entries')

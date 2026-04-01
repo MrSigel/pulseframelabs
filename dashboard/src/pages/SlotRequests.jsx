@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { getAll, getOne, setOne, insert, remove, clearTable, update } from '../lib/store'
 import SlotRequestsOverlay, { DEFAULT_THEME } from '../overlays/SlotRequestsOverlay'
 import { Plus, Trash2, Copy, Check, Palette, RotateCcw, Sparkles, Lock, Unlock, Shuffle, Trophy, X, Info } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 
 const S = {
@@ -150,6 +151,7 @@ const colorFor = (name) => COLORS[(name || '').charCodeAt(0) % COLORS.length]
 export default function SlotRequests() {
   const { t } = useLang()
   const tc = t.common
+  const { user } = useAuth()
   const ts = t.slotRequests
 
   const [requests, setRequests]   = useState([])
@@ -167,7 +169,7 @@ export default function SlotRequests() {
   const raffleTimers = useRef([])
 
   const baseUrl = window.location.origin
-  const obsUrl  = `${baseUrl}/overlay/slotrequests`
+  const obsUrl  = `${baseUrl}/overlay/slotrequests?uid=${user?.id || ""}`
 
   const loadRequests = async () => { const data = await getAll('slot_requests'); setRequests(data) }
 

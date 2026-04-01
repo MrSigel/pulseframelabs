@@ -3,6 +3,7 @@ import { getAll, getOne, setOne, insert, update, remove, onTableChange } from '.
 import BossfightOverlay, { DEFAULT_THEME } from '../overlays/BossfightOverlay'
 import { Plus, Trash2, Copy, Check, Info, Palette, RotateCcw, Swords, Play, Crown, UserPlus, ChevronDown, Sparkles } from 'lucide-react'
 import SpinningWheel from '../components/SpinningWheel'
+import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 
 const S = {
@@ -78,6 +79,7 @@ function Toggle({ value, onChange, label }) {
 function ThemePanel({ theme, onChange }) {
   const { t } = useLang()
   const tc = t.common
+  const { user } = useAuth()
   const set = (key, val) => onChange({ ...theme, [key]: val })
 
   return (
@@ -167,6 +169,7 @@ function ThemePanel({ theme, onChange }) {
 function GauntletPanel({ session, onUpdate }) {
   const { t } = useLang()
   const tc = t.common
+  const { user } = useAuth()
   const tbf = t.bossfight
   const [addForm, setAddForm] = useState({ username: '', game: '' })
   const [showBossSelect, setShowBossSelect] = useState(false)
@@ -562,6 +565,7 @@ function GauntletPanel({ session, onUpdate }) {
 export default function Bossfight() {
   const { t } = useLang()
   const tc = t.common
+  const { user } = useAuth()
   const tbf = t.bossfight
   const [sessions, setSessions]   = useState([])
   const [selectedId, setSelectedId] = useState(null)
@@ -573,7 +577,7 @@ export default function Bossfight() {
   const [copied, setCopied]       = useState(false)
 
   const baseUrl = window.location.origin
-  const obsUrl  = `${baseUrl}/overlay/bossfight`
+  const obsUrl  = `${baseUrl}/overlay/bossfight?uid=${user?.id || ""}`
 
   const reload = async () => {
     const data = await getAll('bossfights')

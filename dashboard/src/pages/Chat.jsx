@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 import { getAll, getOne, setOne, insert, remove, onTableChange } from '../lib/store'
 import ChatOverlay, { DEFAULT_THEME } from '../overlays/ChatOverlay'
@@ -164,6 +165,7 @@ function ThemePanel({ theme, onChange, tc, tch }) {
 export default function Chat() {
   const { t } = useLang()
   const tc = t.common
+  const { user } = useAuth()
   const tch = t.chat
 
   const [sessions, setSessions]     = useState([])
@@ -176,7 +178,7 @@ export default function Chat() {
   const [copied, setCopied]         = useState(false)
 
   const baseUrl = window.location.origin
-  const obsUrl  = `${baseUrl}/overlay/chat`
+  const obsUrl  = `${baseUrl}/overlay/chat?uid=${user?.id || ""}`
 
   useEffect(() => {
     getAll('chat_sessions').then(data => {

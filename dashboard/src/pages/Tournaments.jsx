@@ -3,6 +3,7 @@ import { getAll, getOne, setOne, insert, update, remove, onTableChange } from '.
 import TournamentOverlay, { DEFAULT_THEME } from '../overlays/TournamentOverlay'
 import { Plus, Trash2, Copy, Check, Info, Palette, RotateCcw, Play, Users, UserPlus, Trophy, Sparkles } from 'lucide-react'
 import SpinningWheel from '../components/SpinningWheel'
+import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 
 const S = {
@@ -251,6 +252,7 @@ export default function Tournaments() {
   const { t } = useLang()
   const tt = t.tournaments
   const tc = t.common
+  const { user } = useAuth()
   const [tournaments, setTournaments] = useState([])
   const [selectedId, setSelectedId] = useState(null)
   const [showNew, setShowNew] = useState(false)
@@ -262,7 +264,7 @@ export default function Tournaments() {
   const [showWheel, setShowWheel] = useState(false)
 
   const baseUrl = window.location.origin
-  const obsUrl  = `${baseUrl}/overlay/tournament`
+  const obsUrl  = `${baseUrl}/overlay/tournament?uid=${user?.id || ""}`
 
   useEffect(() => {
     getAll('tournaments').then(data => {

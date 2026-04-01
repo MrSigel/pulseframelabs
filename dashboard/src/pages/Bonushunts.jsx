@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getAll, getOne, setOne, insert, update, remove, removeWhere, onTableChange } from '../lib/store'
 import BonushuntOverlay, { DEFAULT_THEME } from '../overlays/BonushuntOverlay'
 import { Plus, Trash2, Copy, Check, Info, Palette, RotateCcw, Gem } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 
 const S = {
@@ -183,6 +184,7 @@ export default function Bonushunts() {
   const { t } = useLang()
   const tb = t.bonushunt
   const tc = t.common
+  const { user } = useAuth()
   const [hunts, setHunts] = useState([])
   const [selectedId, setSelectedId] = useState(null)
   const [showNew, setShowNew] = useState(false)
@@ -193,7 +195,7 @@ export default function Bonushunts() {
   const [copied, setCopied] = useState(false)
 
   const baseUrl = window.location.origin
-  const obsUrl  = `${baseUrl}/overlay/bonushunt?mode=normal`
+  const obsUrl  = `${baseUrl}/overlay/bonushunt?mode=normal&uid=${user?.id || ''}`
 
   useEffect(() => {
     getAll('bonushunts').then(data => {

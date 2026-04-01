@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getAll, getOne, setOne, insert, remove, update, onTableChange } from '../lib/store'
 import WagerBarOverlay, { DEFAULT_THEME } from '../overlays/WagerBarOverlay'
 import { Plus, Trash2, Copy, Check, Palette, RotateCcw, Info, Gauge } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 
 const S = {
@@ -158,6 +159,7 @@ export default function WagerBar() {
   const { t } = useLang()
   const tw = t.wager
   const tc = t.common
+  const { user } = useAuth()
   const [sessions, setSessions]     = useState([])
   const [selectedId, setSelectedId] = useState(null)
   const [showNew, setShowNew]       = useState(false)
@@ -171,7 +173,7 @@ export default function WagerBar() {
   })
 
   const baseUrl = window.location.origin
-  const obsUrl  = `${baseUrl}/overlay/wager`
+  const obsUrl  = `${baseUrl}/overlay/wager?uid=${user?.id || ""}`
 
   useEffect(() => {
     getOne('wager_theme').then(t => { if (t) setTheme(prev => ({ ...prev, ...t })) })
