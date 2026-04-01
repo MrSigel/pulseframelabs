@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { setOne } from '../lib/store'
 
 const ThemeContext = createContext(null)
 const STORAGE_KEY = 'pfl_theme_mode'
@@ -34,6 +35,8 @@ export function ThemeProvider({ children }) {
     const next = mode === 'dark' ? 'light' : 'dark'
     setMode(next)
     localStorage.setItem(STORAGE_KEY, next)
+    // Also save to Supabase so overlays via OBS URL can read it
+    setOne('pfl_theme_mode', next)
   }
 
   useEffect(() => {
