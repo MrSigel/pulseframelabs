@@ -330,7 +330,7 @@ export default function Tournaments() {
       slots[key] = { name: shuffled[i].username, game: shuffled[i].game, win: '' }
     }
 
-    const changes = { status: 'ongoing', slots, bracket_winners: {}, champion: '' }
+    const changes = { status: 'animating', slots, bracket_winners: {}, champion: '' }
     await update('tournaments', selectedId, changes)
     setTournaments(prev => prev.map(t => t.id === selectedId ? { ...t, ...changes } : t))
   }
@@ -475,7 +475,7 @@ export default function Tournaments() {
             }}>
               {tr.name}
               <span style={{ marginLeft:6, fontSize:9, color:'#4a4842', textTransform:'uppercase' }}>
-                {tr.status === 'join_open' ? tc.joining : tr.status === 'ongoing' ? tc.live : tc.finished}
+                {tr.status === 'join_open' ? tc.joining : (tr.status === 'ongoing' || tr.status === 'animating') ? tc.live : tc.finished}
               </span>
             </button>
           ))}
@@ -498,7 +498,7 @@ export default function Tournaments() {
                   color: selectedStatus === 'join_open' ? '#34d399' : selectedStatus === 'ongoing' ? '#fbbf24' : '#d4af37',
                   border: `1px solid ${selectedStatus === 'join_open' ? 'rgba(52,211,153,0.3)' : selectedStatus === 'ongoing' ? 'rgba(251,191,36,0.3)' : 'rgba(212,175,55,0.15)'}`,
                 }}>
-                  {selectedStatus === 'join_open' ? tc.joining : selectedStatus === 'ongoing' ? tc.live : tc.finished}
+                  {selectedStatus === 'join_open' ? tc.joining : (selectedStatus === 'ongoing' || selectedStatus === 'animating') ? tc.live : (selectedStatus === 'finished' ? tc.finished : tc.joining)}
                 </span>
               </div>
               <HoverBtn onClick={completeTournament}
