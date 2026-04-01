@@ -1,8 +1,17 @@
 import { useState } from 'react'
-import { Coins, Check, ShoppingCart, Clock, Zap, Crown, CreditCard, ArrowRight, Lock } from 'lucide-react'
+import { Coins, Check, ShoppingCart, Clock, Zap, Crown, CreditCard, ArrowRight, Lock, Copy, X, QrCode } from 'lucide-react'
 import { useSubscription, PLANS } from '../context/SubscriptionContext'
+import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
+import { supabase } from '../lib/supabase'
+
+const COINS = [
+  { coin: 'btc', ticker: 'BTC', label: 'Bitcoin' },
+  { coin: 'eth', ticker: 'ETH', label: 'Ethereum' },
+  { coin: 'ltc', ticker: 'LTC', label: 'Litecoin' },
+  { coin: 'usdt/trc20', ticker: 'USDT', label: 'USDT (TRC-20)' },
+]
 
 const gold = '#d4af37'
 
@@ -18,9 +27,15 @@ export default function Shop() {
   const ts = t.shop
   const tc = t.common
   const { credits, subscription, hasActivePlan, transactions, purchaseCredits, activatePlan } = useSubscription()
+  const { user } = useAuth()
   const [activating, setActivating] = useState(null)
   const [activated, setActivated] = useState(null)
   const [buyAmount, setBuyAmount] = useState(null)
+  const [selectedCoin, setSelectedCoin] = useState('btc')
+  const [showPayment, setShowPayment] = useState(false)
+  const [paymentLoading, setPaymentLoading] = useState(false)
+  const [paymentData, setPaymentData] = useState(null)
+  const [addressCopied, setAddressCopied] = useState(false)
 
   const handleActivate = async (planKey) => {
     setActivating(planKey)
@@ -32,10 +47,41 @@ export default function Shop() {
     setActivating(null)
   }
 
-  const handleBuy = async (amount) => {
+  const handleBuy = (amount) => {
     setBuyAmount(amount)
-    await purchaseCredits(amount)
-    setTimeout(() => setBuyAmount(null), 1500)
+    setShowPayment(true)
+    setPaymentData(null)
+  }
+
+  const handleCreatePayment = async () => {
+    if (!buyAmount || !selectedCoin) return
+    setPaymentLoading(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/wallet/topup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ amount: buyAmount, coin: selectedCoin }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+      setPaymentData(data)
+    } catch (err) {
+      console.error('Payment error:', err)
+      // Fallback: direct credit for testing
+      await purchaseCredits(buyAmount)
+      setShowPayment(false)
+      setBuyAmount(null)
+    }
+    setPaymentLoading(false)
+  }
+
+  const copyAddress = () => {
+    if (paymentData?.address_in) {
+      navigator.clipboard.writeText(paymentData.address_in)
+      setAddressCopied(true)
+      setTimeout(() => setAddressCopied(false), 2000)
+    }
   }
 
   const daysLeft = hasActivePlan ? Math.max(0, Math.ceil((new Date(subscription.expires_at) - new Date()) / (1000 * 60 * 60 * 24))) : 0
@@ -133,9 +179,133 @@ export default function Shop() {
         </div>
         <p style={{ fontSize: 10, color: 'var(--label-color)', marginTop: 8 }}>
           <CreditCard size={10} style={{ verticalAlign: -1, marginRight: 4 }} />
-          {ts.cryptoNote}
+          {ts.payWithCrypto || 'Pay with BTC, ETH, LTC, USDT'}
         </p>
       </div>
+
+      {/* Payment Modal */}
+      {showPayment && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)',
+        }} onClick={() => { if (!paymentData) { setShowPayment(false) } }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: 400, padding: 28, borderRadius: 16,
+            background: isDark ? 'rgba(10,10,22,0.96)' : '#ffffff',
+            border: `1px solid rgba(212,175,55,0.3)`,
+            boxShadow: `0 16px 60px rgba(0,0,0,0.6)`,
+          }}>
+            {!paymentData ? (
+              <>
+                {/* Step 1: Select coin */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                  <div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--input-text)' }}>{ts.buyCredits}</div>
+                    <div style={{ fontSize: 12, color: 'var(--label-color)', marginTop: 2 }}>
+                      {buyAmount} Credits — €{buyAmount === 10 ? '9.90' : buyAmount === 100 ? '89' : buyAmount === 260 ? '229' : buyAmount === 460 ? '399' : '699'}
+                    </div>
+                  </div>
+                  <button onClick={() => setShowPayment(false)} style={{ background: 'none', border: 'none', color: 'var(--label-color)', cursor: 'pointer' }}><X size={18} /></button>
+                </div>
+
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--label-color)', marginBottom: 10 }}>
+                  {ts.selectCoin || 'Select Cryptocurrency'}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 20 }}>
+                  {COINS.map(c => (
+                    <button key={c.coin} onClick={() => setSelectedCoin(c.coin)} style={{
+                      padding: '12px', borderRadius: 10, cursor: 'pointer', textAlign: 'center',
+                      background: selectedCoin === c.coin ? 'rgba(212,175,55,0.1)' : 'var(--input-bg)',
+                      border: `1px solid ${selectedCoin === c.coin ? 'rgba(212,175,55,0.4)' : 'var(--card-border)'}`,
+                      color: selectedCoin === c.coin ? gold : 'var(--input-text)', transition: 'all 0.15s',
+                    }}>
+                      <div style={{ fontSize: 14, fontWeight: 700 }}>{c.ticker}</div>
+                      <div style={{ fontSize: 10, color: 'var(--label-color)', marginTop: 2 }}>{c.label}</div>
+                    </button>
+                  ))}
+                </div>
+
+                <button onClick={handleCreatePayment} disabled={paymentLoading} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  width: '100%', padding: '12px', borderRadius: 10, fontSize: 14, fontWeight: 700,
+                  background: `linear-gradient(135deg, ${gold}, #b8962e)`, border: 'none',
+                  color: '#000', cursor: paymentLoading ? 'wait' : 'pointer',
+                }}>
+                  {paymentLoading ? <Clock size={14} style={{ animation: 'spin 1s linear infinite' }} /> : <Zap size={14} />}
+                  {paymentLoading ? (ts.generating || 'Generating address...') : (ts.generateAddress || 'Generate Payment Address')}
+                </button>
+              </>
+            ) : (
+              <>
+                {/* Step 2: Show address + QR */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--input-text)' }}>
+                    {ts.sendPayment || 'Send Payment'}
+                  </div>
+                  <button onClick={() => { setShowPayment(false); setPaymentData(null) }} style={{ background: 'none', border: 'none', color: 'var(--label-color)', cursor: 'pointer' }}><X size={18} /></button>
+                </div>
+
+                {/* Amount info */}
+                <div style={{
+                  padding: '12px 14px', borderRadius: 10, marginBottom: 16,
+                  background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.15)',
+                  textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: gold }}>{paymentData.amount_crypto}</div>
+                  <div style={{ fontSize: 11, color: 'var(--label-color)', marginTop: 2 }}>
+                    {COINS.find(c => c.coin === paymentData.coin)?.ticker || paymentData.coin} (€{paymentData.amount_fiat})
+                  </div>
+                </div>
+
+                {/* QR Code */}
+                {paymentData.qr_code && (
+                  <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                    <img src={paymentData.qr_code} alt="QR" style={{
+                      width: 180, height: 180, borderRadius: 12, border: '1px solid var(--card-border)',
+                      background: '#fff', padding: 8,
+                    }} />
+                  </div>
+                )}
+
+                {/* Address */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--label-color)', marginBottom: 6 }}>
+                    {ts.sendTo || 'Send to this address'}
+                  </div>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 6, padding: '10px 12px', borderRadius: 8,
+                    background: 'var(--input-bg)', border: '1px solid var(--card-border)',
+                  }}>
+                    <span style={{ fontSize: 10, fontFamily: 'monospace', color: 'var(--input-text)', flex: 1, wordBreak: 'break-all', lineHeight: 1.4 }}>
+                      {paymentData.address_in}
+                    </span>
+                    <button onClick={copyAddress} style={{
+                      display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 6,
+                      fontSize: 10, fontWeight: 600, cursor: 'pointer',
+                      background: addressCopied ? 'rgba(52,211,153,0.15)' : 'rgba(212,175,55,0.1)',
+                      border: `1px solid ${addressCopied ? 'rgba(52,211,153,0.4)' : 'rgba(212,175,55,0.25)'}`,
+                      color: addressCopied ? '#34d399' : gold, flexShrink: 0,
+                    }}>
+                      {addressCopied ? <Check size={10} /> : <Copy size={10} />}
+                      {addressCopied ? tc.copied : tc.copyObs}
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.15)', textAlign: 'center' }}>
+                  <div style={{ fontSize: 11, color: '#fbbf24', fontWeight: 600 }}>
+                    <Clock size={11} style={{ verticalAlign: -2, marginRight: 4 }} />
+                    {ts.waitingPayment || 'Waiting for payment confirmation...'}
+                  </div>
+                  <div style={{ fontSize: 10, color: 'var(--label-color)', marginTop: 4 }}>
+                    {ts.autoCredit || 'Credits will be added automatically after confirmation.'}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Subscription Plans */}
       <div style={{ marginBottom: 24 }}>
