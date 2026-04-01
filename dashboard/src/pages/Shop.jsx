@@ -247,25 +247,36 @@ export default function Shop() {
 
                 {/* Amount info */}
                 <div style={{
-                  padding: '12px 14px', borderRadius: 10, marginBottom: 16,
+                  padding: '16px 14px', borderRadius: 10, marginBottom: 16,
                   background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.15)',
                   textAlign: 'center',
                 }}>
-                  <div style={{ fontSize: 20, fontWeight: 800, color: gold }}>{paymentData.amount_crypto}</div>
-                  <div style={{ fontSize: 11, color: 'var(--label-color)', marginTop: 2 }}>
-                    {COINS.find(c => c.coin === paymentData.coin)?.ticker || paymentData.coin} (€{paymentData.amount_fiat})
+                  <div style={{ fontSize: 11, color: 'var(--label-color)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    {ts.amountToPay || 'Amount to pay'}
+                  </div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: gold, fontFamily: 'monospace' }}>
+                    {paymentData.amount_crypto} {COINS.find(c => c.coin === paymentData.coin)?.ticker || ''}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--label-color)', marginTop: 4 }}>
+                    ≈ €{paymentData.amount_fiat}
                   </div>
                 </div>
 
                 {/* QR Code */}
-                {paymentData.qr_code && (
-                  <div style={{ textAlign: 'center', marginBottom: 16 }}>
-                    <img src={paymentData.qr_code} alt="QR" style={{
-                      width: 180, height: 180, borderRadius: 12, border: '1px solid var(--card-border)',
-                      background: '#fff', padding: 8,
+                <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                  {paymentData.qr_code ? (
+                    <img src={paymentData.qr_code} alt="QR Code" style={{
+                      width: 200, height: 200, borderRadius: 12, border: '1px solid var(--card-border)',
+                      background: '#fff', padding: 10,
                     }} />
-                  </div>
-                )}
+                  ) : (
+                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(paymentData.payment_uri || paymentData.address_in)}`}
+                      alt="QR Code" style={{
+                        width: 200, height: 200, borderRadius: 12, border: '1px solid var(--card-border)',
+                        background: '#fff', padding: 10,
+                      }} />
+                  )}
+                </div>
 
                 {/* Address */}
                 <div style={{ marginBottom: 16 }}>
@@ -287,7 +298,7 @@ export default function Shop() {
                       color: addressCopied ? '#34d399' : gold, flexShrink: 0,
                     }}>
                       {addressCopied ? <Check size={10} /> : <Copy size={10} />}
-                      {addressCopied ? tc.copied : tc.copyObs}
+                      {addressCopied ? (ts.copiedLabel || 'Copied') : (ts.copyLabel || 'Copy')}
                     </button>
                   </div>
                 </div>
