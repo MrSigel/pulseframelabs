@@ -6,6 +6,7 @@ import {
   Zap, Crown, Check, Monitor, Shield, Star, Play, Layers, Sun, Moon
 } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
+import { useTheme } from '../context/ThemeContext'
 
 
 const FEATURE_ICONS = [Gauge, Gem, Trophy, Sword, Sparkles, Medal, Swords, Coins, Target, Flame, Bot, Globe, Radio, MessageSquare]
@@ -222,12 +223,11 @@ function MagBtn({ children, primary, onClick, style = {} }) {
 export default function LandingPage() {
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
-  const [mode, setMode] = useState(() => localStorage.getItem('lp_theme') || 'dark')
+  const { mode, toggle: toggleTheme } = useTheme()
   const { lang, toggle: toggleLang, t: translations } = useLang()
   const t = translations.landing
 
   const th = themes[mode]
-  const toggleTheme = () => { const next = mode === 'dark' ? 'light' : 'dark'; setMode(next); localStorage.setItem('lp_theme', next) }
 
   useEffect(() => {
     document.title = 'Pulseframelabs — Stream Like a High Roller'
