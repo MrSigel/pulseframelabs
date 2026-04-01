@@ -26,7 +26,7 @@ export default function BotOverlay() {
   const [log, setLog] = useState([])
 
   const loadData = async () => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     const conn = await getOnePublic('twitch_connection', uid)
     const cmds = await getAllPublic('bot_commands', uid)
     setConnection(conn)
@@ -36,7 +36,7 @@ export default function BotOverlay() {
   }
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     loadData()
     const off1 = onTableChange('user_settings', loadData)
     const off2 = onTableChange('bot_commands', loadData)

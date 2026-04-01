@@ -32,7 +32,7 @@ export default function HotwordsOverlay({ theme: themeProp }) {
   const [entries, setEntries] = useState([])
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getOnePublic('pfl_hotwords_theme', uid).then(v => { if (v) setThemeFromStore(v) })
     getOnePublic('pfl_theme_mode', uid).then(v => {
       if (v === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
@@ -40,12 +40,12 @@ export default function HotwordsOverlay({ theme: themeProp }) {
   }, [uid, themeProp])
 
   const loadData = () => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getAllPublic('hotword_entries', uid).then(d => setEntries(d.sort((a, b) => (b.count || 0) - (a.count || 0))))
   }
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     loadData()
     const off = onTableChange('hotword_entries', loadData)
     return off

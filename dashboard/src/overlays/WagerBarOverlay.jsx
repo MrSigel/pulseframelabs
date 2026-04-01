@@ -87,7 +87,7 @@ export default function WagerBarOverlay({ sessionId, editable = false, theme: th
   const [session, setSession] = useState(null)
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getOnePublic('pfl_wager_theme', uid).then(v => { if (v) setThemeFromStore(v) })
     getOnePublic('pfl_theme_mode', uid).then(v => {
       if (v === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
@@ -95,7 +95,7 @@ export default function WagerBarOverlay({ sessionId, editable = false, theme: th
   }, [uid, themeProp])
 
   const loadData = () => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getAllPublic('wager_sessions', uid).then(data => {
       const active = sessionId
         ? (data.find(x => x.id === sessionId) || null)
@@ -105,7 +105,7 @@ export default function WagerBarOverlay({ sessionId, editable = false, theme: th
   }
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     loadData()
     const off = onTableChange('wager_sessions', loadData)
     return off

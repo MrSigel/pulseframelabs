@@ -51,7 +51,7 @@ export default function PersonalBestsOverlay({ theme: themeProp }) {
   const [bests, setBests] = useState([])
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getOnePublic('pfl_personalbests_theme', uid).then(v => { if (v) setThemeFromStore(v) })
     getOnePublic('pfl_theme_mode', uid).then(v => {
       if (v === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
@@ -59,7 +59,7 @@ export default function PersonalBestsOverlay({ theme: themeProp }) {
   }, [uid, themeProp])
 
   const loadData = () => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getAllPublic('bonushunt_entries', uid).then(entries => {
       const derived = derivePersonalBests(entries)
       derived.sort((a, b) => b.best_win - a.best_win)
@@ -68,7 +68,7 @@ export default function PersonalBestsOverlay({ theme: themeProp }) {
   }
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     loadData()
     const off1 = onTableChange('bonushunt_entries', loadData)
     return () => { off1() }

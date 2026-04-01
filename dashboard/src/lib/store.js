@@ -18,9 +18,10 @@ export async function getAll(table) {
 }
 
 export async function getAllPublic(table, userId) {
-  if (!userId) return []
+  const uid = userId || await getUserId()
+  if (!uid) return []
   const { data, error } = await supabase.from(table).select('*')
-    .eq('user_id', userId).order('created_at', { ascending: true })
+    .eq('user_id', uid).order('created_at', { ascending: true })
   if (error) { console.error('getAllPublic error:', table, error); return [] }
   return (data ?? []).map(row => ({ ...row.data, id: row.id, created_at: row.created_at }))
 }
@@ -79,9 +80,10 @@ export async function getOne(key) {
 }
 
 export async function getOnePublic(key, userId) {
-  if (!userId) return null
+  const uid = userId || await getUserId()
+  if (!uid) return null
   const { data } = await supabase.from('user_settings')
-    .select('value').eq('user_id', userId).eq('key', key).maybeSingle()
+    .select('value').eq('user_id', uid).eq('key', key).maybeSingle()
   return data?.value ?? null
 }
 

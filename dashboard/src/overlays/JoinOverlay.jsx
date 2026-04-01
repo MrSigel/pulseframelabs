@@ -24,7 +24,7 @@ export default function JoinOverlay({ theme: themeProp }) {
   const [drawState, setDrawState]     = useState(null)
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getOnePublic('pfl_join_theme', uid).then(v => { if (v) setThemeFromStore(v) })
     getOnePublic('pfl_theme_mode', uid).then(v => {
       if (v === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
@@ -32,7 +32,7 @@ export default function JoinOverlay({ theme: themeProp }) {
   }, [uid, themeProp])
 
   const loadData = () => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getAllPublic('join_sessions', uid).then(sessions => {
       const active = sessions.find(s => s.status === 'open' || s.status === 'closed' || s.status === 'finished') || null
       setSession(active)
@@ -48,7 +48,7 @@ export default function JoinOverlay({ theme: themeProp }) {
   }
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     loadData()
     const off1 = onTableChange('join_sessions', loadData)
     const off2 = onTableChange('join_participants', loadData)
@@ -57,7 +57,7 @@ export default function JoinOverlay({ theme: themeProp }) {
 
   // Also poll draw state for animation
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     const iv = setInterval(() => {
       getOnePublic('join_draw_state', uid).then(d => setDrawState(d || null))
     }, 80)

@@ -33,7 +33,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
   const [votes, setVotes]       = useState([])
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getOnePublic('pfl_predictions_theme', uid).then(v => { if (v) setThemeFromStore(v) })
     getOnePublic('pfl_theme_mode', uid).then(v => {
       if (v === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
@@ -41,7 +41,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
   }, [uid, themeProp])
 
   const loadGuess = () => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getAllPublic('guess_sessions', uid).then(sessions => {
       const active = sessions.find(s => s.status === 'open' || s.status === 'closed' || s.status === 'finished') || null
       setSession(active)
@@ -56,7 +56,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
   }
 
   const loadPrediction = () => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getAllPublic('prediction_rounds', uid).then(rounds => {
       const active = rounds.find(r => r.status === 'open' || r.status === 'locked' || r.status === 'resolved') || null
       setRound(active)
@@ -71,7 +71,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
   }
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     loadGuess()
     loadPrediction()
     const off1 = onTableChange('guess_sessions', loadGuess)

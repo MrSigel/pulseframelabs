@@ -33,7 +33,7 @@ export default function SlotRequestsOverlay({ theme: themeProp }) {
   const [config, setConfig]       = useState({})
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getOnePublic('pfl_slotrequests_theme', uid).then(v => { if (v) setThemeFromStore(v) })
     getOnePublic('pfl_theme_mode', uid).then(v => {
       if (v === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
@@ -41,13 +41,13 @@ export default function SlotRequestsOverlay({ theme: themeProp }) {
   }, [uid, themeProp])
 
   const loadData = () => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getAllPublic('slot_requests', uid).then(d => setRequests(d))
     getOnePublic('slot_request_config', uid).then(c => setConfig(c || {}))
   }
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     loadData()
     const off1 = onTableChange('slot_requests', loadData)
     const interval = setInterval(loadData, 2000)

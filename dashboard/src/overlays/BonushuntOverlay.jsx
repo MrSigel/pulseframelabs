@@ -150,7 +150,7 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
   const [newBuyIn, setNewBuyIn] = useState('')
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getOnePublic('pfl_bonushunt_theme', uid).then(v => { if (v) setThemeFromStore(v) })
     getOnePublic('pfl_theme_mode', uid).then(v => {
       if (v === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
@@ -158,7 +158,7 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
   }, [uid, themeProp])
 
   const loadData = () => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getAllPublic('bonushunts', uid).then(hunts => {
       if (!hunts.length) { setHunt(null); setEntries([]); return }
       const active = huntId
@@ -173,7 +173,7 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
   }
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     loadData()
     const off1 = onTableChange('bonushunts', loadData)
     const off2 = onTableChange('bonushunt_entries', loadData)

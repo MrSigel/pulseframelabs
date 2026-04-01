@@ -45,7 +45,7 @@ export default function ChatOverlay({ theme: themeProp }) {
   const bottomRef = useRef(null)
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getOnePublic('pfl_chat_theme', uid).then(v => { if (v) setThemeFromStore(v) })
     getOnePublic('pfl_theme_mode', uid).then(v => {
       if (v === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
@@ -53,12 +53,12 @@ export default function ChatOverlay({ theme: themeProp }) {
   }, [uid, themeProp])
 
   const loadMessages = () => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     getAllPublic('chat_messages', uid).then(d => setMessages(d.slice(0, 50).reverse()))
   }
 
   useEffect(() => {
-    if (!uid) return
+    // uid is optional - fallback to logged-in user
     loadMessages()
     const off = onTableChange('chat_messages', loadMessages)
     return off
