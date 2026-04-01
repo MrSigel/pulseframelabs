@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getAll, remove, clearTable, getOne, setOne, insert, update, onTableChange } from '../lib/store'
 import HotwordsOverlay, { DEFAULT_THEME } from '../overlays/HotwordsOverlay'
-import { Trash2, Copy, Check, Palette, RotateCcw, Info, Flame, Save } from 'lucide-react'
+import { Trash2, Check, Palette, RotateCcw, Info, Flame, Save } from 'lucide-react'
+import ObsUrlBar from '../components/ObsUrlBar'
 import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 
@@ -173,7 +174,6 @@ export default function Hotwords() {
   const [showInfo, setShowInfo]     = useState(false)
   const [showTheme, setShowTheme]   = useState(false)
   const [theme, setTheme]           = useState(DEFAULT_THEME)
-  const [copied, setCopied]         = useState(false)
   const [excludedInput, setExcludedInput] = useState('')
 
   const baseUrl = window.location.origin
@@ -200,8 +200,6 @@ export default function Hotwords() {
   const handleThemeChange = async (next) => { setTheme(next); await setOne('hotwords_theme', next) }
   const clearHotwords = async () => { setShowTheme(false); setShowInfo(false); await clearTable('hotword_entries'); setEntries([]) }
   const deleteEntry       = async (id) => { await remove('hotword_entries', id); setEntries(prev => prev.filter(e => e.id !== id)) }
-  const copyUrl           = () => { navigator.clipboard.writeText(obsUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
-
   const saveExcluded = async () => {
     const words = excludedInput.split(',').map(w => w.trim()).filter(Boolean)
     const data = { excluded_words: words }
@@ -312,16 +310,7 @@ export default function Hotwords() {
                   <HotwordsOverlay theme={theme} />
                 </div>
 
-                <div style={{ padding:'10px 16px', borderTop:'1px solid rgba(212,175,55,0.06)', display:'flex', alignItems:'center', gap:8 }}>
-                  <div style={{ width:5, height:5, borderRadius:'50%', background:'#d4af37', animation:'glow-pulse 2s ease-in-out infinite', flexShrink:0 }} />
-                  <span style={{ fontSize:10, color:'var(--input-text)', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>{obsUrl}</span>
-                  <HoverBtn onClick={copyUrl}
-                    style={{ borderRadius:8, padding:'7px 14px', fontSize:12, fontWeight:700, background: copied ? 'rgba(52,211,153,0.15)':'rgba(212,175,55,0.18)', borderColor: copied ? 'rgba(52,211,153,0.5)':'rgba(212,175,55,0.5)', color: copied ? '#34d399':'#d4af37', boxShadow: copied ? '0 0 10px rgba(52,211,153,0.15)':'0 0 10px rgba(212,175,55,0.15)' }}
-                    hoverStyle={!copied ? { background:'rgba(212,175,55,0.28)', boxShadow:'0 0 18px rgba(212,175,55,0.3)', transform:'translateY(-1px)' } : {}}>
-                    {copied ? <Check size={12} /> : <Copy size={12} />}
-                    {copied ? tc.copied : tc.copyObs}
-                  </HoverBtn>
-                </div>
+                <ObsUrlBar obsUrl={obsUrl} />
               </div>
             </div>
 

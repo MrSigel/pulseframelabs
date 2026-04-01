@@ -5,6 +5,7 @@ import App from './App'
 import { AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { LanguageProvider } from './context/LanguageContext'
+import { SubscriptionProvider } from './context/SubscriptionContext'
 import './index.css'
 
 // ── Console Copyright ────────────────────────────────────────────────────
@@ -24,7 +25,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <LanguageProvider>
         <ThemeProvider>
           <AuthProvider>
-            <App />
+            <SubscriptionProvider>
+              <App />
+            </SubscriptionProvider>
           </AuthProvider>
         </ThemeProvider>
       </LanguageProvider>

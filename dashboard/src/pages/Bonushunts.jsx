@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getAll, getOne, setOne, insert, update, remove, removeWhere, onTableChange } from '../lib/store'
 import BonushuntOverlay, { DEFAULT_THEME } from '../overlays/BonushuntOverlay'
-import { Plus, Trash2, Copy, Check, Info, Palette, RotateCcw, Gem } from 'lucide-react'
+import { Plus, Trash2, Check, Info, Palette, RotateCcw, Gem } from 'lucide-react'
+import ObsUrlBar from '../components/ObsUrlBar'
 import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 
@@ -193,8 +194,6 @@ export default function Bonushunts() {
   const [showTheme, setShowTheme] = useState(false)
   const [theme, setTheme] = useState({ ...DEFAULT_THEME })
   const [form, setForm] = useState({ name:'', start_balance:'' })
-  const [copied, setCopied] = useState(false)
-
   const baseUrl = window.location.origin
   const obsUrl  = `${baseUrl}/overlay/bonushunt?mode=normal&uid=${user?.id || ''}`
 
@@ -229,8 +228,6 @@ export default function Bonushunts() {
     await remove('bonushunts', selectedId)
     setShowTheme(false); setShowInfo(false); setHunts(prev => { const next = prev.filter(h => h.id !== selectedId); setSelectedId(next[0]?.id || null); return next })
   }
-
-  const copyUrl = () => { navigator.clipboard.writeText(obsUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   return (
     <div>
@@ -302,21 +299,13 @@ export default function Bonushunts() {
             {selectedId && <BonushuntOverlay huntId={selectedId} editable showTooltips={showInfo} theme={theme} />}
           </div>
 
-          <div style={{ padding:'10px 16px', borderTop:'1px solid rgba(212,175,55,0.06)', display:'flex', alignItems:'center', gap:8 }}>
-            <div style={{ width:5, height:5, borderRadius:'50%', background:'#d4af37', animation:'glow-pulse 2s ease-in-out infinite', flexShrink:0 }} />
-            <span style={{ fontSize:10, color:'var(--input-text)', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>{obsUrl}</span>
-            <HoverBtn onClick={copyUrl}
-              style={{ borderRadius:8, padding:'7px 14px', fontSize:12, fontWeight:700, background: copied ? 'rgba(52,211,153,0.15)':'rgba(212,175,55,0.18)', borderColor: copied ? 'rgba(52,211,153,0.5)':'rgba(212,175,55,0.5)', color: copied ? '#34d399':'#d4af37', boxShadow: copied ? '0 0 10px rgba(52,211,153,0.15)':'0 0 10px rgba(212,175,55,0.15)' }}
-              hoverStyle={!copied ? { background:'rgba(212,175,55,0.28)', boxShadow:'0 0 18px rgba(212,175,55,0.3)', transform:'translateY(-1px)' } : {}}>
-              {copied ? <Check size={12} /> : <Copy size={12} />}
-              {copied ? tc.copied : tc.copyObs}
-            </HoverBtn>
+          <ObsUrlBar obsUrl={obsUrl}>
             <HoverBtn onClick={completeHunt}
               style={{ borderRadius:8, padding:'7px 12px', fontSize:12, fontWeight:600, background:'rgba(239,68,68,0.08)', borderColor:'rgba(239,68,68,0.25)', color:'#f87171' }}
               hoverStyle={{ background:'rgba(239,68,68,0.18)', borderColor:'rgba(239,68,68,0.5)', boxShadow:'0 0 14px rgba(239,68,68,0.2)', transform:'translateY(-1px)' }}>
               <Trash2 size={12} /> {tb.completed}
             </HoverBtn>
-          </div>
+          </ObsUrlBar>
         </div>
       )}
     </div>

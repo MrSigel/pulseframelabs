@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 import { getAll, getOne, setOne, insert, update, remove, clearTable, onTableChange } from '../lib/store'
 import PredictionsOverlay, { DEFAULT_THEME } from '../overlays/PredictionsOverlay'
-import { Info, Palette, Copy, Check, RotateCcw, Target, Trash2, Trophy, Plus } from 'lucide-react'
+import { Info, Palette, Check, RotateCcw, Target, Trash2, Trophy, Plus } from 'lucide-react'
+import ObsUrlBar from '../components/ObsUrlBar'
 
 const S = {
   card: { background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: 14 },
@@ -168,8 +169,6 @@ export default function Predictions() {
   const [showInfo, setShowInfo]     = useState(false)
   const [showTheme, setShowTheme]   = useState(false)
   const [theme, setTheme]           = useState(DEFAULT_THEME)
-  const [copied, setCopied]         = useState(false)
-
   // Guessing Game state
   const [session, setSession]       = useState(null)
   const [entries, setEntries]       = useState([])
@@ -223,7 +222,6 @@ export default function Predictions() {
   }, [])
 
   const handleThemeChange = async (next) => { setTheme(next); await setOne('predictions_theme', next) }
-  const copyUrl = () => { navigator.clipboard.writeText(obsUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const hasData = !!session || !!round
 
@@ -539,15 +537,7 @@ export default function Predictions() {
               <PredictionsOverlay theme={theme} />
             </div>
 
-            <div style={{ padding:'10px 16px', borderTop:'1px solid rgba(212,175,55,0.06)', display:'flex', alignItems:'center', gap:8 }}>
-              <div style={{ width:5, height:5, borderRadius:'50%', background:'#d4af37', animation:'glow-pulse 2s ease-in-out infinite', flexShrink:0 }} />
-              <span style={{ fontSize:10, color:'var(--input-text)', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>{obsUrl}</span>
-              <HoverBtn onClick={copyUrl}
-                style={{ borderRadius:8, padding:'7px 14px', fontSize:12, fontWeight:700, background: copied ? 'rgba(52,211,153,0.15)':'rgba(212,175,55,0.18)', borderColor: copied ? 'rgba(52,211,153,0.5)':'rgba(212,175,55,0.5)', color: copied ? '#34d399':'#d4af37', boxShadow: copied ? '0 0 10px rgba(52,211,153,0.15)':'0 0 10px rgba(212,175,55,0.15)' }}
-                hoverStyle={!copied ? { background:'rgba(212,175,55,0.28)', boxShadow:'0 0 18px rgba(212,175,55,0.3)', transform:'translateY(-1px)' } : {}}>
-                {copied ? <Check size={12} /> : <Copy size={12} />}
-                {copied ? tc.copied : tc.copyObs}
-              </HoverBtn>
+            <ObsUrlBar obsUrl={obsUrl}>
               {session && (
                 <HoverBtn onClick={resetSession}
                   style={{ borderRadius:8, padding:'7px 12px', fontSize:12, fontWeight:600, background:'rgba(239,68,68,0.08)', borderColor:'rgba(239,68,68,0.25)', color:'#f87171' }}
@@ -555,7 +545,7 @@ export default function Predictions() {
                   <Trash2 size={12} /> {tc.complete}
                 </HoverBtn>
               )}
-            </div>
+            </ObsUrlBar>
           </div>
         </div>
       )}
@@ -712,15 +702,7 @@ export default function Predictions() {
               <PredictionsOverlay theme={theme} />
             </div>
 
-            <div style={{ padding:'10px 16px', borderTop:'1px solid rgba(212,175,55,0.06)', display:'flex', alignItems:'center', gap:8 }}>
-              <div style={{ width:5, height:5, borderRadius:'50%', background:'#d4af37', animation:'glow-pulse 2s ease-in-out infinite', flexShrink:0 }} />
-              <span style={{ fontSize:10, color:'var(--input-text)', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>{obsUrl}</span>
-              <HoverBtn onClick={copyUrl}
-                style={{ borderRadius:8, padding:'7px 14px', fontSize:12, fontWeight:700, background: copied ? 'rgba(52,211,153,0.15)':'rgba(212,175,55,0.18)', borderColor: copied ? 'rgba(52,211,153,0.5)':'rgba(212,175,55,0.5)', color: copied ? '#34d399':'#d4af37', boxShadow: copied ? '0 0 10px rgba(52,211,153,0.15)':'0 0 10px rgba(212,175,55,0.15)' }}
-                hoverStyle={!copied ? { background:'rgba(212,175,55,0.28)', boxShadow:'0 0 18px rgba(212,175,55,0.3)', transform:'translateY(-1px)' } : {}}>
-                {copied ? <Check size={12} /> : <Copy size={12} />}
-                {copied ? tc.copied : tc.copyObs}
-              </HoverBtn>
+            <ObsUrlBar obsUrl={obsUrl}>
               {round && (
                 <HoverBtn onClick={resetPrediction}
                   style={{ borderRadius:8, padding:'7px 12px', fontSize:12, fontWeight:600, background:'rgba(239,68,68,0.08)', borderColor:'rgba(239,68,68,0.25)', color:'#f87171' }}
@@ -728,7 +710,7 @@ export default function Predictions() {
                   <Trash2 size={12} /> {tc.complete}
                 </HoverBtn>
               )}
-            </div>
+            </ObsUrlBar>
           </div>
         </div>
       )}

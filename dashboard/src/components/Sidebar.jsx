@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LayoutDashboard, Gem, Trophy, Sword, MessageSquare, Bot, LogOut, Radio, Medal, Gauge, Sparkles, Flame, Target, ChevronDown, Globe, Coins, Swords, Sun, Moon } from 'lucide-react'
+import { LayoutDashboard, Gem, Trophy, Sword, MessageSquare, Bot, LogOut, Radio, Medal, Gauge, Sparkles, Flame, Target, ChevronDown, Globe, Coins, Swords, Sun, Moon, ShoppingCart } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 import { useLang } from '../context/LanguageContext'
+import { useSubscription } from '../context/SubscriptionContext'
 
 function useNavSections(ts) {
   return [
     {
       items: [
         { path: '/', label: ts.dashboard, Icon: LayoutDashboard },
+        { path: '/shop', label: ts.shop, Icon: ShoppingCart },
       ],
     },
     {
@@ -199,6 +201,7 @@ export default function Sidebar() {
   const { signOut, user } = useAuth()
   const { theme: th, mode, toggle: toggleTheme } = useTheme()
   const { lang, toggle: toggleLang, t: translations } = useLang()
+  const { credits, hasActivePlan } = useSubscription()
   const ts = translations.sidebar
   const navSections = useNavSections(ts)
   usePageTitle(navSections)
@@ -228,6 +231,9 @@ export default function Sidebar() {
             </p>
             <p style={{ fontSize: 9, color: mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 120 }}>
               {user?.email || user?.user_metadata?.username || 'admin'}
+            </p>
+            <p style={{ fontSize: 9, color: '#d4af37', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Coins size={9} /> {credits} {ts.credits || 'Credits'}
             </p>
           </div>
         </div>

@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { getAll, getOne, setOne, insert, remove, clearTable, update } from '../lib/store'
 import SlotRequestsOverlay, { DEFAULT_THEME } from '../overlays/SlotRequestsOverlay'
-import { Plus, Trash2, Copy, Check, Palette, RotateCcw, Sparkles, Lock, Unlock, Shuffle, Trophy, X, Info } from 'lucide-react'
+import { Plus, Trash2, Check, Palette, RotateCcw, Sparkles, Lock, Unlock, Shuffle, Trophy, X, Info } from 'lucide-react'
+import ObsUrlBar from '../components/ObsUrlBar'
 import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 
@@ -162,7 +163,6 @@ export default function SlotRequests() {
   const [showTheme, setShowTheme] = useState(false)
   const [theme, setTheme]         = useState(DEFAULT_THEME)
   const [form, setForm]           = useState({ username: '', game: '' })
-  const [copied, setCopied]       = useState(false)
   const [raffleAnim, setRaffleAnim] = useState(false)
   const [raffleModal, setRaffleModal] = useState(false)
   const [raffleDisplay, setRaffleDisplay] = useState('')
@@ -277,8 +277,6 @@ export default function SlotRequests() {
     setRaffleWinner(null)
     await loadRequests()
   }
-
-  const copyUrl = () => { navigator.clipboard.writeText(obsUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const hasRequests = requests.length > 0
 
@@ -505,21 +503,13 @@ export default function SlotRequests() {
             <div style={{ padding:20 }}>
               <SlotRequestsOverlay theme={theme} />
             </div>
-            <div style={{ padding:'10px 16px', borderTop:'1px solid rgba(212,175,55,0.06)', display:'flex', alignItems:'center', gap:8 }}>
-              <div style={{ width:5, height:5, borderRadius:'50%', background:'#d4af37', animation:'glow-pulse 2s ease-in-out infinite', flexShrink:0 }} />
-              <span style={{ fontSize:10, color:'var(--input-text)', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>{obsUrl}</span>
-              <HoverBtn onClick={copyUrl}
-                style={{ borderRadius:8, padding:'6px 12px', fontSize:11, fontWeight:700, background: copied ? 'rgba(52,211,153,0.15)':'rgba(212,175,55,0.18)', borderColor: copied ? 'rgba(52,211,153,0.5)':'rgba(212,175,55,0.5)', color: copied ? '#34d399':'#d4af37' }}
-                hoverStyle={!copied ? { background:'rgba(212,175,55,0.28)', transform:'translateY(-1px)' } : {}}>
-                {copied ? <Check size={11} /> : <Copy size={11} />}
-                {copied ? tc.copied : tc.copyObs}
-              </HoverBtn>
+            <ObsUrlBar obsUrl={obsUrl}>
               <HoverBtn onClick={clearAll}
                 style={{ borderRadius:8, padding:'7px 12px', fontSize:12, fontWeight:600, background:'rgba(239,68,68,0.08)', borderColor:'rgba(239,68,68,0.25)', color:'#f87171' }}
                 hoverStyle={{ background:'rgba(239,68,68,0.18)', borderColor:'rgba(239,68,68,0.5)', boxShadow:'0 0 14px rgba(239,68,68,0.2)', transform:'translateY(-1px)' }}>
                 <Trash2 size={12} /> {tc.complete}
               </HoverBtn>
-            </div>
+            </ObsUrlBar>
           </div>
 
         </div>

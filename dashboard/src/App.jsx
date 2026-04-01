@@ -18,6 +18,7 @@ import TwitchChatbot from './pages/TwitchChatbot'
 import Website from './pages/Website'
 import PointsBattle from './pages/PointsBattle'
 import StreamPoints from './pages/StreamPoints'
+import Shop from './pages/Shop'
 import StreamerPage from './pages/StreamerPage'
 import LandingPage from './pages/LandingPage'
 import OverlayPage from './pages/OverlayPage'
@@ -46,6 +47,7 @@ function ProtectedLayout() {
             <Route path="/website"          element={<Website />} />
             <Route path="/points-battle"   element={<PointsBattle />} />
             <Route path="/stream-points"   element={<StreamPoints />} />
+            <Route path="/shop"            element={<Shop />} />
             <Route path="*"                element={<Navigate to="/" replace />} />
           </Routes>
         </PageTransition>

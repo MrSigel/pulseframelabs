@@ -204,7 +204,29 @@ const i18n = {
       bonushunt: 'Bonushunt', tournaments: 'Tournaments', bossFight: 'Boss Fight',
       hotWords: 'Hot Words', predictions: 'Predictions', join: 'Join', chat: 'Chat',
       twitchBot: 'Twitch Bot', pointsBattle: 'Points Battle', streamPoints: 'Stream Points',
-      website: 'Website', lightMode: 'Light Mode', darkMode: 'Dark Mode', signOut: 'Sign out',
+      website: 'Website', shop: 'Shop', credits: 'Credits',
+      lightMode: 'Light Mode', darkMode: 'Dark Mode', signOut: 'Sign out',
+    },
+
+    // ── Shop ──────────────────────────────────────────────────────────
+    shop: {
+      title: 'Shop',
+      creditBalance: 'Credit Balance', credits: 'Credits',
+      buyCredits: 'Buy Credits',
+      cryptoNote: 'Crypto payment integration coming soon — credits are added instantly for testing.',
+      plans: 'Subscription Plans', activePlan: 'Active Plan',
+      noPlan: 'No active plan',
+      activate: 'Activate', activated: 'Activated!',
+      insufficientCredits: 'Not enough credits',
+      expiresIn: 'Expires in', days: 'days',
+      transactionHistory: 'Transaction History',
+      purchase: 'Credit Purchase', planActivation: 'Plan Activation',
+      trial: 'Trial', monthly: 'Monthly', quarterly: 'Quarterly', halfYear: 'Half Year', annual: 'Annual',
+      trialDesc: '1 Day Access', monthlyDesc: '30 Days Access', quarterlyDesc: '90 Days Access',
+      halfYearDesc: '180 Days Access', annualDesc: '365 Days Access',
+      activateToUnlock: 'Activate a plan to unlock',
+      urlHidden: 'Subscribe to reveal your OBS URL',
+      pageNotAvailable: 'This page is not available. The owner has no active subscription.',
     },
 
     // ── Dashboard ─────────────────────────────────────────────────────
@@ -701,7 +723,29 @@ const i18n = {
       bonushunt: 'Bonushunt', tournaments: 'Turniere', bossFight: 'Boss Fight',
       hotWords: 'Hot Words', predictions: 'Vorhersagen', join: 'Beitreten', chat: 'Chat',
       twitchBot: 'Twitch-Bot', pointsBattle: 'Punkte-Battle', streamPoints: 'Stream-Punkte',
-      website: 'Webseite', lightMode: 'Hell-Modus', darkMode: 'Dunkel-Modus', signOut: 'Abmelden',
+      website: 'Webseite', shop: 'Shop', credits: 'Guthaben',
+      lightMode: 'Hell-Modus', darkMode: 'Dunkel-Modus', signOut: 'Abmelden',
+    },
+
+    // ── Shop ──────────────────────────────────────────────────────────
+    shop: {
+      title: 'Shop',
+      creditBalance: 'Guthaben', credits: 'Credits',
+      buyCredits: 'Credits kaufen',
+      cryptoNote: 'Krypto-Zahlungsintegration kommt bald — Credits werden zum Testen sofort hinzugefügt.',
+      plans: 'Abonnement-Pakete', activePlan: 'Aktives Paket',
+      noPlan: 'Kein aktives Paket',
+      activate: 'Aktivieren', activated: 'Aktiviert!',
+      insufficientCredits: 'Nicht genug Credits',
+      expiresIn: 'Läuft ab in', days: 'Tagen',
+      transactionHistory: 'Transaktionsverlauf',
+      purchase: 'Credit-Kauf', planActivation: 'Paket-Aktivierung',
+      trial: 'Testpaket', monthly: 'Monatlich', quarterly: 'Vierteljährlich', halfYear: 'Halbjährlich', annual: 'Jährlich',
+      trialDesc: '1 Tag Zugang', monthlyDesc: '30 Tage Zugang', quarterlyDesc: '90 Tage Zugang',
+      halfYearDesc: '180 Tage Zugang', annualDesc: '365 Tage Zugang',
+      activateToUnlock: 'Aktiviere ein Paket zum Freischalten',
+      urlHidden: 'Abonniere um deine OBS-URL anzuzeigen',
+      pageNotAvailable: 'Diese Seite ist nicht verfügbar. Der Besitzer hat kein aktives Abonnement.',
     },
 
     // ── Dashboard ─────────────────────────────────────────────────────

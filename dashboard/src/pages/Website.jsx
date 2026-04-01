@@ -5,6 +5,7 @@ import { Globe, ChevronRight, ChevronLeft, Check, Palette, Type, Layout, Image, 
 import { useLang } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
 import { useAuth } from '../context/AuthContext'
+import { useSubscription } from '../context/SubscriptionContext'
 
 const gold = '#d4af37'
 
@@ -607,6 +608,7 @@ function WebsiteWizard({ initial, onSave, onCancel }) {
 export default function Website() {
   const { t } = useLang()
   const { user } = useAuth()
+  const { hasActivePlan } = useSubscription()
   const tc = t.common
   const tw = t.website
   const [website, setWebsite] = useState(null)
@@ -886,27 +888,37 @@ export default function Website() {
               background: 'rgba(212,175,55,0.04)', border: '1px solid rgba(212,175,55,0.12)',
               borderRadius: 10, marginBottom: 12,
             }}>
-              <div style={{ width: 5, height: 5, borderRadius: '50%', background: gold, flexShrink: 0, animation: 'glow-pulse 2s ease-in-out infinite' }} />
-              <span style={{ fontSize: 11, color: 'var(--input-text)', fontFamily: 'monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {window.location.origin}/s/{website.title.toLowerCase().replace(/\s+/g, '')}
-              </span>
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: hasActivePlan ? gold : '#4a4842', flexShrink: 0, animation: hasActivePlan ? 'glow-pulse 2s ease-in-out infinite' : 'none' }} />
+              {hasActivePlan ? (
+                <span style={{ fontSize: 11, color: 'var(--input-text)', fontFamily: 'monospace', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {window.location.origin}/s/{website.title.toLowerCase().replace(/\s+/g, '')}
+                </span>
+              ) : (
+                <span style={{ fontSize: 11, color: '#4a4842', fontFamily: 'monospace', flex: 1, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  {'••••••••'}
+                  <span style={{ fontSize: 9, color: gold, fontFamily: 'system-ui', fontWeight: 600, marginLeft: 4 }}>{t.shop.activateToUnlock}</span>
+                </span>
+              )}
               <button onClick={() => {
+                if (!hasActivePlan) return
                 navigator.clipboard.writeText(`${window.location.origin}/s/${website.title.toLowerCase().replace(/\s+/g, '')}`)
-              }} style={{
-                fontSize: 10, fontWeight: 600, color: gold, background: 'rgba(212,175,55,0.1)',
+              }} disabled={!hasActivePlan} style={{
+                fontSize: 10, fontWeight: 600, color: hasActivePlan ? gold : '#4a4842', background: 'rgba(212,175,55,0.1)',
                 border: '1px solid rgba(212,175,55,0.25)', borderRadius: 6, padding: '4px 10px',
-                cursor: 'pointer', transition: 'all 0.15s',
+                cursor: hasActivePlan ? 'pointer' : 'not-allowed', transition: 'all 0.15s',
+                opacity: hasActivePlan ? 1 : 0.5,
               }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,175,55,0.2)'}
+                onMouseEnter={e => { if (hasActivePlan) e.currentTarget.style.background = 'rgba(212,175,55,0.2)' }}
                 onMouseLeave={e => e.currentTarget.style.background = 'rgba(212,175,55,0.1)'}>
                 {tw.copy}
               </button>
-              <button onClick={() => window.open(`/s/${website.title.toLowerCase().replace(/\s+/g, '')}`, '_blank')} style={{
-                fontSize: 10, fontWeight: 600, color: gold, background: 'none',
+              <button onClick={() => { if (!hasActivePlan) return; window.open(`/s/${website.title.toLowerCase().replace(/\s+/g, '')}`, '_blank') }} disabled={!hasActivePlan} style={{
+                fontSize: 10, fontWeight: 600, color: hasActivePlan ? gold : '#4a4842', background: 'none',
                 border: '1px solid rgba(212,175,55,0.2)', borderRadius: 6, padding: '4px 10px',
-                cursor: 'pointer', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4,
+                cursor: hasActivePlan ? 'pointer' : 'not-allowed', transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 4,
+                opacity: hasActivePlan ? 1 : 0.5,
               }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(212,175,55,0.08)'}
+                onMouseEnter={e => { if (hasActivePlan) e.currentTarget.style.background = 'rgba(212,175,55,0.08)' }}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                 {tw.open} <ExternalLink size={10} />
               </button>

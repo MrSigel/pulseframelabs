@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getAll, getOne, setOne, insert, update, remove, onTableChange } from '../lib/store'
 import TournamentOverlay, { DEFAULT_THEME } from '../overlays/TournamentOverlay'
-import { Plus, Trash2, Copy, Check, Info, Palette, RotateCcw, Play, Users, UserPlus, Trophy, Sparkles } from 'lucide-react'
+import { Plus, Trash2, Check, Info, Palette, RotateCcw, Play, Users, UserPlus, Trophy, Sparkles } from 'lucide-react'
+import ObsUrlBar from '../components/ObsUrlBar'
 import SpinningWheel from '../components/SpinningWheel'
 import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
@@ -261,7 +262,6 @@ export default function Tournaments() {
   const [showTheme, setShowTheme] = useState(false)
   const [theme, setTheme] = useState({ ...DEFAULT_THEME })
   const [form, setForm] = useState({ name:'', max_participants:'8' })
-  const [copied, setCopied] = useState(false)
   const [showWheel, setShowWheel] = useState(false)
 
   const baseUrl = window.location.origin
@@ -345,8 +345,6 @@ export default function Tournaments() {
   const updateSelectedTournament = (changes) => {
     setTournaments(prev => prev.map(t => t.id === selectedId ? { ...t, ...changes } : t))
   }
-
-  const copyUrl = () => { navigator.clipboard.writeText(obsUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const handleWheelComplete = async (selectedParticipants) => {
     if (!selectedTournament) return
@@ -540,16 +538,7 @@ export default function Tournaments() {
               <div style={{ padding:16 }}>
                 {selectedId && <TournamentOverlay tournamentId={selectedId} editable showTooltips={showInfo} theme={theme} />}
               </div>
-              <div style={{ padding:'10px 16px', borderTop:'1px solid rgba(212,175,55,0.06)', display:'flex', alignItems:'center', gap:8 }}>
-                <div style={{ width:5, height:5, borderRadius:'50%', background:'#d4af37', animation:'glow-pulse 2s ease-in-out infinite', flexShrink:0 }} />
-                <span style={{ fontSize:10, color:'var(--input-text)', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>{obsUrl}</span>
-                <HoverBtn onClick={copyUrl}
-                  style={{ borderRadius:8, padding:'7px 14px', fontSize:12, fontWeight:700, background: copied ? 'rgba(52,211,153,0.15)':'rgba(212,175,55,0.18)', borderColor: copied ? 'rgba(52,211,153,0.5)':'rgba(212,175,55,0.5)', color: copied ? '#34d399':'#d4af37', boxShadow: copied ? '0 0 10px rgba(52,211,153,0.15)':'0 0 10px rgba(212,175,55,0.15)' }}
-                  hoverStyle={!copied ? { background:'rgba(212,175,55,0.28)', boxShadow:'0 0 18px rgba(212,175,55,0.3)', transform:'translateY(-1px)' } : {}}>
-                  {copied ? <Check size={12} /> : <Copy size={12} />}
-                  {copied ? tc.copied : tc.copyObs}
-                </HoverBtn>
-              </div>
+              <ObsUrlBar obsUrl={obsUrl} />
             </div>
           </div>
         </div>

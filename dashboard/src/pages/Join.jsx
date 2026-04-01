@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 import { getAll, getOne, setOne, insert, update, remove, clearTable, onTableChange } from '../lib/store'
 import JoinOverlay, { DEFAULT_THEME } from '../overlays/JoinOverlay'
-import { Copy, Check, Info, Palette, RotateCcw, Users, Plus, Trash2 } from 'lucide-react'
+import { Check, Info, Palette, RotateCcw, Users, Plus, Trash2 } from 'lucide-react'
+import ObsUrlBar from '../components/ObsUrlBar'
 
 const S = {
   card: { background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: 14 },
@@ -167,7 +168,6 @@ export default function Join() {
   const [showInfo, setShowInfo]         = useState(false)
   const [showTheme, setShowTheme]       = useState(false)
   const [theme, setTheme]               = useState(DEFAULT_THEME)
-  const [copied, setCopied]             = useState(false)
   const [addForm, setAddForm]           = useState('')
   const [drawing, setDrawing]           = useState(false)
   const [displayName, setDisplayName]   = useState('')
@@ -196,7 +196,6 @@ export default function Join() {
   }, [])
 
   const handleThemeChange = async (next) => { setTheme(next); await setOne('join_theme', next) }
-  const copyUrl = () => { navigator.clipboard.writeText(obsUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const openSession = async () => {
     const data = await insert('join_sessions', { status: 'open', winner: null, created_at: new Date().toISOString() })
@@ -467,21 +466,13 @@ export default function Join() {
               <div style={{ padding:16 }}>
                 <JoinOverlay theme={theme} />
               </div>
-              <div style={{ padding:'10px 16px', borderTop:'1px solid rgba(212,175,55,0.06)', display:'flex', alignItems:'center', gap:8 }}>
-                <div style={{ width:5, height:5, borderRadius:'50%', background:'#d4af37', animation:'glow-pulse 2s ease-in-out infinite', flexShrink:0 }} />
-                <span style={{ fontSize:10, color:'var(--input-text)', fontFamily:'monospace', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', flex:1 }}>{obsUrl}</span>
-                <HoverBtn onClick={copyUrl}
-                  style={{ borderRadius:8, padding:'7px 14px', fontSize:12, fontWeight:700, background: copied ? 'rgba(52,211,153,0.15)':'rgba(212,175,55,0.18)', borderColor: copied ? 'rgba(52,211,153,0.5)':'rgba(212,175,55,0.5)', color: copied ? '#34d399':'#d4af37', boxShadow: copied ? '0 0 10px rgba(52,211,153,0.15)':'0 0 10px rgba(212,175,55,0.15)' }}
-                  hoverStyle={!copied ? { background:'rgba(212,175,55,0.28)', boxShadow:'0 0 18px rgba(212,175,55,0.3)', transform:'translateY(-1px)' } : {}}>
-                  {copied ? <Check size={12} /> : <Copy size={12} />}
-                  {copied ? tc.copied : tc.copyObs}
-                </HoverBtn>
+              <ObsUrlBar obsUrl={obsUrl}>
                 <HoverBtn onClick={newRound}
                   style={{ borderRadius:8, padding:'7px 12px', fontSize:12, fontWeight:600, background:'rgba(239,68,68,0.08)', borderColor:'rgba(239,68,68,0.25)', color:'#f87171' }}
                   hoverStyle={{ background:'rgba(239,68,68,0.18)', borderColor:'rgba(239,68,68,0.5)', boxShadow:'0 0 14px rgba(239,68,68,0.2)', transform:'translateY(-1px)' }}>
                   <Trash2 size={12} /> {tc.complete}
                 </HoverBtn>
-              </div>
+              </ObsUrlBar>
             </div>
           </div>
         </div>

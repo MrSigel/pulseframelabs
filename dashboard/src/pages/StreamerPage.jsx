@@ -99,6 +99,7 @@ export default function StreamerPage() {
   const [uid, setUid] = useState(null)
   const [config, setConfig] = useState(null)
   const [notFound, setNotFound] = useState(false)
+  const [noSubscription, setNoSubscription] = useState(false)
   const [activeSection, setActiveSection] = useState('deals')
   const [storeItems, setStoreItems] = useState([])
   const [buyingItem, setBuyingItem] = useState(null)
@@ -118,6 +119,15 @@ export default function StreamerPage() {
         }
       })
   }, [name])
+
+  // Check subscription once uid is resolved
+  useEffect(() => {
+    if (!uid) return
+    supabase.from('subscriptions').select('expires_at').eq('user_id', uid).gte('expires_at', new Date().toISOString()).limit(1).maybeSingle()
+      .then(({ data }) => {
+        if (!data) setNoSubscription(true)
+      })
+  }, [uid])
 
   // Load website data once uid is resolved
   useEffect(() => {
@@ -148,6 +158,18 @@ export default function StreamerPage() {
           <Globe size={32} style={{ color: '#333', marginBottom: 12 }} />
           <p style={{ fontSize: 18, fontWeight: 700, color: '#555' }}>Page not found</p>
           <p style={{ fontSize: 12, color: '#333', marginTop: 6 }}>/s/{name} does not exist</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (noSubscription) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0914', fontFamily: 'system-ui, sans-serif' }}>
+        <div style={{ textAlign: 'center' }}>
+          <Globe size={32} style={{ color: '#333', marginBottom: 12 }} />
+          <p style={{ fontSize: 18, fontWeight: 700, color: '#555' }}>This page is not available</p>
+          <p style={{ fontSize: 12, color: '#333', marginTop: 6 }}>The streamer's subscription is not active.</p>
         </div>
       </div>
     )
