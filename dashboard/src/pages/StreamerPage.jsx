@@ -157,6 +157,11 @@ export default function StreamerPage() {
 
   const c = config
   const p = c.primaryColor || '#d4af37'
+  const rad = c.borderRadius ?? 14
+  const ff = c.fontFamily || 'system-ui, sans-serif'
+  const tc = c.textColor || '#fff'
+  const cw = c.contentWidth || 740
+  const scale = (c.siteScale || 100) / 100
   const LABELS = { about: 'About', schedule: 'Schedule', socials: 'Socials', stats: 'Stats', gallery: 'Gallery', donate: 'Donate', deals: 'Deals', store: 'Store' }
 
   // Reorder sections: deals first, add store if items exist
@@ -166,23 +171,24 @@ export default function StreamerPage() {
   if (storeItems.length > 0 && !sections.includes('store')) { sections.push('store') }
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: c.bgColor || '#0a0914', fontFamily: 'system-ui, sans-serif', color: '#fff', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: c.bgColor || '#0a0914', fontFamily: ff, color: tc, position: 'relative' }}>
       <style>{`--sp-c: ${p};`}</style>
       <ParticleBackground color={p} />
 
       {/* ── Navigation ───────────────────────────────────────────────── */}
-      <nav style={{
+      {(c.showNavbar ?? true) && <nav style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '12px 24px', borderBottom: `1px solid ${p}10`,
-        backdropFilter: 'blur(16px)', position: 'sticky', top: 0, zIndex: 100,
+        backdropFilter: (c.navBlur ?? true) ? 'blur(16px)' : 'none',
+        position: (c.navPosition || 'sticky') === 'sticky' ? 'sticky' : 'relative', top: 0, zIndex: 100,
         background: `${c.bgColor || '#0a0914'}cc`,
       }}>
         {/* Logo — left */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
           {c.customIcon ? (
-            <img src={c.customIcon} alt="" style={{ width: 28, height: 28, borderRadius: 8, objectFit: 'contain' }} />
+            <img src={c.customIcon} alt="" style={{ width: 28, height: 28, borderRadius: Math.max(4, rad - 6), objectFit: 'contain' }} />
           ) : (
-            <div style={{ width: 28, height: 28, borderRadius: 8, background: `${p}15`, border: `1px solid ${p}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: p }}>
+            <div style={{ width: 28, height: 28, borderRadius: Math.max(4, rad - 6), background: `${p}15`, border: `1px solid ${p}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: p }}>
               {c.title[0].toUpperCase()}
             </div>
           )}
@@ -194,7 +200,7 @@ export default function StreamerPage() {
           {sections.map(s => (
             <button key={s} onClick={(e) => { e.preventDefault(); setActiveSection(s) }} style={{
               fontSize: 11, fontWeight: 600, textDecoration: 'none', cursor: 'pointer',
-              padding: '6px 14px', borderRadius: 8,
+              padding: '6px 14px', borderRadius: Math.max(4, rad - 6),
               color: activeSection === s ? '#000' : `${p}aa`,
               background: activeSection === s ? p : 'transparent',
               border: `1px solid ${activeSection === s ? p : 'transparent'}`,
@@ -209,10 +215,10 @@ export default function StreamerPage() {
 
         {/* Spacer — right (balances the layout) */}
         <div style={{ width: 120, flexShrink: 0 }} />
-      </nav>
+      </nav>}
 
       {/* ── Content ──────────────────────────────────────────────────── */}
-      <div style={{ flex: 1, maxWidth: 740, width: '100%', margin: '0 auto', padding: '0 20px 40px', display: 'flex', flexDirection: 'column', gap: 32, position: 'relative', zIndex: 1 }}>
+      <div style={{ flex: 1, maxWidth: cw, width: '100%', margin: '0 auto', padding: '32px 20px 40px', display: 'flex', flexDirection: 'column', gap: 32, position: 'relative', zIndex: 1, fontSize: `${scale}em` }}>
 
         {/* Only show active section */}
         {activeSection === 'deals' && (c.deals || []).length > 0 && (
@@ -223,15 +229,15 @@ export default function StreamerPage() {
                 <div key={i} style={{
                   display: 'flex', alignItems: 'center', gap: 16, padding: '18px 22px',
                   background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)',
-                  borderRadius: 14, transition: 'all 0.25s', cursor: deal.link ? 'pointer' : 'default',
+                  borderRadius: rad, transition: 'all 0.25s', cursor: deal.link ? 'pointer' : 'default',
                   animation: `sp-fade-up 0.4s ease-out ${i * 0.08}s both`,
                 }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = `${p}40`; e.currentTarget.style.background = `${p}08`; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 30px ${p}10` }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}>
                   {deal.image ? (
-                    <img src={deal.image} alt="" style={{ width: 90, height: 45, objectFit: 'contain', borderRadius: 8, flexShrink: 0 }} />
+                    <img src={deal.image} alt="" style={{ width: 90, height: 45, objectFit: 'contain', borderRadius: Math.max(4, rad - 6), flexShrink: 0 }} />
                   ) : (
-                    <div style={{ width: 90, height: 45, borderRadius: 8, background: 'rgba(255,255,255,0.04)', flexShrink: 0 }} />
+                    <div style={{ width: 90, height: 45, borderRadius: Math.max(4, rad - 6), background: 'rgba(255,255,255,0.04)', flexShrink: 0 }} />
                   )}
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>{deal.title}</div>
@@ -239,7 +245,7 @@ export default function StreamerPage() {
                   {deal.link ? (
                     <a href={deal.link} target="_blank" rel="noopener noreferrer" style={{
                       display: 'flex', alignItems: 'center', gap: 6,
-                      padding: '10px 22px', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                      padding: '10px 22px', borderRadius: Math.max(4, rad - 4), fontSize: 13, fontWeight: 700,
                       background: `linear-gradient(135deg, ${p}, ${p}cc)`, color: '#000', textDecoration: 'none',
                       transition: 'all 0.2s', flexShrink: 0, position: 'relative', overflow: 'hidden',
                     }}
@@ -249,7 +255,7 @@ export default function StreamerPage() {
                       {deal.btnText || 'Play Now'} <ExternalLink size={12} />
                     </a>
                   ) : (
-                    <span style={{ padding: '10px 22px', borderRadius: 10, fontSize: 13, fontWeight: 700, background: p, color: '#000', flexShrink: 0 }}>
+                    <span style={{ padding: '10px 22px', borderRadius: Math.max(4, rad - 4), fontSize: 13, fontWeight: 700, background: p, color: '#000', flexShrink: 0 }}>
                       {deal.btnText || 'Play Now'}
                     </span>
                   )}
@@ -262,13 +268,13 @@ export default function StreamerPage() {
         {/* Other sections — only active */}
         {sections.filter(s => s !== 'deals' && s === activeSection).map(s => {
           if (s === 'about') return (
-            <section key={s} id="about" style={{ padding: '24px', borderRadius: 14, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
+            <section key={s} id="about" style={{ padding: '24px', borderRadius: rad, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
               <h2 style={{ fontSize: 13, fontWeight: 700, color: p, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>About</h2>
               <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8 }}>Welcome to {c.title}'s page. Content coming soon.</p>
             </section>
           )
           if (s === 'schedule') return (
-            <section key={s} id="schedule" style={{ padding: '24px', borderRadius: 14, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
+            <section key={s} id="schedule" style={{ padding: '24px', borderRadius: rad, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
               <h2 style={{ fontSize: 13, fontWeight: 700, color: p, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Stream Schedule</h2>
               <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8 }}>Schedule will be displayed here.</p>
             </section>
@@ -280,7 +286,7 @@ export default function StreamerPage() {
                 {Object.entries(c.socials || {}).filter(([, v]) => v).map(([k, v]) => (
                   <a key={k} href={v} target="_blank" rel="noopener noreferrer" style={{
                     display: 'flex', alignItems: 'center', gap: 6,
-                    padding: '10px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+                    padding: '10px 20px', borderRadius: Math.max(4, rad - 4), fontSize: 13, fontWeight: 600,
                     background: `${p}0a`, border: `1px solid ${p}18`,
                     color: p, textDecoration: 'none', textTransform: 'capitalize',
                     transition: 'all 0.2s',
@@ -294,19 +300,19 @@ export default function StreamerPage() {
             </section>
           )
           if (s === 'stats') return (
-            <section key={s} id="stats" style={{ padding: '24px', borderRadius: 14, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
+            <section key={s} id="stats" style={{ padding: '24px', borderRadius: rad, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
               <h2 style={{ fontSize: 13, fontWeight: 700, color: p, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Stats</h2>
               <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8 }}>Stats will be displayed here.</p>
             </section>
           )
           if (s === 'gallery') return (
-            <section key={s} id="gallery" style={{ padding: '24px', borderRadius: 14, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
+            <section key={s} id="gallery" style={{ padding: '24px', borderRadius: rad, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
               <h2 style={{ fontSize: 13, fontWeight: 700, color: p, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Gallery</h2>
               <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8 }}>Clips and highlights will be shown here.</p>
             </section>
           )
           if (s === 'donate') return (
-            <section key={s} id="donate" style={{ padding: '24px', borderRadius: 14, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
+            <section key={s} id="donate" style={{ padding: '24px', borderRadius: rad, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
               <h2 style={{ fontSize: 13, fontWeight: 700, color: p, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Donate</h2>
               <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8 }}>Donation info will be displayed here.</p>
             </section>
@@ -323,7 +329,7 @@ export default function StreamerPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
               {storeItems.map((item, i) => (
                 <div key={item.id} style={{
-                  padding: 16, borderRadius: 14,
+                  padding: 16, borderRadius: rad,
                   background: 'rgba(255,255,255,0.025)', border: `1px solid rgba(255,255,255,0.06)`,
                   transition: 'all 0.25s', display: 'flex', flexDirection: 'column', gap: 10,
                   animation: `sp-fade-up 0.4s ease-out ${i * 0.06}s both`,
@@ -332,9 +338,9 @@ export default function StreamerPage() {
                   onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; e.currentTarget.style.transform = 'none' }}>
                   {/* Image */}
                   {item.image_url ? (
-                    <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 10, border: `1px solid ${p}15` }} />
+                    <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: Math.max(4, rad - 4), border: `1px solid ${p}15` }} />
                   ) : (
-                    <div style={{ width: '100%', height: 80, borderRadius: 10, background: `${p}08`, border: `1px solid ${p}12`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '100%', height: 80, borderRadius: Math.max(4, rad - 4), background: `${p}08`, border: `1px solid ${p}12`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Gift size={24} style={{ color: `${p}40` }} />
                     </div>
                   )}
@@ -351,7 +357,7 @@ export default function StreamerPage() {
                       <span style={{ fontSize: 10, color: '#555' }}>pts</span>
                     </div>
                     <button onClick={() => { setBuyingItem(item); setTwitchName(''); setBuySuccess(false) }} style={{
-                      padding: '6px 14px', borderRadius: 8, fontSize: 11, fontWeight: 700,
+                      padding: '6px 14px', borderRadius: Math.max(4, rad - 6), fontSize: 11, fontWeight: 700,
                       background: `linear-gradient(135deg, ${p}, ${p}cc)`, color: '#000',
                       border: 'none', cursor: 'pointer', transition: 'all 0.2s',
                     }}
@@ -391,7 +397,7 @@ export default function StreamerPage() {
                     <span style={{ color: p, fontWeight: 600 }}>{twitchName}</span> will receive <span style={{ color: p, fontWeight: 600 }}>{buyingItem.name}</span>. The streamer will process your request.
                   </p>
                   <button onClick={() => setBuyingItem(null)} style={{
-                    width: '100%', padding: '12px', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                    width: '100%', padding: '12px', borderRadius: Math.max(4, rad - 4), fontSize: 13, fontWeight: 700,
                     background: `linear-gradient(135deg, ${p}, ${p}cc)`, color: '#000', border: 'none', cursor: 'pointer',
                   }}>Close</button>
                 </div>
@@ -399,9 +405,9 @@ export default function StreamerPage() {
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
                     {buyingItem.image_url ? (
-                      <img src={buyingItem.image_url} alt="" style={{ width: 48, height: 48, borderRadius: 10, objectFit: 'cover' }} />
+                      <img src={buyingItem.image_url} alt="" style={{ width: 48, height: 48, borderRadius: Math.max(4, rad - 4), objectFit: 'cover' }} />
                     ) : (
-                      <div style={{ width: 48, height: 48, borderRadius: 10, background: `${p}10`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ width: 48, height: 48, borderRadius: Math.max(4, rad - 4), background: `${p}10`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <Gift size={20} style={{ color: p }} />
                       </div>
                     )}
@@ -419,7 +425,7 @@ export default function StreamerPage() {
                   </label>
                   <input value={twitchName} onChange={e => setTwitchName(e.target.value)} placeholder="your_twitch_name"
                     style={{
-                      width: '100%', padding: '12px 14px', borderRadius: 10, fontSize: 13,
+                      width: '100%', padding: '12px 14px', borderRadius: Math.max(4, rad - 4), fontSize: 13,
                       background: 'rgba(255,255,255,0.05)', border: `1px solid ${p}20`, color: '#fff',
                       outline: 'none', fontFamily: 'system-ui', boxSizing: 'border-box', marginBottom: 16,
                     }}
@@ -428,7 +434,7 @@ export default function StreamerPage() {
 
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button onClick={() => setBuyingItem(null)} style={{
-                      flex: 1, padding: '12px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+                      flex: 1, padding: '12px', borderRadius: Math.max(4, rad - 4), fontSize: 13, fontWeight: 600,
                       background: 'none', border: `1px solid rgba(255,255,255,0.1)`, color: '#888', cursor: 'pointer',
                     }}>Cancel</button>
                     <button disabled={!twitchName.trim()} onClick={async () => {
@@ -439,7 +445,7 @@ export default function StreamerPage() {
                       })
                       setBuySuccess(true)
                     }} style={{
-                      flex: 2, padding: '12px', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                      flex: 2, padding: '12px', borderRadius: Math.max(4, rad - 4), fontSize: 13, fontWeight: 700,
                       background: !twitchName.trim() ? '#333' : `linear-gradient(135deg, ${p}, ${p}cc)`,
                       color: !twitchName.trim() ? '#666' : '#000', border: 'none',
                       cursor: !twitchName.trim() ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
@@ -456,9 +462,11 @@ export default function StreamerPage() {
       </div>
 
       {/* ── Footer — pushed to bottom ────────────────────────────────── */}
-      <footer style={{ textAlign: 'center', padding: '20px 20px 24px', borderTop: `1px solid ${p}08`, position: 'relative', zIndex: 1, marginTop: 'auto' }}>
-        <p style={{ fontSize: 10, color: '#333' }}>Powered by <span style={{ color: p }}>Pulseframelabs</span></p>
-      </footer>
+      {(c.showFooter ?? true) && (
+        <footer style={{ textAlign: 'center', padding: '20px 20px 24px', borderTop: `1px solid ${p}08`, position: 'relative', zIndex: 1, marginTop: 'auto' }}>
+          <p style={{ fontSize: 10, color: '#333' }}>Powered by <span style={{ color: p }}>Pulseframelabs</span></p>
+        </footer>
+      )}
     </div>
   )
 }

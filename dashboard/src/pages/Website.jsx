@@ -708,45 +708,81 @@ export default function Website() {
               </div>
             </div>
 
+            {/* Layout */}
+            <div>
+              <p style={{ ...S.label, fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 10, paddingBottom: 6, borderBottom: '1px solid rgba(212,175,55,0.08)' }}>{tc.layout}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span style={{ fontSize: 10, color: 'var(--label-color)' }}>{tc.fontSize}</span>
+                    <span style={{ fontSize: 10, color: 'var(--label-color)' }}>{website.siteScale || 100}%</span>
+                  </div>
+                  <input type="range" min={80} max={130} value={website.siteScale || 100} onChange={e => {
+                    const updated = { ...website, siteScale: Number(e.target.value) }
+                    setWebsite(updated); saveWebsite(updated)
+                  }} className="theme-slider" style={{ width: '100%' }} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span style={{ fontSize: 10, color: 'var(--label-color)' }}>{tc.padding}</span>
+                    <span style={{ fontSize: 10, color: 'var(--label-color)' }}>{website.contentWidth || 740}px</span>
+                  </div>
+                  <input type="range" min={500} max={1100} step={20} value={website.contentWidth || 740} onChange={e => {
+                    const updated = { ...website, contentWidth: Number(e.target.value) }
+                    setWebsite(updated); saveWebsite(updated)
+                  }} className="theme-slider" style={{ width: '100%' }} />
+                </div>
+                <div>
+                  <span style={{ fontSize: 10, color: 'var(--label-color)', display: 'block', marginBottom: 4 }}>{tw.navStyle || 'Navigation Style'}</span>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {['sticky', 'static'].map(v => (
+                      <button key={v} onClick={() => {
+                        const updated = { ...website, navPosition: v }
+                        setWebsite(updated); saveWebsite(updated)
+                      }} style={{
+                        padding: '4px 10px', borderRadius: 6, fontSize: 11, cursor: 'pointer',
+                        background: (website.navPosition || 'sticky') === v ? 'rgba(212,175,55,0.12)' : 'var(--input-bg)',
+                        border: `1px solid ${(website.navPosition || 'sticky') === v ? 'rgba(212,175,55,0.3)' : 'var(--card-border)'}`,
+                        color: (website.navPosition || 'sticky') === v ? gold : 'var(--label-color)',
+                      }}>{v === 'sticky' ? 'Sticky' : 'Static'}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Effects */}
             <div>
               <p style={{ ...S.label, fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 10, paddingBottom: 6, borderBottom: '1px solid rgba(212,175,55,0.08)' }}>{tc.visibilityEffects}</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <div onClick={() => {
-                    const updated = { ...website, showParticles: !(website.showParticles ?? true) }
-                    setWebsite(updated); saveWebsite(updated)
-                  }} style={{
-                    width: 32, height: 18, borderRadius: 9, position: 'relative', cursor: 'pointer', flexShrink: 0,
-                    background: (website.showParticles ?? true) ? 'rgba(212,175,55,0.8)' : 'rgba(40,40,70,0.8)',
-                    border: `1px solid ${(website.showParticles ?? true) ? 'rgba(212,175,55,0.3)' : 'rgba(60,60,90,0.5)'}`,
-                    transition: 'all 0.2s',
-                  }}>
-                    <div style={{ position: 'absolute', top: 2, left: (website.showParticles ?? true) ? 13 : 2, width: 12, height: 12, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }} />
-                  </div>
-                  <span style={{ fontSize: 11, color: 'var(--label-color)' }}>{tw.particles || 'Particle Animation'}</span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <div onClick={() => {
-                    const updated = { ...website, showNavbar: !(website.showNavbar ?? true) }
-                    setWebsite(updated); saveWebsite(updated)
-                  }} style={{
-                    width: 32, height: 18, borderRadius: 9, position: 'relative', cursor: 'pointer', flexShrink: 0,
-                    background: (website.showNavbar ?? true) ? 'rgba(212,175,55,0.8)' : 'rgba(40,40,70,0.8)',
-                    border: `1px solid ${(website.showNavbar ?? true) ? 'rgba(212,175,55,0.3)' : 'rgba(60,60,90,0.5)'}`,
-                    transition: 'all 0.2s',
-                  }}>
-                    <div style={{ position: 'absolute', top: 2, left: (website.showNavbar ?? true) ? 13 : 2, width: 12, height: 12, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }} />
-                  </div>
-                  <span style={{ fontSize: 11, color: 'var(--label-color)' }}>{tw.showNavbar || 'Show Navigation'}</span>
-                </label>
+                {[
+                  { key: 'showParticles', label: tw.particles, def: true },
+                  { key: 'showNavbar', label: tw.showNavbar, def: true },
+                  { key: 'showFooter', label: tw.showFooter || 'Show Footer', def: true },
+                  { key: 'navBlur', label: tw.navBlur || 'Navigation Blur', def: true },
+                ].map(tog => (
+                  <label key={tog.key} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                    <div onClick={() => {
+                      const updated = { ...website, [tog.key]: !(website[tog.key] ?? tog.def) }
+                      setWebsite(updated); saveWebsite(updated)
+                    }} style={{
+                      width: 32, height: 18, borderRadius: 9, position: 'relative', cursor: 'pointer', flexShrink: 0,
+                      background: (website[tog.key] ?? tog.def) ? 'rgba(212,175,55,0.8)' : 'rgba(40,40,70,0.8)',
+                      border: `1px solid ${(website[tog.key] ?? tog.def) ? 'rgba(212,175,55,0.3)' : 'rgba(60,60,90,0.5)'}`,
+                      transition: 'all 0.2s',
+                    }}>
+                      <div style={{ position: 'absolute', top: 2, left: (website[tog.key] ?? tog.def) ? 13 : 2, width: 12, height: 12, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }} />
+                    </div>
+                    <span style={{ fontSize: 11, color: 'var(--label-color)' }}>{tog.label}</span>
+                  </label>
+                ))}
               </div>
             </div>
           </div>
 
           <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(212,175,55,0.08)', display: 'flex', justifyContent: 'flex-end' }}>
             <button onClick={() => {
-              const reset = { ...website, bgColor: '#0a0914', primaryColor: '#d4af37', accentColor: '#f5e6b8', textColor: '#ffffff', fontFamily: 'system-ui, sans-serif', borderRadius: 14, showParticles: true, showNavbar: true }
+              const reset = { ...website, bgColor: '#0a0914', primaryColor: '#d4af37', accentColor: '#f5e6b8', textColor: '#ffffff', fontFamily: 'system-ui, sans-serif', borderRadius: 14, showParticles: true, showNavbar: true, showFooter: true, navBlur: true, siteScale: 100, contentWidth: 740, navPosition: 'sticky' }
               setWebsite(reset); saveWebsite(reset)
             }}
               style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--label-color)', background: 'none', border: '1px solid var(--card-border)', borderRadius: 7, padding: '5px 10px', cursor: 'pointer', transition: 'all 0.15s' }}

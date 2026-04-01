@@ -492,6 +492,9 @@ const i18n = {
       accentColorSite: 'Accent Color',
       particles: 'Particle Animation',
       showNavbar: 'Show Navigation',
+      showFooter: 'Show Footer',
+      navBlur: 'Navigation Blur',
+      navStyle: 'Navigation Style',
     },
   },
 
@@ -981,6 +984,9 @@ const i18n = {
       accentColorSite: 'Akzentfarbe',
       particles: 'Partikel-Animation',
       showNavbar: 'Navigation anzeigen',
+      showFooter: 'Footer anzeigen',
+      navBlur: 'Navigation Blur',
+      navStyle: 'Navigation-Stil',
     },
   },
 }
