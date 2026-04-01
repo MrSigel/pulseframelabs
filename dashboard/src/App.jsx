@@ -19,6 +19,9 @@ import Website from './pages/Website'
 import PointsBattle from './pages/PointsBattle'
 import StreamPoints from './pages/StreamPoints'
 import Shop from './pages/Shop'
+import Settings from './pages/Settings'
+import Support from './pages/Support'
+import ResetPassword from './pages/ResetPassword'
 import StreamerPage from './pages/StreamerPage'
 import LandingPage from './pages/LandingPage'
 import OverlayPage from './pages/OverlayPage'
@@ -48,6 +51,9 @@ function ProtectedLayout() {
             <Route path="/points-battle"   element={<PointsBattle />} />
             <Route path="/stream-points"   element={<StreamPoints />} />
             <Route path="/shop"            element={<Shop />} />
+            <Route path="/settings"        element={<Settings />} />
+            <Route path="/support"         element={<Support />} />
+            <Route path="/reset-password"  element={<ResetPassword />} />
             <Route path="*"                element={<Navigate to="/" replace />} />
           </Routes>
         </PageTransition>
@@ -90,6 +96,7 @@ export default function App() {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<LandingPage />} />
       </Routes>
     )

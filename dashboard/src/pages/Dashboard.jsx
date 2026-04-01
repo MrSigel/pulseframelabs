@@ -2,7 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
 import { useTheme } from '../context/ThemeContext'
-import { Gauge, Medal, Sparkles, Gem, Trophy, Sword, Flame, Target, Radio, MessageSquare, Bot, Globe, Swords, Coins } from 'lucide-react'
+import { useSubscription, PLANS } from '../context/SubscriptionContext'
+import { Gauge, Medal, Sparkles, Gem, Trophy, Sword, Flame, Target, Radio, MessageSquare, Bot, Globe, Swords, Coins, Crown, Clock, ArrowRight } from 'lucide-react'
 
 const gold = '#d4af37'
 
@@ -11,9 +12,11 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const { t } = useLang()
   const { theme: th, mode } = useTheme()
+  const { credits, subscription, hasActivePlan, transactions } = useSubscription()
   const isDark = mode === 'dark'
   const td = t.dashboard
   const tc = t.common
+  const daysLeft = hasActivePlan ? Math.max(0, Math.ceil((new Date(subscription.expires_at) - new Date()) / (1000*60*60*24))) : 0
 
   const QUICK_ACTIONS = [
     { path: '/wager',          label: t.sidebar.wagerBar,      Icon: Gauge,          desc: td.actions.wagerBar },
@@ -55,6 +58,119 @@ export default function Dashboard() {
         <p style={{ fontSize:11, color: th.textMuted, marginTop:10 }}>
           {td.supportMsg}
         </p>
+      </div>
+
+      {/* Stats Cards */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:12, marginBottom:24 }}>
+        {/* Credit Balance */}
+        <div style={{
+          padding:'18px 16px', borderRadius:12,
+          background: isDark ? 'linear-gradient(135deg, #0c0b14, #100f1a)' : 'linear-gradient(135deg, #ffffff, #f8f6f1)',
+          border: `1px solid ${isDark ? 'rgba(212,175,55,0.06)' : 'rgba(139,109,31,0.1)'}`,
+        }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
+            <div style={{ width:32, height:32, borderRadius:8, background: isDark ? 'rgba(212,175,55,0.08)' : 'rgba(139,109,31,0.08)', border:`1px solid ${isDark ? 'rgba(212,175,55,0.15)' : 'rgba(139,109,31,0.15)'}`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Coins size={15} style={{ color: gold }} />
+            </div>
+            <span style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', color: th.textMuted }}>{td.stats.creditBalance}</span>
+          </div>
+          <div style={{ fontSize:24, fontWeight:800, color: gold }}>{credits}</div>
+        </div>
+
+        {/* Subscription */}
+        <div style={{
+          padding:'18px 16px', borderRadius:12,
+          background: isDark ? 'linear-gradient(135deg, #0c0b14, #100f1a)' : 'linear-gradient(135deg, #ffffff, #f8f6f1)',
+          border: `1px solid ${isDark ? 'rgba(212,175,55,0.06)' : 'rgba(139,109,31,0.1)'}`,
+        }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
+            <div style={{ width:32, height:32, borderRadius:8, background: isDark ? 'rgba(212,175,55,0.08)' : 'rgba(139,109,31,0.08)', border:`1px solid ${isDark ? 'rgba(212,175,55,0.15)' : 'rgba(139,109,31,0.15)'}`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Crown size={15} style={{ color: gold }} />
+            </div>
+            <span style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', color: th.textMuted }}>{td.stats.subscription}</span>
+          </div>
+          <div style={{ fontSize:16, fontWeight:700, color: hasActivePlan ? '#34d399' : '#f87171' }}>
+            {hasActivePlan ? td.stats.active : td.stats.noPlan}
+          </div>
+        </div>
+
+        {/* Days Remaining */}
+        <div style={{
+          padding:'18px 16px', borderRadius:12,
+          background: isDark ? 'linear-gradient(135deg, #0c0b14, #100f1a)' : 'linear-gradient(135deg, #ffffff, #f8f6f1)',
+          border: `1px solid ${isDark ? 'rgba(212,175,55,0.06)' : 'rgba(139,109,31,0.1)'}`,
+        }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
+            <div style={{ width:32, height:32, borderRadius:8, background: isDark ? 'rgba(212,175,55,0.08)' : 'rgba(139,109,31,0.08)', border:`1px solid ${isDark ? 'rgba(212,175,55,0.15)' : 'rgba(139,109,31,0.15)'}`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Clock size={15} style={{ color: gold }} />
+            </div>
+            <span style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', color: th.textMuted }}>{td.stats.daysRemaining}</span>
+          </div>
+          <div style={{ fontSize:24, fontWeight:800, color: th.text }}>
+            {hasActivePlan ? daysLeft : '\u2014'}
+          </div>
+        </div>
+
+        {/* Plan */}
+        <div style={{
+          padding:'18px 16px', borderRadius:12,
+          background: isDark ? 'linear-gradient(135deg, #0c0b14, #100f1a)' : 'linear-gradient(135deg, #ffffff, #f8f6f1)',
+          border: `1px solid ${isDark ? 'rgba(212,175,55,0.06)' : 'rgba(139,109,31,0.1)'}`,
+        }}>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10 }}>
+            <div style={{ width:32, height:32, borderRadius:8, background: isDark ? 'rgba(212,175,55,0.08)' : 'rgba(139,109,31,0.08)', border:`1px solid ${isDark ? 'rgba(212,175,55,0.15)' : 'rgba(139,109,31,0.15)'}`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <Crown size={15} style={{ color: gold }} />
+            </div>
+            <span style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', color: th.textMuted }}>{td.stats.plan}</span>
+          </div>
+          <div style={{ fontSize:16, fontWeight:700, color: th.text }}>
+            {hasActivePlan && subscription?.plan_key ? (PLANS[subscription.plan_key]?.labelKey || subscription.plan_key) : '\u2014'}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div style={{ marginBottom:24 }}>
+        <p style={{ fontSize:10, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.14em', color: th.textMuted, marginBottom:14 }}>{td.recentActivity}</p>
+        <div style={{
+          borderRadius:12, overflow:'hidden',
+          background: isDark ? 'linear-gradient(135deg, #0c0b14, #100f1a)' : 'linear-gradient(135deg, #ffffff, #f8f6f1)',
+          border: `1px solid ${isDark ? 'rgba(212,175,55,0.06)' : 'rgba(139,109,31,0.1)'}`,
+        }}>
+          {transactions.length === 0 ? (
+            <div style={{ padding:'24px 16px', textAlign:'center', fontSize:12, color: th.textMuted }}>{td.noRecentActivity}</div>
+          ) : (
+            transactions.slice(0, 5).map((tx, i) => {
+              const isPositive = tx.amount > 0
+              return (
+                <div key={tx.id || i} style={{
+                  display:'flex', alignItems:'center', gap:12, padding:'12px 16px',
+                  borderBottom: i < Math.min(transactions.length, 5) - 1 ? `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}` : 'none',
+                }}>
+                  <div style={{
+                    width:30, height:30, borderRadius:8, flexShrink:0,
+                    background: isPositive ? 'rgba(52,211,153,0.1)' : 'rgba(212,175,55,0.08)',
+                    border: `1px solid ${isPositive ? 'rgba(52,211,153,0.2)' : 'rgba(212,175,55,0.15)'}`,
+                    display:'flex', alignItems:'center', justifyContent:'center',
+                  }}>
+                    <ArrowRight size={13} style={{ color: isPositive ? '#34d399' : gold, transform: isPositive ? 'rotate(-45deg)' : 'rotate(45deg)' }} />
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:12, fontWeight:600, color: th.text, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                      {tx.description || tx.type}
+                    </div>
+                    <div style={{ fontSize:10, color: th.textMuted, marginTop:2 }}>
+                      {new Date(tx.created_at).toLocaleDateString(undefined, { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' })}
+                    </div>
+                  </div>
+                  <div style={{ fontSize:13, fontWeight:700, color: isPositive ? '#34d399' : '#f87171', flexShrink:0 }}>
+                    {isPositive ? '+' : ''}{tx.amount}
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
       </div>
 
       {/* Quick Actions */}

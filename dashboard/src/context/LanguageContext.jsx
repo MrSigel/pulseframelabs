@@ -243,6 +243,15 @@ const i18n = {
       resent: 'Email resent!',
       emailNotConfirmed: 'Your email address has not been confirmed yet. Please check your inbox.',
       backToLogin: 'Back to Sign In',
+      forgotPassword: 'Forgot password?',
+      forgotPasswordSub: 'Enter your email to receive a reset link',
+      resetEmail: 'Send Reset Link',
+      resetEmailSent: 'Reset link sent!',
+      resetEmailSentDesc: 'Check your inbox for the password reset link.',
+      newPassword: 'New Password',
+      confirmNewPassword: 'Confirm New Password',
+      resetPassword: 'Reset Password',
+      passwordResetSuccess: 'Password updated successfully!',
     },
 
     // ── Sidebar ───────────────────────────────────────────────────────
@@ -253,7 +262,47 @@ const i18n = {
       hotWords: 'Hot Words', predictions: 'Predictions', join: 'Join', chat: 'Chat',
       twitchBot: 'Twitch Bot', pointsBattle: 'Points Battle', streamPoints: 'Stream Points',
       website: 'Website', shop: 'Shop', credits: 'Credits',
+      settings: 'Settings', support: 'Support',
       lightMode: 'Light Mode', darkMode: 'Dark Mode', signOut: 'Sign out',
+    },
+
+    // ── Settings ──────────────────────────────────────────────────────
+    settings: {
+      title: 'Account Settings',
+      profile: 'Profile',
+      changeUsername: 'Change Username', currentUsername: 'Current Username', newUsername: 'New Username',
+      changeEmail: 'Change Email', currentEmail: 'Current Email', newEmail: 'New Email',
+      changePassword: 'Change Password', newPassword: 'New Password', confirmPassword: 'Confirm New Password',
+      deleteAccount: 'Delete Account',
+      deleteWarning: 'This action is permanent and cannot be undone. All your data will be deleted.',
+      deleteConfirm: 'Type DELETE to confirm',
+      saved: 'Saved!',
+      emailChangeNote: 'A confirmation link will be sent to your new email address.',
+    },
+
+    // ── Support ───────────────────────────────────────────────────────
+    support: {
+      title: 'Support & Help',
+      contactForm: 'Contact Form',
+      name: 'Name', email: 'Email', subject: 'Subject', message: 'Message',
+      send: 'Send Message', sent: 'Message sent!',
+      sentDesc: 'We will get back to you as soon as possible.',
+      telegramChat: 'Live Chat',
+      telegramDesc: 'Get instant help via our Telegram support channel.',
+      openTelegram: 'Open Telegram',
+      namePlaceholder: 'Your name',
+      subjectPlaceholder: 'What do you need help with?',
+      messagePlaceholder: 'Describe your issue or question...',
+    },
+
+    // ── Notifications ─────────────────────────────────────────────────
+    notifications: {
+      title: 'Notifications', noNotifications: 'No notifications',
+      markAllRead: 'Mark all as read',
+      subExpiring: 'Your subscription expires in {days} days',
+      subExpired: 'Your subscription has expired',
+      paymentConfirmed: 'Credits added',
+      planActivated: 'Plan activated',
     },
 
     // ── Shop ──────────────────────────────────────────────────────────
@@ -292,6 +341,8 @@ const i18n = {
       morning: 'Good Morning', afternoon: 'Good Afternoon', evening: 'Good Evening',
       welcomeMsg: 'We wish you good luck and success on a new streaming day!',
       supportMsg: 'For questions, please reach out to our support via the live chat at the bottom right of the screen.',
+      stats: { creditBalance: 'Credit Balance', subscription: 'Subscription', daysRemaining: 'Days Remaining', plan: 'Plan', active: 'Active', noPlan: 'No Plan' },
+      recentActivity: 'Recent Activity', noRecentActivity: 'No recent activity',
       quickActions: 'Quick Actions',
       actions: {
         wagerBar: 'Track wager progress', personalBests: 'View best wins', slotRequests: 'Manage slot requests',
@@ -816,6 +867,15 @@ const i18n = {
       resent: 'E-Mail erneut gesendet!',
       emailNotConfirmed: 'Deine E-Mail-Adresse wurde noch nicht bestätigt. Bitte prüfe deinen Posteingang.',
       backToLogin: 'Zurück zur Anmeldung',
+      forgotPassword: 'Passwort vergessen?',
+      forgotPasswordSub: 'Gib deine E-Mail ein um einen Reset-Link zu erhalten',
+      resetEmail: 'Reset-Link senden',
+      resetEmailSent: 'Reset-Link gesendet!',
+      resetEmailSentDesc: 'Prüfe deinen Posteingang für den Passwort-Reset-Link.',
+      newPassword: 'Neues Passwort',
+      confirmNewPassword: 'Neues Passwort bestätigen',
+      resetPassword: 'Passwort zurücksetzen',
+      passwordResetSuccess: 'Passwort erfolgreich aktualisiert!',
     },
 
     // ── Sidebar ───────────────────────────────────────────────────────
@@ -826,7 +886,44 @@ const i18n = {
       hotWords: 'Hot Words', predictions: 'Vorhersagen', join: 'Beitreten', chat: 'Chat',
       twitchBot: 'Twitch-Bot', pointsBattle: 'Punkte-Battle', streamPoints: 'Stream-Punkte',
       website: 'Webseite', shop: 'Shop', credits: 'Guthaben',
+      settings: 'Einstellungen', support: 'Support',
       lightMode: 'Hell-Modus', darkMode: 'Dunkel-Modus', signOut: 'Abmelden',
+    },
+
+    settings: {
+      title: 'Kontoeinstellungen',
+      profile: 'Profil',
+      changeUsername: 'Benutzername ändern', currentUsername: 'Aktueller Benutzername', newUsername: 'Neuer Benutzername',
+      changeEmail: 'E-Mail ändern', currentEmail: 'Aktuelle E-Mail', newEmail: 'Neue E-Mail',
+      changePassword: 'Passwort ändern', newPassword: 'Neues Passwort', confirmPassword: 'Neues Passwort bestätigen',
+      deleteAccount: 'Konto löschen',
+      deleteWarning: 'Diese Aktion ist dauerhaft und kann nicht rückgängig gemacht werden. Alle deine Daten werden gelöscht.',
+      deleteConfirm: 'Gib DELETE ein zum Bestätigen',
+      saved: 'Gespeichert!',
+      emailChangeNote: 'Ein Bestätigungslink wird an deine neue E-Mail-Adresse gesendet.',
+    },
+
+    support: {
+      title: 'Support & Hilfe',
+      contactForm: 'Kontaktformular',
+      name: 'Name', email: 'E-Mail', subject: 'Betreff', message: 'Nachricht',
+      send: 'Nachricht senden', sent: 'Nachricht gesendet!',
+      sentDesc: 'Wir melden uns so schnell wie möglich bei dir.',
+      telegramChat: 'Live-Chat',
+      telegramDesc: 'Erhalte sofortige Hilfe über unseren Telegram-Support.',
+      openTelegram: 'Telegram öffnen',
+      namePlaceholder: 'Dein Name',
+      subjectPlaceholder: 'Wobei brauchst du Hilfe?',
+      messagePlaceholder: 'Beschreibe dein Problem oder deine Frage...',
+    },
+
+    notifications: {
+      title: 'Benachrichtigungen', noNotifications: 'Keine Benachrichtigungen',
+      markAllRead: 'Alle als gelesen markieren',
+      subExpiring: 'Dein Abo läuft in {days} Tagen ab',
+      subExpired: 'Dein Abo ist abgelaufen',
+      paymentConfirmed: 'Credits gutgeschrieben',
+      planActivated: 'Paket aktiviert',
     },
 
     // ── Shop ──────────────────────────────────────────────────────────
@@ -865,6 +962,8 @@ const i18n = {
       morning: 'Guten Morgen', afternoon: 'Guten Nachmittag', evening: 'Guten Abend',
       welcomeMsg: 'Wir wünschen dir viel Glück und Erfolg an einem neuen Streaming-Tag!',
       supportMsg: 'Bei Fragen wende dich bitte an unseren Support über den Live-Chat unten rechts auf dem Bildschirm.',
+      stats: { creditBalance: 'Guthaben', subscription: 'Abonnement', daysRemaining: 'Verbleibende Tage', plan: 'Paket', active: 'Aktiv', noPlan: 'Kein Paket' },
+      recentActivity: 'Letzte Aktivität', noRecentActivity: 'Keine Aktivität',
       quickActions: 'Schnellaktionen',
       actions: {
         wagerBar: 'Wager-Fortschritt verfolgen', personalBests: 'Beste Gewinne ansehen', slotRequests: 'Slot-Anfragen verwalten',

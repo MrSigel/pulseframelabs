@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useTheme } from '../context/ThemeContext'
 import { useLang } from '../context/LanguageContext'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 import { LogIn, UserPlus, Eye, EyeOff, Check, X, Play, Mail, User, Lock, ArrowRight, Sun, Moon, MailCheck, RefreshCw } from 'lucide-react'
 
 const gold = '#d4af37'
@@ -106,6 +107,10 @@ export default function Login() {
   const [sentEmail, setSentEmail] = useState('')
   const [resending, setResending] = useState(false)
   const [resent, setResent] = useState(false)
+  const [forgotPassword, setForgotPassword] = useState(false)
+  const [resetEmailAddress, setResetEmailAddress] = useState('')
+  const [resetSending, setResetSending] = useState(false)
+  const [resetSent, setResetSent] = useState(false)
 
   const switchTab = (tb) => { setTab(tb); setError(''); document.title = `Pulseframelabs - ${tb === 'login' ? tl.signIn : tl.register}` }
   if (typeof document !== 'undefined') document.title = `Pulseframelabs - ${tab === 'login' ? tl.signIn : tl.register}`
@@ -249,15 +254,89 @@ export default function Login() {
             </span>
           </div>
           <h1 style={{ fontSize:26, fontWeight:800, color: isDark ? '#fff' : '#1a1714', margin:'0 0 6px', lineHeight:1.2 }}>
-            {emailSent ? tl.emailSent : tab === 'login' ? tl.welcomeBack : tl.getStarted}
+            {forgotPassword ? tl.forgotPassword : emailSent ? tl.emailSent : tab === 'login' ? tl.welcomeBack : tl.getStarted}
           </h1>
           <p style={{ fontSize:13, color:subtitleColor, margin:0, lineHeight:1.5 }}>
-            {emailSent ? '' : tab === 'login' ? tl.signInSub : tl.registerSub}
+            {forgotPassword ? '' : emailSent ? '' : tab === 'login' ? tl.signInSub : tl.registerSub}
           </p>
         </div>
 
-        {/* ── Email Confirmation Screen ─────────────────────────── */}
-        {emailSent ? (
+        {/* ── Forgot Password Screen ──────────────────────────── */}
+        {forgotPassword ? (
+          <div style={{ animation:'lp-slide-up 0.5s ease-out 0.1s both' }}>
+            <div style={{ display:'flex', justifyContent:'center', marginBottom:24 }}>
+              <div style={{
+                width:72, height:72, borderRadius:'50%',
+                background:`rgba(212,175,55,0.08)`, border:`2px solid rgba(212,175,55,0.25)`,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                animation:'lp-float 3s ease-in-out infinite',
+              }}>
+                <Mail size={32} style={{ color:gold }} />
+              </div>
+            </div>
+
+            {!resetSent ? (
+              <>
+                <p style={{ fontSize:13, color:subtitleColor, textAlign:'center', marginBottom:16, lineHeight:1.6 }}>
+                  {tl.forgotPasswordSub}
+                </p>
+
+                <div style={{ marginBottom:14 }}>
+                  <label style={{ display:'flex', alignItems:'center', gap:5, fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', color:subtitleColor, marginBottom:6 }}>
+                    <Mail size={10} style={{ color:dimColor }} /> {tl.email}
+                  </label>
+                  <input className="login-input" type="email" value={resetEmailAddress} onChange={e => setResetEmailAddress(e.target.value)} placeholder={tl.emailPlaceholder}
+                    style={{ width:'100%', padding:'13px 16px', borderRadius:12, fontSize:13, background:inputBg, border:`1px solid ${inputBorder}`, color:inputColor, outline:'none', fontFamily:'system-ui,sans-serif', transition:'border-color 0.25s, box-shadow 0.25s', boxSizing:'border-box' }} />
+                </div>
+
+                <button onClick={async () => {
+                  if (!resetEmailAddress.trim() || resetSending) return
+                  setResetSending(true)
+                  await supabase.auth.resetPasswordForEmail(resetEmailAddress.trim(), { redirectTo: window.location.origin + '/reset-password' })
+                  setResetSending(false)
+                  setResetSent(true)
+                }} disabled={resetSending || !resetEmailAddress.trim()} style={{
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:8, width:'100%',
+                  padding:'13px 20px', borderRadius:12, fontSize:14, fontWeight:700,
+                  background: (!resetEmailAddress.trim() || resetSending) ? (isDark ? '#1a1818' : '#d8d4cc') : `linear-gradient(135deg, ${gold}, #b8962e)`,
+                  border:'none', color: (!resetEmailAddress.trim() || resetSending) ? dimColor : '#000',
+                  cursor: (!resetEmailAddress.trim() || resetSending) ? 'not-allowed' : 'pointer',
+                  transition:'all 0.25s', position:'relative', overflow:'hidden',
+                }}
+                  onMouseEnter={e => { if (resetEmailAddress.trim() && !resetSending) { e.currentTarget.style.boxShadow = `0 0 28px rgba(212,175,55,0.3)`; e.currentTarget.style.transform = 'translateY(-2px)' }}}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}>
+                  {resetSending ? <RefreshCw size={14} style={{ animation:'spin 1s linear infinite' }} /> : <Mail size={14} />}
+                  {tl.resetEmail}
+                </button>
+              </>
+            ) : (
+              <div style={{
+                padding:'16px 20px', borderRadius:12, marginBottom:16,
+                background: isDark ? 'rgba(212,175,55,0.06)' : 'rgba(139,109,31,0.06)',
+                border:`1px solid ${isDark ? 'rgba(212,175,55,0.15)' : 'rgba(139,109,31,0.15)'}`,
+              }}>
+                <p style={{ fontSize:14, fontWeight:700, color: isDark ? '#e8e2d4' : '#1a1714', textAlign:'center', margin:'0 0 6px' }}>
+                  {tl.resetEmailSent}
+                </p>
+                <p style={{ fontSize:12, color:subtitleColor, textAlign:'center', margin:0, lineHeight:1.6 }}>
+                  {tl.resetEmailSentDesc}
+                </p>
+              </div>
+            )}
+
+            <button onClick={() => { setForgotPassword(false); setResetSent(false); setError('') }} style={{
+              display:'flex', alignItems:'center', justifyContent:'center', gap:6, width:'100%',
+              padding:'12px 20px', marginTop:12, borderRadius:12, fontSize:13, fontWeight:600,
+              background:'none', border:`1px solid ${isDark ? 'rgba(212,175,55,0.2)' : 'rgba(139,109,31,0.2)'}`,
+              color: gold, cursor:'pointer', transition:'all 0.25s',
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = `${gold}50`; e.currentTarget.style.background = `${gold}08` }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = isDark ? 'rgba(212,175,55,0.2)' : 'rgba(139,109,31,0.2)'; e.currentTarget.style.background = 'none' }}>
+              <ArrowRight size={14} style={{ transform:'rotate(180deg)' }} /> {tl.backToLogin}
+            </button>
+          </div>
+
+        ) : emailSent ? (
           <div style={{ animation:'lp-slide-up 0.5s ease-out 0.1s both' }}>
             {/* Success icon */}
             <div style={{ display:'flex', justifyContent:'center', marginBottom:24 }}>
@@ -363,6 +442,9 @@ export default function Login() {
               </div>
             )}
             <div style={{ animation:'lp-fade-in 0.4s ease-out 0.15s both' }}>{submitBtn(<>{tl.signInBtn} <ArrowRight size={14} /></>)}</div>
+            <p style={{ fontSize:11, color:dimColor, textAlign:'center', marginTop:2 }}>
+              <span onClick={() => { setForgotPassword(true); setResetEmailAddress(loginEmail); setResetSent(false) }} style={{ color:gold, cursor:'pointer', fontWeight:600 }}>{tl.forgotPassword}</span>
+            </p>
             <p style={{ fontSize:11, color:dimColor, textAlign:'center', marginTop:4 }}>
               {tl.noAccount} <span onClick={() => switchTab('register')} style={{ color:gold, cursor:'pointer', fontWeight:600 }}>{tl.register}</span>
             </p>
