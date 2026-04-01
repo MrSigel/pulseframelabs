@@ -349,30 +349,102 @@ function WebsiteWizard({ initial, onSave, onCancel }) {
               {SECTION_OPTIONS.map(sec => {
                 const active = (config.sections || []).includes(sec.key)
                 return (
-                  <button key={sec.key} onClick={() => {
-                    const cur = config.sections || []
-                    set('sections', active ? cur.filter(s => s !== sec.key) : [...cur, sec.key])
-                  }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
-                      borderRadius: 10, cursor: 'pointer', textAlign: 'left',
-                      background: active ? 'rgba(212,175,55,0.06)' : 'rgba(255,255,255,0.01)',
-                      border: `1px solid ${active ? 'rgba(212,175,55,0.25)' : 'rgba(255,255,255,0.04)'}`,
-                      transition: 'all 0.15s',
-                    }}>
-                    <div style={{
-                      width: 20, height: 20, borderRadius: 6, flexShrink: 0,
-                      background: active ? gold : 'rgba(255,255,255,0.05)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      transition: 'all 0.15s',
-                    }}>
-                      {active && <Check size={12} style={{ color: '#000' }} />}
-                    </div>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: active ? '#e8e2d4' : '#5a5548' }}>{tw[sec.tLabel]}</div>
-                      <div style={{ fontSize: 10, color: '#4a4842', marginTop: 1 }}>{tw[sec.tDesc]}</div>
-                    </div>
-                  </button>
+                  <div key={sec.key}>
+                    <button onClick={() => {
+                      const cur = config.sections || []
+                      set('sections', active ? cur.filter(s => s !== sec.key) : [...cur, sec.key])
+                    }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', width: '100%',
+                        borderRadius: active ? '10px 10px 0 0' : 10, cursor: 'pointer', textAlign: 'left',
+                        background: active ? 'rgba(212,175,55,0.06)' : 'var(--input-bg)',
+                        border: `1px solid ${active ? 'rgba(212,175,55,0.25)' : 'var(--card-border)'}`,
+                        borderBottom: active ? 'none' : undefined,
+                        transition: 'all 0.15s',
+                      }}>
+                      <div style={{
+                        width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+                        background: active ? gold : 'rgba(255,255,255,0.05)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        {active && <Check size={12} style={{ color: '#000' }} />}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: active ? 'var(--input-text)' : 'var(--label-color)' }}>{tw[sec.tLabel]}</div>
+                        <div style={{ fontSize: 10, color: 'var(--label-color)', marginTop: 1 }}>{tw[sec.tDesc]}</div>
+                      </div>
+                    </button>
+
+                    {/* Inline content editor for active sections */}
+                    {active && sec.key === 'about' && (
+                      <div style={{ padding: 12, background: 'rgba(212,175,55,0.03)', border: '1px solid rgba(212,175,55,0.15)', borderTop: 'none', borderRadius: '0 0 10px 10px' }}>
+                        <textarea className="input" rows={3} placeholder={tw.aboutPlaceholder || 'Write a short bio...'} value={config.aboutText || ''}
+                          onChange={e => set('aboutText', e.target.value)}
+                          style={{ resize: 'vertical', width: '100%', boxSizing: 'border-box' }} />
+                      </div>
+                    )}
+                    {active && sec.key === 'schedule' && (
+                      <div style={{ padding: 12, background: 'rgba(212,175,55,0.03)', border: '1px solid rgba(212,175,55,0.15)', borderTop: 'none', borderRadius: '0 0 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {(config.scheduleEntries || []).map((entry, i) => (
+                          <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                            <input className="input" placeholder={tw.scheduleDay || 'Day'} value={entry.day || ''} style={{ width: 100 }}
+                              onChange={e => { const entries = [...(config.scheduleEntries || [])]; entries[i] = { ...entries[i], day: e.target.value }; set('scheduleEntries', entries) }} />
+                            <input className="input" placeholder={tw.scheduleTime || 'Time'} value={entry.time || ''} style={{ flex: 1 }}
+                              onChange={e => { const entries = [...(config.scheduleEntries || [])]; entries[i] = { ...entries[i], time: e.target.value }; set('scheduleEntries', entries) }} />
+                            <button onClick={() => set('scheduleEntries', (config.scheduleEntries || []).filter((_, j) => j !== i))}
+                              style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0 }}><RotateCcw size={12} /></button>
+                          </div>
+                        ))}
+                        <button onClick={() => set('scheduleEntries', [...(config.scheduleEntries || []), { day: '', time: '' }])}
+                          style={{ fontSize: 11, color: gold, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', borderRadius: 6, padding: '5px 10px', cursor: 'pointer' }}>
+                          + {tw.addScheduleEntry || 'Add Entry'}
+                        </button>
+                      </div>
+                    )}
+                    {active && sec.key === 'stats' && (
+                      <div style={{ padding: 12, background: 'rgba(212,175,55,0.03)', border: '1px solid rgba(212,175,55,0.15)', borderTop: 'none', borderRadius: '0 0 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {(config.statsEntries || []).map((entry, i) => (
+                          <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                            <input className="input" placeholder={tw.statLabel || 'Label'} value={entry.label || ''} style={{ flex: 1 }}
+                              onChange={e => { const entries = [...(config.statsEntries || [])]; entries[i] = { ...entries[i], label: e.target.value }; set('statsEntries', entries) }} />
+                            <input className="input" placeholder={tw.statValue || 'Value'} value={entry.value || ''} style={{ width: 100 }}
+                              onChange={e => { const entries = [...(config.statsEntries || [])]; entries[i] = { ...entries[i], value: e.target.value }; set('statsEntries', entries) }} />
+                            <button onClick={() => set('statsEntries', (config.statsEntries || []).filter((_, j) => j !== i))}
+                              style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0 }}><RotateCcw size={12} /></button>
+                          </div>
+                        ))}
+                        <button onClick={() => set('statsEntries', [...(config.statsEntries || []), { label: '', value: '' }])}
+                          style={{ fontSize: 11, color: gold, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', borderRadius: 6, padding: '5px 10px', cursor: 'pointer' }}>
+                          + {tw.addStat || 'Add Stat'}
+                        </button>
+                      </div>
+                    )}
+                    {active && sec.key === 'gallery' && (
+                      <div style={{ padding: 12, background: 'rgba(212,175,55,0.03)', border: '1px solid rgba(212,175,55,0.15)', borderTop: 'none', borderRadius: '0 0 10px 10px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {(config.galleryUrls || []).map((url, i) => (
+                          <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                            <input className="input" placeholder={tw.galleryUrl || 'Image or Clip URL'} value={url} style={{ flex: 1 }}
+                              onChange={e => { const urls = [...(config.galleryUrls || [])]; urls[i] = e.target.value; set('galleryUrls', urls) }} />
+                            <button onClick={() => set('galleryUrls', (config.galleryUrls || []).filter((_, j) => j !== i))}
+                              style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0 }}><RotateCcw size={12} /></button>
+                          </div>
+                        ))}
+                        <button onClick={() => set('galleryUrls', [...(config.galleryUrls || []), ''])}
+                          style={{ fontSize: 11, color: gold, background: 'rgba(212,175,55,0.08)', border: '1px solid rgba(212,175,55,0.2)', borderRadius: 6, padding: '5px 10px', cursor: 'pointer' }}>
+                          + {tw.addGalleryItem || 'Add Image/Clip'}
+                        </button>
+                      </div>
+                    )}
+                    {active && sec.key === 'donate' && (
+                      <div style={{ padding: 12, background: 'rgba(212,175,55,0.03)', border: '1px solid rgba(212,175,55,0.15)', borderTop: 'none', borderRadius: '0 0 10px 10px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        <input className="input" placeholder={tw.donateLink || 'Donation Link URL'} value={config.donateLink || ''}
+                          onChange={e => set('donateLink', e.target.value)} />
+                        <textarea className="input" rows={2} placeholder={tw.donateText || 'Donation info text...'} value={config.donateText || ''}
+                          onChange={e => set('donateText', e.target.value)}
+                          style={{ resize: 'vertical', width: '100%', boxSizing: 'border-box' }} />
+                      </div>
+                    )}
+                  </div>
                 )
               })}
             </div>

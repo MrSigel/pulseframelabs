@@ -495,6 +495,11 @@ const i18n = {
       showFooter: 'Show Footer',
       navBlur: 'Navigation Blur',
       navStyle: 'Navigation Style',
+      aboutPlaceholder: 'Write a short bio about yourself...',
+      scheduleDay: 'Day', scheduleTime: 'Time', addScheduleEntry: 'Add Entry',
+      statLabel: 'Label', statValue: 'Value', addStat: 'Add Stat',
+      galleryUrl: 'Image or Clip URL', addGalleryItem: 'Add Image/Clip',
+      donateLink: 'Donation Link URL', donateText: 'Donation info text...',
     },
   },
 
@@ -987,6 +992,11 @@ const i18n = {
       showFooter: 'Footer anzeigen',
       navBlur: 'Navigation Blur',
       navStyle: 'Navigation-Stil',
+      aboutPlaceholder: 'Schreibe eine kurze Bio über dich...',
+      scheduleDay: 'Tag', scheduleTime: 'Uhrzeit', addScheduleEntry: 'Eintrag hinzufügen',
+      statLabel: 'Bezeichnung', statValue: 'Wert', addStat: 'Statistik hinzufügen',
+      galleryUrl: 'Bild- oder Clip-URL', addGalleryItem: 'Bild/Clip hinzufügen',
+      donateLink: 'Spenden-Link URL', donateText: 'Spendeninfo-Text...',
     },
   },
 }

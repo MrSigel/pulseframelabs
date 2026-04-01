@@ -270,13 +270,22 @@ export default function StreamerPage() {
           if (s === 'about') return (
             <section key={s} id="about" style={{ padding: '24px', borderRadius: rad, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
               <h2 style={{ fontSize: 13, fontWeight: 700, color: p, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>About</h2>
-              <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8 }}>Welcome to {c.title}'s page. Content coming soon.</p>
+              <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{c.aboutText || `Welcome to ${c.title}'s page.`}</p>
             </section>
           )
           if (s === 'schedule') return (
             <section key={s} id="schedule" style={{ padding: '24px', borderRadius: rad, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
               <h2 style={{ fontSize: 13, fontWeight: 700, color: p, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Stream Schedule</h2>
-              <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8 }}>Schedule will be displayed here.</p>
+              {(c.scheduleEntries || []).length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {c.scheduleEntries.map((e, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', borderRadius: Math.max(4, rad - 6), background: `${p}06`, border: `1px solid ${p}10` }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: p, width: 80, flexShrink: 0 }}>{e.day}</span>
+                      <span style={{ fontSize: 12, color: '#aaa' }}>{e.time}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8 }}>No schedule set.</p>}
             </section>
           )
           if (s === 'socials') return (
@@ -302,19 +311,52 @@ export default function StreamerPage() {
           if (s === 'stats') return (
             <section key={s} id="stats" style={{ padding: '24px', borderRadius: rad, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
               <h2 style={{ fontSize: 13, fontWeight: 700, color: p, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Stats</h2>
-              <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8 }}>Stats will be displayed here.</p>
+              {(c.statsEntries || []).length > 0 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 10 }}>
+                  {c.statsEntries.map((e, i) => (
+                    <div key={i} style={{ textAlign: 'center', padding: '12px 8px', borderRadius: Math.max(4, rad - 6), background: `${p}06`, border: `1px solid ${p}10` }}>
+                      <div style={{ fontSize: 20, fontWeight: 800, color: p }}>{e.value}</div>
+                      <div style={{ fontSize: 10, color: '#888', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 }}>{e.label}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : <p style={{ fontSize: 13, color: '#888' }}>No stats available.</p>}
             </section>
           )
           if (s === 'gallery') return (
             <section key={s} id="gallery" style={{ padding: '24px', borderRadius: rad, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
               <h2 style={{ fontSize: 13, fontWeight: 700, color: p, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Gallery</h2>
-              <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8 }}>Clips and highlights will be shown here.</p>
+              {(c.galleryUrls || []).length > 0 ? (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
+                  {c.galleryUrls.filter(u => u).map((url, i) => (
+                    <div key={i} style={{ borderRadius: Math.max(4, rad - 6), overflow: 'hidden', border: `1px solid ${p}15`, aspectRatio: '16/9' }}>
+                      {url.includes('twitch.tv/') || url.includes('youtube.com/') || url.includes('youtu.be/') ? (
+                        <iframe src={url.replace('watch?v=', 'embed/').replace('clips.twitch.tv/', 'clips.twitch.tv/embed?clip=')} style={{ width: '100%', height: '100%', border: 'none' }} allowFullScreen />
+                      ) : (
+                        <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : <p style={{ fontSize: 13, color: '#888' }}>No content yet.</p>}
             </section>
           )
           if (s === 'donate') return (
             <section key={s} id="donate" style={{ padding: '24px', borderRadius: rad, background: `${p}05`, border: `1px solid ${p}0c`, animation: 'sp-fade-up 0.5s ease-out' }}>
               <h2 style={{ fontSize: 13, fontWeight: 700, color: p, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 12 }}>Donate</h2>
-              <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8 }}>Donation info will be displayed here.</p>
+              {c.donateText && <p style={{ fontSize: 13, color: '#888', lineHeight: 1.8, whiteSpace: 'pre-wrap', marginBottom: 12 }}>{c.donateText}</p>}
+              {c.donateLink ? (
+                <a href={c.donateLink} target="_blank" rel="noopener noreferrer" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 22px',
+                  borderRadius: Math.max(4, rad - 4), fontSize: 13, fontWeight: 700,
+                  background: `linear-gradient(135deg, ${p}, ${p}cc)`, color: '#000',
+                  textDecoration: 'none', transition: 'all 0.2s',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 0 20px ${p}60`; e.currentTarget.style.transform = 'scale(1.04)' }}
+                  onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}>
+                  Donate <ExternalLink size={12} />
+                </a>
+              ) : <p style={{ fontSize: 13, color: '#888' }}>No donation link set.</p>}
             </section>
           )
           return null
