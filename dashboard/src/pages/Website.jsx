@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getOne, setOne } from '../lib/store'
 import { Globe, ChevronRight, ChevronLeft, Check, Palette, Type, Layout, Image, Link2, Eye, RotateCcw, ExternalLink, Info, Upload, Gamepad2, Zap, Crown, Star, Diamond, Flame, Trophy } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
+import { useTheme } from '../context/ThemeContext'
 
 const gold = '#d4af37'
 
@@ -179,6 +180,8 @@ function WebsitePreview({ config }) {
 // ── Wizard ───────────────────────────────────────────────────────────────
 function WebsiteWizard({ initial, onSave, onCancel }) {
   const { t } = useLang()
+  const { mode } = useTheme()
+  const isDark = mode === 'dark'
   const tw = t.website
   const [step, setStep] = useState(0)
   const [config, setConfig] = useState(initial || {
@@ -501,7 +504,7 @@ function WebsiteWizard({ initial, onSave, onCancel }) {
                 <ChevronLeft size={13} /> Back
               </button>
             ) : (
-              <button onClick={onCancel} style={{ fontSize: 12, fontWeight: 600, color: '#f87171', background: 'none', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 8, cursor: 'pointer', padding: '6px 14px', transition: 'all 0.15s' }} onMouseEnter={e => { e.currentTarget.style.background='rgba(248,113,113,0.1)'; e.currentTarget.style.borderColor='rgba(248,113,113,0.5)'; e.currentTarget.style.transform='translateY(-1px)' }} onMouseLeave={e => { e.currentTarget.style.background='none'; e.currentTarget.style.borderColor='rgba(248,113,113,0.3)'; e.currentTarget.style.transform='none' }}>
+              <button onClick={onCancel} style={{ fontSize: 12, fontWeight: 600, color: '#f87171', background: isDark ? 'rgba(248,113,113,0.06)' : 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: 8, cursor: 'pointer', padding: '6px 14px', transition: 'all 0.15s' }} onMouseEnter={e => { e.currentTarget.style.background='rgba(248,113,113,0.15)'; e.currentTarget.style.borderColor='rgba(248,113,113,0.5)'; e.currentTarget.style.transform='translateY(-1px)' }} onMouseLeave={e => { e.currentTarget.style.background = isDark ? 'rgba(248,113,113,0.06)' : 'rgba(248,113,113,0.08)'; e.currentTarget.style.borderColor='rgba(248,113,113,0.3)'; e.currentTarget.style.transform='none' }}>
                 {tw.cancel}
               </button>
             )}

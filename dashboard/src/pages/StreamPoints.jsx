@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { getAll, getOne, setOne, insert, update, remove, onTableChange } from '../lib/store'
-import { Info, Plus, Trash2, Check, Coins, Search, ChevronDown, Gift, ShoppingBag, Settings } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { Info, Plus, Trash2, Check, Coins, Search, ChevronDown, Gift, ShoppingBag, Settings, Upload, Image } from 'lucide-react'
 import { useLang } from '../context/LanguageContext'
+import { useAuth } from '../context/AuthContext'
 
 const gold = '#d4af37'
 const S = {
@@ -22,9 +24,11 @@ function HoverBtn({ onClick, children, style, hoverStyle, disabled }) {
 
 export default function StreamPoints() {
   const { t } = useLang()
+  const { user } = useAuth()
   const tc = t.common
   const ts = t.streamPoints
   const [activeTab, setActiveTab] = useState('points')
+  const fileInputRef = useRef(null)
   const [showInfo, setShowInfo] = useState(false)
   const [viewers, setViewers] = useState([])
   const [items, setItems] = useState([])
@@ -34,7 +38,8 @@ export default function StreamPoints() {
   const [editId, setEditId] = useState(null)
   const [editAmount, setEditAmount] = useState('')
   const [showAddItem, setShowAddItem] = useState(false)
-  const [itemForm, setItemForm] = useState({ name: '', description: '', price: '', quantity: '-1', visible: true })
+  const [itemForm, setItemForm] = useState({ name: '', description: '', price: '', quantity: '-1', visible: true, image_url: '' })
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     getAll('stream_viewers').then(d => setViewers(d))
@@ -60,11 +65,31 @@ export default function StreamPoints() {
     setEditAmount('')
   }
 
+  const uploadImage = async (file) => {
+    if (!file || !user) return null
+    setUploading(true)
+    const ext = file.name.split('.').pop()
+    const path = `${user.id}/${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('store-images').upload(path, file, { upsert: true })
+    setUploading(false)
+    if (error) { console.error('Upload error:', error); return null }
+    const { data } = supabase.storage.from('store-images').getPublicUrl(path)
+    return data?.publicUrl || null
+  }
+
+  const handleImageSelect = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 512 * 1024) { alert('Max 512 KB'); return }
+    const url = await uploadImage(file)
+    if (url) setItemForm(p => ({ ...p, image_url: url }))
+  }
+
   const addItem = async () => {
     if (!itemForm.name.trim() || !itemForm.price) return
-    await insert('store_items', { name: itemForm.name.trim(), description: itemForm.description.trim(), price_points: Number(itemForm.price), quantity_available: Number(itemForm.quantity), visible: itemForm.visible })
+    await insert('store_items', { name: itemForm.name.trim(), description: itemForm.description.trim(), price_points: Number(itemForm.price), quantity_available: Number(itemForm.quantity), visible: itemForm.visible, image_url: itemForm.image_url || '' })
     setItems(await getAll('store_items'))
-    setItemForm({ name: '', description: '', price: '', quantity: '-1', visible: true })
+    setItemForm({ name: '', description: '', price: '', quantity: '-1', visible: true, image_url: '' })
     setShowAddItem(false)
   }
 
@@ -244,6 +269,37 @@ export default function StreamPoints() {
                 <span style={{ ...S.label, marginBottom:4 }}>{ts.description}</span>
                 <input className="input" placeholder={ts.itemDesc} value={itemForm.description} onChange={e => setItemForm(p => ({ ...p, description: e.target.value }))} />
               </div>
+
+              {/* Image upload */}
+              <div style={{ marginBottom:12 }}>
+                <span style={{ ...S.label, marginBottom:4 }}>{ts.itemImage}</span>
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelect} style={{ display:'none' }} />
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  {itemForm.image_url ? (
+                    <div style={{ position:'relative' }}>
+                      <img src={itemForm.image_url} alt="" style={{ width:60, height:60, objectFit:'cover', borderRadius:10, border:'1px solid rgba(212,175,55,0.2)' }} />
+                      <button onClick={() => setItemForm(p => ({ ...p, image_url: '' }))} style={{
+                        position:'absolute', top:-6, right:-6, width:18, height:18, borderRadius:'50%',
+                        background:'#f87171', border:'none', color:'#fff', fontSize:11, cursor:'pointer',
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                      }}>×</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => fileInputRef.current?.click()} disabled={uploading} style={{
+                      width:60, height:60, borderRadius:10, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:4,
+                      background:'rgba(212,175,55,0.04)', border:'1px dashed rgba(212,175,55,0.2)',
+                      cursor: uploading ? 'wait' : 'pointer', color:'#5a5548', transition:'all 0.15s',
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(212,175,55,0.4)'; e.currentTarget.style.background='rgba(212,175,55,0.08)' }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor='rgba(212,175,55,0.2)'; e.currentTarget.style.background='rgba(212,175,55,0.04)' }}>
+                      {uploading ? <div style={{ width:14, height:14, border:'2px solid rgba(212,175,55,0.3)', borderTopColor:gold, borderRadius:'50%', animation:'spin 1s linear infinite' }} /> : <Upload size={14} />}
+                      <span style={{ fontSize:8 }}>{uploading ? '...' : 'Upload'}</span>
+                    </button>
+                  )}
+                  <span style={{ fontSize:10, color:'#4a4842' }}>{ts.imageHint}</span>
+                </div>
+              </div>
+
               <HoverBtn onClick={addItem} disabled={!itemForm.name.trim() || !itemForm.price}
                 style={{ background:`linear-gradient(135deg,${gold},#b8962e)`, borderColor:'rgba(212,175,55,0.4)', color:'#fff', opacity: (!itemForm.name.trim() || !itemForm.price) ? 0.5 : 1 }}
                 hoverStyle={{ boxShadow:'0 0 18px rgba(212,175,55,0.3)', transform:'translateY(-1px)' }}>
@@ -261,7 +317,11 @@ export default function StreamPoints() {
               <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
                 {items.map(item => (
                   <div key={item.id} style={{ display:'flex', alignItems:'center', gap:12, padding:'10px 12px', borderRadius:10, background:'rgba(212,175,55,0.02)', border:'1px solid rgba(212,175,55,0.06)' }}>
-                    <Gift size={16} style={{ color:gold, flexShrink:0 }} />
+                    {item.image_url ? (
+                      <img src={item.image_url} alt="" style={{ width:36, height:36, objectFit:'cover', borderRadius:8, flexShrink:0, border:'1px solid rgba(212,175,55,0.15)' }} />
+                    ) : (
+                      <Gift size={16} style={{ color:gold, flexShrink:0 }} />
+                    )}
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ fontSize:13, fontWeight:600, color:'#e8e2d4' }}>{item.name}</div>
                       {item.description && <div style={{ fontSize:10, color:'#5a5548', marginTop:2 }}>{item.description}</div>}

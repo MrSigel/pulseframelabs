@@ -440,6 +440,7 @@ const i18n = {
       unlimited: '∞', left: 'left',
       redemptions: 'Redemptions',
       completed: 'completed', refunded: 'refunded', pending: 'pending',
+      itemImage: 'Item Image', imageHint: 'PNG/JPG, max 512 KB',
     },
 
     // ── Website ───────────────────────────────────────────────────────
@@ -470,7 +471,7 @@ const i18n = {
       twitch: 'Twitch', youtube: 'YouTube', twitter: 'Twitter/X',
       instagram: 'Instagram', discord: 'Discord', tiktok: 'TikTok', kick: 'Kick',
       myWebsite: 'My Website', welcomeStream: 'Welcome to my stream', playNow: 'Play Now',
-      newWebsite: '+ New Website', editWebsite: 'Edit Website', reset: 'Reset',
+      newWebsite: '+ New Website', editWebsite: 'Edit Website', reset: 'Reset', cancel: 'Cancel', saveWebsite: 'Save Website',
       websiteBuilder: 'Website Builder',
       websiteBuilderInfo: 'Create your personal streamer landing page with casino deals, social links, and a custom design. Your page is publicly accessible and can be shared with one link.',
       empty: 'No website created yet. Click "+ New Website" to start.',
@@ -912,6 +913,7 @@ const i18n = {
       unlimited: '∞', left: 'übrig',
       redemptions: 'Einlösungen',
       completed: 'abgeschlossen', refunded: 'erstattet', pending: 'ausstehend',
+      itemImage: 'Artikelbild', imageHint: 'PNG/JPG, max 512 KB',
     },
 
     // ── Website ───────────────────────────────────────────────────────
@@ -942,7 +944,7 @@ const i18n = {
       twitch: 'Twitch', youtube: 'YouTube', twitter: 'Twitter/X',
       instagram: 'Instagram', discord: 'Discord', tiktok: 'TikTok', kick: 'Kick',
       myWebsite: 'Meine Webseite', welcomeStream: 'Willkommen zu meinem Stream', playNow: 'Jetzt spielen',
-      newWebsite: '+ Neue Webseite', editWebsite: 'Webseite bearbeiten', reset: 'Zurücksetzen',
+      newWebsite: '+ Neue Webseite', editWebsite: 'Webseite bearbeiten', reset: 'Zurücksetzen', cancel: 'Abbrechen', saveWebsite: 'Webseite speichern',
       websiteBuilder: 'Website-Builder',
       websiteBuilderInfo: 'Erstelle deine persönliche Streamer-Landingpage mit Casino-Deals, Social-Links und einem eigenen Design. Deine Seite ist öffentlich erreichbar und kann mit einem Link geteilt werden.',
       empty: 'Noch keine Webseite erstellt. Klicke auf "+ Neue Webseite" um zu starten.',

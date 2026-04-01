@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { getOnePublic } from '../lib/store'
-import { Globe, ExternalLink } from 'lucide-react'
+import { getOnePublic, getAllPublic, insert } from '../lib/store'
+import { Globe, ExternalLink, ShoppingBag, Gift, Coins } from 'lucide-react'
 
 // ── Particle Canvas ──────────────────────────────────────────────────────
 function ParticleBackground({ color }) {
@@ -99,9 +99,16 @@ export default function StreamerPage() {
   const [config, setConfig] = useState(null)
   const [notFound, setNotFound] = useState(false)
   const [activeSection, setActiveSection] = useState('deals')
+  const [storeItems, setStoreItems] = useState([])
+  const [buyingItem, setBuyingItem] = useState(null)
+  const [twitchName, setTwitchName] = useState('')
+  const [buySuccess, setBuySuccess] = useState(false)
 
   useEffect(() => {
     if (!uid) { setNotFound(true); return }
+    getAllPublic('store_items', uid).then(items => {
+      setStoreItems((items || []).filter(i => i.visible !== false))
+    })
     getOnePublic('website_config', uid).then(site => {
       if (site && site.title && site.title.toLowerCase().replace(/\s+/g, '') === (name || '').toLowerCase()) {
         setConfig(site)
@@ -134,12 +141,13 @@ export default function StreamerPage() {
 
   const c = config
   const p = c.primaryColor || '#d4af37'
-  const LABELS = { about: 'About', schedule: 'Schedule', socials: 'Socials', stats: 'Stats', gallery: 'Gallery', donate: 'Donate', deals: 'Deals' }
+  const LABELS = { about: 'About', schedule: 'Schedule', socials: 'Socials', stats: 'Stats', gallery: 'Gallery', donate: 'Donate', deals: 'Deals', store: 'Store' }
 
-  // Reorder sections: deals first
+  // Reorder sections: deals first, add store if items exist
   const sections = [...(c.sections || [])]
   const dealsIdx = sections.indexOf('deals')
   if (dealsIdx > 0) { sections.splice(dealsIdx, 1); sections.unshift('deals') }
+  if (storeItems.length > 0 && !sections.includes('store')) { sections.push('store') }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: c.bgColor || '#0a0914', fontFamily: 'system-ui, sans-serif', color: '#fff', position: 'relative' }}>
@@ -289,6 +297,146 @@ export default function StreamerPage() {
           )
           return null
         })}
+
+        {/* ── Store Section ──────────────────────────────────────────── */}
+        {activeSection === 'store' && storeItems.length > 0 && (
+          <section id="store" style={{ animation: 'sp-fade-up 0.5s ease-out' }}>
+            <h2 style={{ fontSize: 13, fontWeight: 700, color: p, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ShoppingBag size={14} /> Store
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 12 }}>
+              {storeItems.map((item, i) => (
+                <div key={item.id} style={{
+                  padding: 16, borderRadius: 14,
+                  background: 'rgba(255,255,255,0.025)', border: `1px solid rgba(255,255,255,0.06)`,
+                  transition: 'all 0.25s', display: 'flex', flexDirection: 'column', gap: 10,
+                  animation: `sp-fade-up 0.4s ease-out ${i * 0.06}s both`,
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = `${p}40`; e.currentTarget.style.background = `${p}06`; e.currentTarget.style.transform = 'translateY(-3px)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = 'rgba(255,255,255,0.025)'; e.currentTarget.style.transform = 'none' }}>
+                  {/* Image */}
+                  {item.image_url ? (
+                    <img src={item.image_url} alt={item.name} style={{ width: '100%', height: 120, objectFit: 'cover', borderRadius: 10, border: `1px solid ${p}15` }} />
+                  ) : (
+                    <div style={{ width: '100%', height: 80, borderRadius: 10, background: `${p}08`, border: `1px solid ${p}12`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Gift size={24} style={{ color: `${p}40` }} />
+                    </div>
+                  )}
+                  {/* Info */}
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{item.name}</div>
+                    {item.description && <div style={{ fontSize: 11, color: '#777', marginTop: 4, lineHeight: 1.5 }}>{item.description}</div>}
+                  </div>
+                  {/* Price + Buy */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Coins size={14} style={{ color: p }} />
+                      <span style={{ fontSize: 16, fontWeight: 700, color: p }}>{item.price_points}</span>
+                      <span style={{ fontSize: 10, color: '#555' }}>pts</span>
+                    </div>
+                    <button onClick={() => { setBuyingItem(item); setTwitchName(''); setBuySuccess(false) }} style={{
+                      padding: '6px 14px', borderRadius: 8, fontSize: 11, fontWeight: 700,
+                      background: `linear-gradient(135deg, ${p}, ${p}cc)`, color: '#000',
+                      border: 'none', cursor: 'pointer', transition: 'all 0.2s',
+                    }}
+                      onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 0 16px ${p}50`; e.currentTarget.style.transform = 'scale(1.05)' }}
+                      onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'none' }}>
+                      Redeem
+                    </button>
+                  </div>
+                  {item.quantity_available !== -1 && (
+                    <div style={{ fontSize: 9, color: '#555' }}>{item.quantity_available} left</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── Buy Modal ──────────────────────────────────────────────── */}
+        {buyingItem && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+          }} onClick={() => setBuyingItem(null)}>
+            <div onClick={e => e.stopPropagation()} style={{
+              width: 360, padding: 28, borderRadius: 16,
+              background: c.bgColor || '#0a0914', border: `1px solid ${p}30`,
+              boxShadow: `0 16px 60px rgba(0,0,0,0.5), 0 0 30px ${p}10`,
+              animation: 'sp-fade-up 0.3s ease-out',
+            }}>
+              {buySuccess ? (
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(52,211,153,0.15)', border: '2px solid rgba(52,211,153,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                    <Gift size={22} style={{ color: '#34d399' }} />
+                  </div>
+                  <p style={{ fontSize: 16, fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>Redemption Submitted!</p>
+                  <p style={{ fontSize: 12, color: '#888', margin: '0 0 20px', lineHeight: 1.6 }}>
+                    <span style={{ color: p, fontWeight: 600 }}>{twitchName}</span> will receive <span style={{ color: p, fontWeight: 600 }}>{buyingItem.name}</span>. The streamer will process your request.
+                  </p>
+                  <button onClick={() => setBuyingItem(null)} style={{
+                    width: '100%', padding: '12px', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                    background: `linear-gradient(135deg, ${p}, ${p}cc)`, color: '#000', border: 'none', cursor: 'pointer',
+                  }}>Close</button>
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                    {buyingItem.image_url ? (
+                      <img src={buyingItem.image_url} alt="" style={{ width: 48, height: 48, borderRadius: 10, objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: 48, height: 48, borderRadius: 10, background: `${p}10`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Gift size={20} style={{ color: p }} />
+                      </div>
+                    )}
+                    <div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#fff' }}>{buyingItem.name}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                        <Coins size={12} style={{ color: p }} />
+                        <span style={{ fontSize: 13, fontWeight: 700, color: p }}>{buyingItem.price_points} pts</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <label style={{ display: 'block', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#888', marginBottom: 8 }}>
+                    Twitch Username *
+                  </label>
+                  <input value={twitchName} onChange={e => setTwitchName(e.target.value)} placeholder="your_twitch_name"
+                    style={{
+                      width: '100%', padding: '12px 14px', borderRadius: 10, fontSize: 13,
+                      background: 'rgba(255,255,255,0.05)', border: `1px solid ${p}20`, color: '#fff',
+                      outline: 'none', fontFamily: 'system-ui', boxSizing: 'border-box', marginBottom: 16,
+                    }}
+                    onFocus={e => e.currentTarget.style.borderColor = `${p}50`}
+                    onBlur={e => e.currentTarget.style.borderColor = `${p}20`} />
+
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => setBuyingItem(null)} style={{
+                      flex: 1, padding: '12px', borderRadius: 10, fontSize: 13, fontWeight: 600,
+                      background: 'none', border: `1px solid rgba(255,255,255,0.1)`, color: '#888', cursor: 'pointer',
+                    }}>Cancel</button>
+                    <button disabled={!twitchName.trim()} onClick={async () => {
+                      await insert('store_redemptions', {
+                        item_id: buyingItem.id, item_name: buyingItem.name,
+                        viewer_username: twitchName.trim(), status: 'pending',
+                        price_points: buyingItem.price_points,
+                      })
+                      setBuySuccess(true)
+                    }} style={{
+                      flex: 2, padding: '12px', borderRadius: 10, fontSize: 13, fontWeight: 700,
+                      background: !twitchName.trim() ? '#333' : `linear-gradient(135deg, ${p}, ${p}cc)`,
+                      color: !twitchName.trim() ? '#666' : '#000', border: 'none',
+                      cursor: !twitchName.trim() ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+                    }}>
+                      <Gift size={13} style={{ display: 'inline', verticalAlign: -2, marginRight: 6 }} />
+                      Redeem with Points
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Footer — pushed to bottom ────────────────────────────────── */}
