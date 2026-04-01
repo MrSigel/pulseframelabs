@@ -540,6 +540,7 @@ export default function Website() {
   const [website, setWebsite] = useState(null)
   const [showWizard, setShowWizard] = useState(false)
   const [showInfo, setShowInfo] = useState(false)
+  const [showTheme, setShowTheme] = useState(false)
 
   useEffect(() => {
     getOne('website_config').then(d => setWebsite(d))
@@ -560,6 +561,7 @@ export default function Website() {
   }
 
   const deleteWebsite = async () => {
+    setShowTheme(false); setShowInfo(false)
     await setOne('website_config', null)
     setWebsite(null)
     // Remove slug mapping
@@ -576,13 +578,19 @@ export default function Website() {
     <div>
       {/* Action bar */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-        {website && (
+        {website && (<>
           <HoverBtn onClick={() => setShowInfo(!showInfo)}
             style={{ background: showInfo ? 'rgba(212,175,55,0.12)' : 'rgba(212,175,55,0.05)', borderColor: showInfo ? 'rgba(212,175,55,0.35)' : 'rgba(212,175,55,0.12)', color: showInfo ? gold : '#4a4842', boxShadow: showInfo ? '0 0 12px rgba(212,175,55,0.12)' : 'none' }}
             hoverStyle={{ background: 'rgba(212,175,55,0.1)', borderColor: 'rgba(212,175,55,0.3)', color: gold, transform: 'translateY(-1px)' }}>
             <Info size={14} /> {tc.info}
           </HoverBtn>
-        )}
+
+          <HoverBtn onClick={() => setShowTheme(!showTheme)}
+            style={{ background: showTheme ? 'rgba(212,175,55,0.15)' : 'rgba(212,175,55,0.06)', borderColor: showTheme ? 'rgba(212,175,55,0.55)' : 'rgba(212,175,55,0.2)', color: showTheme ? gold : '#4a4842', boxShadow: showTheme ? '0 0 12px rgba(212,175,55,0.15)' : 'none' }}
+            hoverStyle={{ background: 'rgba(212,175,55,0.14)', borderColor: 'rgba(212,175,55,0.5)', color: gold, transform: 'translateY(-1px)' }}>
+            <Palette size={14} /> {tc.themeSettings}
+          </HoverBtn>
+        </>)}
 
         <HoverBtn onClick={() => setShowWizard(true)}
           style={{ background: `linear-gradient(135deg, ${gold}, #b8962e)`, borderColor: 'rgba(212,175,55,0.4)', color: '#fff', boxShadow: '0 0 14px rgba(212,175,55,0.2)' }}
@@ -613,6 +621,139 @@ export default function Website() {
             <span style={{ fontSize: 12, color: '#8a8478', lineHeight: 1.6 }}>
               {tw.websiteBuilderInfo}
             </span>
+          </div>
+        </div>
+      )}
+
+      {/* Theme Settings panel */}
+      {showTheme && website && (
+        <div style={{ ...S.card, padding: 20, marginBottom: 16, animation: 'fade-up 0.18s ease-out' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
+
+            {/* Background */}
+            <div>
+              <p style={{ ...S.label, fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 10, paddingBottom: 6, borderBottom: '1px solid rgba(212,175,55,0.08)' }}>{tc.background}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div>
+                  <span style={{ fontSize: 10, color: 'var(--label-color)', display: 'block', marginBottom: 4 }}>{tw.bgColor || 'Background Color'}</span>
+                  <input type="color" value={website.bgColor || '#0a0914'} onChange={e => {
+                    const updated = { ...website, bgColor: e.target.value }
+                    setWebsite(updated); saveWebsite(updated)
+                  }} style={{ width: '100%', height: 32, borderRadius: 6, border: '1px solid var(--card-border)', cursor: 'pointer', background: 'var(--input-bg)' }} />
+                </div>
+                <div>
+                  <span style={{ fontSize: 10, color: 'var(--label-color)', display: 'block', marginBottom: 4 }}>{tw.textColorSite || 'Text Color'}</span>
+                  <input type="color" value={website.textColor || '#ffffff'} onChange={e => {
+                    const updated = { ...website, textColor: e.target.value }
+                    setWebsite(updated); saveWebsite(updated)
+                  }} style={{ width: '100%', height: 32, borderRadius: 6, border: '1px solid var(--card-border)', cursor: 'pointer', background: 'var(--input-bg)' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Colors */}
+            <div>
+              <p style={{ ...S.label, fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 10, paddingBottom: 6, borderBottom: '1px solid rgba(212,175,55,0.08)' }}>{tw.colorTheme}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div>
+                  <span style={{ fontSize: 10, color: 'var(--label-color)', display: 'block', marginBottom: 4 }}>{tw.primaryColor}</span>
+                  <input type="color" value={website.primaryColor || '#d4af37'} onChange={e => {
+                    const updated = { ...website, primaryColor: e.target.value }
+                    setWebsite(updated); saveWebsite(updated)
+                  }} style={{ width: '100%', height: 32, borderRadius: 6, border: '1px solid var(--card-border)', cursor: 'pointer', background: 'var(--input-bg)' }} />
+                </div>
+                <div>
+                  <span style={{ fontSize: 10, color: 'var(--label-color)', display: 'block', marginBottom: 4 }}>{tw.accentColorSite || 'Accent Color'}</span>
+                  <input type="color" value={website.accentColor || '#f5e6b8'} onChange={e => {
+                    const updated = { ...website, accentColor: e.target.value }
+                    setWebsite(updated); saveWebsite(updated)
+                  }} style={{ width: '100%', height: 32, borderRadius: 6, border: '1px solid var(--card-border)', cursor: 'pointer', background: 'var(--input-bg)' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Font */}
+            <div>
+              <p style={{ ...S.label, fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 10, paddingBottom: 6, borderBottom: '1px solid rgba(212,175,55,0.08)' }}>{tc.font}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div>
+                  <span style={{ fontSize: 10, color: 'var(--label-color)', display: 'block', marginBottom: 6 }}>{tc.fontFamily}</span>
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                    {[
+                      { label: 'Sans', value: 'system-ui, sans-serif' },
+                      { label: 'Inter', value: 'Inter, sans-serif' },
+                      { label: 'Serif', value: 'Georgia, serif' },
+                      { label: 'Mono', value: 'monospace' },
+                    ].map(f => (
+                      <button key={f.value} onClick={() => {
+                        const updated = { ...website, fontFamily: f.value }
+                        setWebsite(updated); saveWebsite(updated)
+                      }} style={{
+                        padding: '4px 10px', borderRadius: 6, fontSize: 11, cursor: 'pointer', fontFamily: f.value,
+                        background: (website.fontFamily || 'system-ui, sans-serif') === f.value ? 'rgba(212,175,55,0.12)' : 'var(--input-bg)',
+                        border: `1px solid ${(website.fontFamily || 'system-ui, sans-serif') === f.value ? 'rgba(212,175,55,0.3)' : 'var(--card-border)'}`,
+                        color: (website.fontFamily || 'system-ui, sans-serif') === f.value ? gold : 'var(--label-color)', transition: 'all 0.12s',
+                      }}>{f.label}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <span style={{ fontSize: 10, color: 'var(--label-color)', display: 'block', marginBottom: 4 }}>{tc.borderRadius}</span>
+                  <input type="range" min={0} max={24} value={website.borderRadius || 14} onChange={e => {
+                    const updated = { ...website, borderRadius: Number(e.target.value) }
+                    setWebsite(updated); saveWebsite(updated)
+                  }} className="theme-slider" style={{ width: '100%' }} />
+                  <span style={{ fontSize: 10, color: 'var(--label-color)' }}>{website.borderRadius || 14}px</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Effects */}
+            <div>
+              <p style={{ ...S.label, fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', marginBottom: 10, paddingBottom: 6, borderBottom: '1px solid rgba(212,175,55,0.08)' }}>{tc.visibilityEffects}</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <div onClick={() => {
+                    const updated = { ...website, showParticles: !(website.showParticles ?? true) }
+                    setWebsite(updated); saveWebsite(updated)
+                  }} style={{
+                    width: 32, height: 18, borderRadius: 9, position: 'relative', cursor: 'pointer', flexShrink: 0,
+                    background: (website.showParticles ?? true) ? 'rgba(212,175,55,0.8)' : 'rgba(40,40,70,0.8)',
+                    border: `1px solid ${(website.showParticles ?? true) ? 'rgba(212,175,55,0.3)' : 'rgba(60,60,90,0.5)'}`,
+                    transition: 'all 0.2s',
+                  }}>
+                    <div style={{ position: 'absolute', top: 2, left: (website.showParticles ?? true) ? 13 : 2, width: 12, height: 12, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }} />
+                  </div>
+                  <span style={{ fontSize: 11, color: 'var(--label-color)' }}>{tw.particles || 'Particle Animation'}</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <div onClick={() => {
+                    const updated = { ...website, showNavbar: !(website.showNavbar ?? true) }
+                    setWebsite(updated); saveWebsite(updated)
+                  }} style={{
+                    width: 32, height: 18, borderRadius: 9, position: 'relative', cursor: 'pointer', flexShrink: 0,
+                    background: (website.showNavbar ?? true) ? 'rgba(212,175,55,0.8)' : 'rgba(40,40,70,0.8)',
+                    border: `1px solid ${(website.showNavbar ?? true) ? 'rgba(212,175,55,0.3)' : 'rgba(60,60,90,0.5)'}`,
+                    transition: 'all 0.2s',
+                  }}>
+                    <div style={{ position: 'absolute', top: 2, left: (website.showNavbar ?? true) ? 13 : 2, width: 12, height: 12, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.4)' }} />
+                  </div>
+                  <span style={{ fontSize: 11, color: 'var(--label-color)' }}>{tw.showNavbar || 'Show Navigation'}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(212,175,55,0.08)', display: 'flex', justifyContent: 'flex-end' }}>
+            <button onClick={() => {
+              const reset = { ...website, bgColor: '#0a0914', primaryColor: '#d4af37', accentColor: '#f5e6b8', textColor: '#ffffff', fontFamily: 'system-ui, sans-serif', borderRadius: 14, showParticles: true, showNavbar: true }
+              setWebsite(reset); saveWebsite(reset)
+            }}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--label-color)', background: 'none', border: '1px solid var(--card-border)', borderRadius: 7, padding: '5px 10px', cursor: 'pointer', transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.color = gold; e.currentTarget.style.borderColor = 'rgba(212,175,55,0.25)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--label-color)'; e.currentTarget.style.borderColor = 'var(--card-border)' }}>
+              <RotateCcw size={11} /> {tc.reset}
+            </button>
           </div>
         </div>
       )}

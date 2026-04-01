@@ -487,6 +487,11 @@ const i18n = {
       dealLinkUrl: 'Affiliate Link URL',
       untitledDeal: 'Untitled Deal',
       noLink: 'No link set',
+      bgColor: 'Background Color',
+      textColorSite: 'Text Color',
+      accentColorSite: 'Accent Color',
+      particles: 'Particle Animation',
+      showNavbar: 'Show Navigation',
     },
   },
 
@@ -971,6 +976,11 @@ const i18n = {
       dealLinkUrl: 'Affiliate-Link URL',
       untitledDeal: 'Unbenannter Deal',
       noLink: 'Kein Link gesetzt',
+      bgColor: 'Hintergrundfarbe',
+      textColorSite: 'Textfarbe',
+      accentColorSite: 'Akzentfarbe',
+      particles: 'Partikel-Animation',
+      showNavbar: 'Navigation anzeigen',
     },
   },
 }
