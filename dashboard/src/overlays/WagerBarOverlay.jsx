@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getAllPublic, getOnePublic, onTableChange, update } from '../lib/store'
 import { Check } from 'lucide-react'
+import { getOverlayStrings } from './overlayI18n'
 
 export const DEFAULT_THEME = {
   bgColor:       '10,10,22',
@@ -85,6 +86,7 @@ export default function WagerBarOverlay({ sessionId, editable = false, theme: th
   const [themeFromStore, setThemeFromStore] = useState(null)
   const t = { ...DEFAULT_THEME, ...(themeProp || themeFromStore) }
 
+  const [overlayLang, setOverlayLang] = useState('en')
   const [session, setSession] = useState(null)
 
   useEffect(() => {
@@ -93,6 +95,8 @@ export default function WagerBarOverlay({ sessionId, editable = false, theme: th
     const localMode = localStorage.getItem('pfl_theme_mode'); getOnePublic('pfl_theme_mode', uid).then(v => { const mode = v || localMode;
       if (mode === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
     })
+    getOnePublic('overlay_lang', uid).then(v => { if (v) setOverlayLang(v) })
+    const localLang = localStorage.getItem('pfl_lang'); if (localLang) setOverlayLang(localLang)
   }, [uid, themeProp])
 
   const loadData = () => {
@@ -120,7 +124,9 @@ export default function WagerBarOverlay({ sessionId, editable = false, theme: th
     setSession(prev => ({ ...prev, [field]: value }))
   }
 
-  if (!session) return <Placeholder text="No wager session found" />
+  const ot = getOverlayStrings(overlayLang)
+
+  if (!session) return <Placeholder text={ot.noWager} />
 
   const ac         = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
@@ -163,13 +169,13 @@ export default function WagerBarOverlay({ sessionId, editable = false, theme: th
           <div style={{ fontSize:'0.68em', color: t.textMuted, textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:3 }}>
             {editable
               ? <EditableField value={session.header_text || ''} onChange={v => saveField('header_text', v)}
-                  placeholder="Header Text" style={{ color: t.textMuted }} inputStyle={{ width:160 }} />
+                  placeholder={ot.headerText} style={{ color: t.textMuted }} inputStyle={{ width:160 }} />
               : (session.header_text || '')}
           </div>
           <div style={{ fontSize:'0.9em', fontWeight:700, color: t.textPrimary }}>
             {editable
               ? <EditableField value={session.casino_name} onChange={v => saveField('casino_name', v)}
-                  placeholder="Casino Name" style={{ color: t.textPrimary, fontWeight:700 }} inputStyle={{ width:160 }} />
+                  placeholder={ot.casinoName} style={{ color: t.textPrimary, fontWeight:700 }} inputStyle={{ width:160 }} />
               : (session.casino_name || 'Casino')}
           </div>
         </div>

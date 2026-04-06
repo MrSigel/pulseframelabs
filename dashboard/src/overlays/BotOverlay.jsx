@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getAllPublic, getOnePublic, onTableChange } from '../lib/store'
+import { getOverlayStrings } from './overlayI18n'
 
 const FEATURES = [
   { key: 'chat_relay',    label: 'Chat Relay' },
@@ -21,6 +22,7 @@ export default function BotOverlay() {
   const [params] = useSearchParams()
   const mode = params.get('mode') || 'status'
   const uid = params.get('uid')
+  const [overlayLang, setOverlayLang] = useState('en')
   const [connection, setConnection] = useState(null)
   const [commands, setCommands] = useState([])
   const [log, setLog] = useState([])
@@ -37,12 +39,16 @@ export default function BotOverlay() {
 
   useEffect(() => {
     // uid is optional - fallback to logged-in user
+    getOnePublic('overlay_lang', uid).then(v => { if (v) setOverlayLang(v) })
+    const localLang = localStorage.getItem('pfl_lang'); if (localLang) setOverlayLang(localLang)
     loadData()
     const off1 = onTableChange('user_settings', loadData)
     const off2 = onTableChange('bot_commands', loadData)
     const off3 = onTableChange('chat_messages', () => getAllPublic('chat_messages', uid).then(d => setLog((d || []).slice(0, 20))))
     return () => { off1(); off2(); off3() }
   }, [uid])
+
+  const ot = getOverlayStrings(overlayLang)
 
   if (!connection) return <Placeholder text="No bot connection found" />
 
@@ -54,11 +60,11 @@ export default function BotOverlay() {
       <div style={{ ...base, padding:16, minWidth:360 }}>
         <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:12, paddingBottom:8, borderBottom:'1px solid #1e1e40' }}>
           <div style={{ width:6, height:6, borderRadius:'50%', background:'#22c55e', boxShadow:'0 0 6px #22c55e' }} />
-          <span style={{ fontSize:9, color:'#44447a', textTransform:'uppercase', letterSpacing:'0.15em' }}>Bot Activity</span>
+          <span style={{ fontSize:9, color:'#44447a', textTransform:'uppercase', letterSpacing:'0.15em' }}>{ot.botActivity}</span>
           <span style={{ fontSize:9, color:'#2e2e5a', marginLeft:'auto' }}>#{connection.channel_name}</span>
         </div>
         {log.length === 0 ? (
-          <div style={{ color:'#333355', fontSize:12, textAlign:'center', padding:16 }}>Waiting for activity…</div>
+          <div style={{ color:'#333355', fontSize:12, textAlign:'center', padding:16 }}>{ot.waitingActivity}</div>
         ) : (
           <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
             {log.map((m, i) => (
@@ -80,19 +86,19 @@ export default function BotOverlay() {
     <div style={{ ...base, padding:20, minWidth:320 }}>
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
         <div>
-          <div style={{ fontSize:9, color:'#44447a', textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:3 }}>Twitch Bot</div>
+          <div style={{ fontSize:9, color:'#44447a', textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:3 }}>{ot.twitchBot}</div>
           <div style={{ fontSize:14, fontWeight:700, color:'#fff' }}>#{connection.channel_name}</div>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:6 }}>
           <div style={{ width:8, height:8, borderRadius:'50%', background:'#22c55e', boxShadow:'0 0 6px #22c55e' }} />
-          <span style={{ fontSize:10, color:'#22c55e', fontWeight:600 }}>online</span>
+          <span style={{ fontSize:10, color:'#22c55e', fontWeight:600 }}>{ot.online}</span>
         </div>
       </div>
 
       <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:8, marginBottom:14 }}>
         {[
-          { l:'Commands', v:commands.length },
-          { l:'Features', v:activeFeatures.length },
+          { l:ot.commands, v:commands.length },
+          { l:ot.features, v:activeFeatures.length },
         ].map(s => (
           <div key={s.l} style={{ background:'#0f0f22', border:'1px solid #1e1e40', borderRadius:8, padding:'6px 8px', textAlign:'center' }}>
             <div style={{ fontSize:8, color:'#44447a', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:2 }}>{s.l}</div>

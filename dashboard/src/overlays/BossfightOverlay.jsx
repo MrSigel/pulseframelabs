@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { getAllPublic, getOnePublic, onTableChange } from '../lib/store'
 import { Swords, Trophy } from 'lucide-react'
+import { getOverlayStrings } from './overlayI18n'
 
 export const DEFAULT_THEME = {
   bgColor:       '10,10,22',
@@ -45,6 +46,7 @@ export default function BossfightOverlay({ sessionId, editable = false, showTool
   const [themeFromStore, setThemeFromStore] = useState(null)
   const t = { ...DEFAULT_THEME, ...(themeProp || themeFromStore) }
 
+  const [overlayLang, setOverlayLang] = useState('en')
   const [session, setSession] = useState(null)
   const [animating, setAnimating] = useState(false)
   const [animatedIdx, setAnimatedIdx] = useState(-1)
@@ -57,6 +59,8 @@ export default function BossfightOverlay({ sessionId, editable = false, showTool
     const localMode = localStorage.getItem('pfl_theme_mode'); getOnePublic('pfl_theme_mode', uid).then(v => { const mode = v || localMode;
       if (mode === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
     })
+    getOnePublic('overlay_lang', uid).then(v => { if (v) setOverlayLang(v) })
+    const localLang = localStorage.getItem('pfl_lang'); if (localLang) setOverlayLang(localLang)
   }, [uid, themeProp])
 
   const loadData = () => {
@@ -112,7 +116,9 @@ export default function BossfightOverlay({ sessionId, editable = false, showTool
     setTimeout(animateNext, 500)
   }
 
-  if (!session) return <Placeholder text="No boss fight found" />
+  const ot = getOverlayStrings(overlayLang)
+
+  if (!session) return <Placeholder text={ot.noBossfight} />
 
   const ac         = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
@@ -149,7 +155,7 @@ export default function BossfightOverlay({ sessionId, editable = false, showTool
   const currentChallenger = challengers[currentDuel] || null
 
   const status = session.status || 'join_open'
-  const statusLabels = { join_open: 'Waiting', animating: 'Drawing...', live: 'Live', finished: 'Finished' }
+  const statusLabels = { join_open: ot.waiting, animating: ot.drawing, live: ot.live, finished: ot.finished }
   const statusColors = { join_open: '#fbbf24', animating: '#fbbf24', live: '#34d399', finished: '#818cf8' }
 
   return (
@@ -172,7 +178,7 @@ export default function BossfightOverlay({ sessionId, editable = false, showTool
       <div style={{ textAlign:'center', marginBottom:16 }}>
         <div style={{ fontSize:'1.4em', fontWeight:800, color:t.textPrimary, letterSpacing:'0.08em', textTransform:'uppercase' }}>
           <Swords size={20} style={{ verticalAlign:'middle', marginRight:8, color:`rgba(${t.accentColor},0.8)` }} />
-          BOSS FIGHT
+          {ot.bossFight}
         </div>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, marginTop:8 }}>
           <div style={{ width:6, height:6, borderRadius:'50%', background: statusColors[status] || '#44447a', boxShadow:`0 0 8px ${statusColors[status] || '#44447a'}`, animation: status === 'animating' ? 'bf-pulse 1s ease-in-out infinite' : 'none' }} />
@@ -190,7 +196,7 @@ export default function BossfightOverlay({ sessionId, editable = false, showTool
           border: `1px solid ${winnerSide === 'boss' ? 'rgba(239,68,68,0.4)' : 'rgba(52,211,153,0.4)'}`,
         }}>
           <div style={{ fontSize:'1.3em', fontWeight:800, color: winnerSide === 'boss' ? '#f87171' : '#34d399', textTransform:'uppercase', letterSpacing:'0.1em' }}>
-            {winnerSide === 'boss' ? 'BOSS WINS!' : 'PLAYERS WIN!'}
+            {winnerSide === 'boss' ? ot.bossWins : ot.playersWin}
           </div>
         </div>
       )}
@@ -202,7 +208,7 @@ export default function BossfightOverlay({ sessionId, editable = false, showTool
             flex:'0 0 140px', textAlign:'center', padding:12, borderRadius:10,
             background:'rgba(52,211,153,0.08)', border:'1px solid rgba(52,211,153,0.2)',
           }}>
-            <div style={{ fontSize:'0.7em', fontWeight:700, color:'#34d399', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>Challenger</div>
+            <div style={{ fontSize:'0.7em', fontWeight:700, color:'#34d399', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>{ot.challenger}</div>
             <div style={{ fontSize:'0.9em', fontWeight:700, color:t.textPrimary }}>{currentChallenger.username}</div>
             <div style={{ fontSize:'0.72em', color:t.textSecondary, marginTop:2 }}>{currentChallenger.game || '\u2014'}</div>
           </div>
@@ -213,7 +219,7 @@ export default function BossfightOverlay({ sessionId, editable = false, showTool
             flex:'0 0 140px', textAlign:'center', padding:12, borderRadius:10,
             background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)',
           }}>
-            <div style={{ fontSize:'0.7em', fontWeight:700, color:'#f87171', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>Boss</div>
+            <div style={{ fontSize:'0.7em', fontWeight:700, color:'#f87171', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>{ot.boss}</div>
             <div style={{ fontSize:'0.9em', fontWeight:700, color:t.textPrimary }}>{session.boss_name || 'BOSS'}</div>
             <div style={{ fontSize:'0.72em', color:t.textSecondary, marginTop:2 }}>{session.boss_game || '\u2014'}</div>
           </div>
@@ -224,12 +230,12 @@ export default function BossfightOverlay({ sessionId, editable = false, showTool
       {winnerSide && (
         <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:20, marginBottom:16 }}>
           <div style={{ flex:'0 0 140px', textAlign:'center', padding:12, borderRadius:10, background:'rgba(52,211,153,0.08)', border:'1px solid rgba(52,211,153,0.2)' }}>
-            <div style={{ fontSize:'0.7em', fontWeight:700, color:'#34d399', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>Players</div>
+            <div style={{ fontSize:'0.7em', fontWeight:700, color:'#34d399', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>{ot.players}</div>
             <div style={{ fontSize:'1.2em', fontWeight:800, color:t.textPrimary }}>{playerWins}</div>
           </div>
           <div style={{ fontSize:'1em', fontWeight:700, color:t.textMuted }}>\u2014</div>
           <div style={{ flex:'0 0 140px', textAlign:'center', padding:12, borderRadius:10, background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)' }}>
-            <div style={{ fontSize:'0.7em', fontWeight:700, color:'#f87171', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>Boss ({session.boss_name})</div>
+            <div style={{ fontSize:'0.7em', fontWeight:700, color:'#f87171', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>{ot.boss} ({session.boss_name})</div>
             <div style={{ fontSize:'1.2em', fontWeight:800, color:t.textPrimary }}>{bossWins}</div>
           </div>
         </div>
@@ -238,7 +244,7 @@ export default function BossfightOverlay({ sessionId, editable = false, showTool
       {/* Boss lives */}
       <div style={{ textAlign:'center', marginBottom:14 }}>
         <div style={{ fontSize:'0.72em', fontWeight:700, color:t.textMuted, textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>
-          Boss Lives: {bossLives} / {bossMaxLives}
+          {ot.bossLives}: {bossLives} / {bossMaxLives}
         </div>
         <div style={{ display:'flex', justifyContent:'center', gap:3, flexWrap:'wrap' }}>
           {Array.from({ length: bossMaxLives }, (_, i) => (
@@ -252,13 +258,13 @@ export default function BossfightOverlay({ sessionId, editable = false, showTool
       {/* Score (live) */}
       {(status === 'live') && !winnerSide && (
         <div style={{ textAlign:'center', marginBottom:14, fontSize:'0.8em', color:t.textSecondary }}>
-          Score: Players <span style={{ fontWeight:700, color:'#34d399' }}>{playerWins}</span> \u2014 Boss <span style={{ fontWeight:700, color:'#f87171' }}>{bossWins}</span>
+          {ot.score}: {ot.players} <span style={{ fontWeight:700, color:'#34d399' }}>{playerWins}</span> \u2014 {ot.boss} <span style={{ fontWeight:700, color:'#f87171' }}>{bossWins}</span>
         </div>
       )}
 
       {/* Challenger list — always visible */}
       <div style={{ marginTop:12 }}>
-        <div style={{ fontSize:'0.7em', fontWeight:700, color:t.textMuted, textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:8, textAlign:'center' }}>Challengers</div>
+        <div style={{ fontSize:'0.7em', fontWeight:700, color:t.textMuted, textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:8, textAlign:'center' }}>{ot.challengers}</div>
         <div style={{ display:'flex', flexWrap:'wrap', gap:6, justifyContent:'center' }}>
           {challengers.map((p, i) => {
             const duel = duels.find(d => d.challenger === p.username)

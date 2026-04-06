@@ -567,6 +567,49 @@ export default function LandingPage() {
         </R>
       </section>
 
+      {/* ═══ BUILT FOR CASINO STREAMERS ════════════════════════════════ */}
+      <section style={{
+        position: 'relative', zIndex: 1, padding: 'clamp(80px, 12vw, 140px) 24px',
+        background: `radial-gradient(ellipse at 50% 0%, rgba(212,175,55,0.04) 0%, transparent 60%)`,
+      }}>
+        <R style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 64px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 14 }}>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, transparent, ${gold}30)` }} />
+            <span style={{ fontSize: '0.7rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.18em', color: gold }}>{t.scenarios.label}</span>
+            <div style={{ height: 1, width: 30, background: `linear-gradient(90deg, ${gold}30, transparent)` }} />
+          </div>
+          <h2 style={{ fontFamily: ff, fontSize: 'clamp(1.8rem, 3.5vw, 2.4rem)', fontWeight: 700, margin: 0, letterSpacing: '-0.02em' }}>
+            {t.scenarios.title}
+          </h2>
+        </R>
+
+        <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 400px), 1fr))', gap: 20 }}>
+          {t.scenarios.items.map((item, i) => {
+            const iconMap = { Gem, Trophy, Target, Sword }
+            const Icon = iconMap[item.icon] || Gem
+            return (
+              <R key={i} delay={i * 0.08}>
+                <GlassCard style={{ padding: 'clamp(28px, 4vw, 40px)' }}>
+                  <div style={{
+                    width: 56, height: 56, borderRadius: 16, marginBottom: 20,
+                    background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Icon size={26} style={{ color: gold }} />
+                  </div>
+                  <h3 style={{ fontFamily: ff, fontSize: 'clamp(1.1rem, 1.5vw, 1.3rem)', fontWeight: 700, margin: '0 0 10px', color: th.text }}>
+                    {item.t}
+                  </h3>
+                  <p style={{ fontSize: 'clamp(0.85rem, 1vw, 0.92rem)', color: th.textSub, lineHeight: 1.7, margin: 0 }}>
+                    {item.d}
+                  </p>
+                </GlassCard>
+              </R>
+            )
+          })}
+        </div>
+      </section>
+
       {/* ═══ WHY PULSEFRAMELABS ═══════════════════════════════════════ */}
       <section style={{ position: 'relative', zIndex: 1, padding: 'clamp(60px, 10vw, 100px) 24px' }}>
         <R style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 56px)' }}>

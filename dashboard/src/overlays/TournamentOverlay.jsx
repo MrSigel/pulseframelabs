@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { getAllPublic, getOnePublic, onTableChange, update } from '../lib/store'
 import { Check, Trophy, X } from 'lucide-react'
+import { getOverlayStrings } from './overlayI18n'
 
 export const DEFAULT_THEME = {
   bgColor:       '10,10,22',
@@ -99,7 +100,7 @@ const Placeholder = ({ text }) => (
 )
 
 // ── Amount Popup ──────────────────────────────────────────────────────────
-function AmountPopup({ s0, s1, onSubmit, onClose, ac }) {
+function AmountPopup({ s0, s1, onSubmit, onClose, ac, ot }) {
   const [amount0, setAmount0] = useState('')
   const [amount1, setAmount1] = useState('')
   const [result, setResult] = useState(null) // null | 0 | 1 | 'tie'
@@ -129,7 +130,7 @@ function AmountPopup({ s0, s1, onSubmit, onClose, ac }) {
       }}>
         <div style={{ textAlign:'center', marginBottom:20 }}>
           <Trophy size={20} style={{ color:'#fbbf24', marginBottom:8 }} />
-          <div style={{ fontSize:11, fontWeight:700, color:'#fbbf24', textTransform:'uppercase', letterSpacing:'0.1em' }}>Enter Amounts</div>
+          <div style={{ fontSize:11, fontWeight:700, color:'#fbbf24', textTransform:'uppercase', letterSpacing:'0.1em' }}>{ot.enterAmounts}</div>
         </div>
 
         {/* Player 0 */}
@@ -170,17 +171,17 @@ function AmountPopup({ s0, s1, onSubmit, onClose, ac }) {
         {/* Result message */}
         {result === 'tie' && (
           <div style={{ textAlign:'center', padding:'8px', marginBottom:12, borderRadius:8, background:'rgba(251,191,36,0.1)', border:'1px solid rgba(251,191,36,0.25)', fontSize:11, fontWeight:600, color:'#fbbf24' }}>
-            Tie — enter new amounts
+            {ot.tie}
           </div>
         )}
         {result === 0 && (
           <div style={{ textAlign:'center', padding:'8px', marginBottom:12, borderRadius:8, background:'rgba(52,211,153,0.1)', border:'1px solid rgba(52,211,153,0.25)', fontSize:11, fontWeight:700, color:'#34d399' }}>
-            {s0.name || 'Player 1'} wins!
+            {s0.name || 'Player 1'} {ot.wins}
           </div>
         )}
         {result === 1 && (
           <div style={{ textAlign:'center', padding:'8px', marginBottom:12, borderRadius:8, background:'rgba(52,211,153,0.1)', border:'1px solid rgba(52,211,153,0.25)', fontSize:11, fontWeight:700, color:'#34d399' }}>
-            {s1.name || 'Player 2'} wins!
+            {s1.name || 'Player 2'} {ot.wins}
           </div>
         )}
 
@@ -193,7 +194,7 @@ function AmountPopup({ s0, s1, onSubmit, onClose, ac }) {
               background: bothFilled ? 'linear-gradient(135deg,#d4af37,#b8962e)' : '#222',
               color: bothFilled ? '#000' : '#555', border:'none',
               cursor: bothFilled ? 'pointer' : 'not-allowed', transition:'all 0.2s',
-            }}>Determine Winner</button>
+            }}>{ot.determineWinner}</button>
           </div>
         )}
       </div>
@@ -202,7 +203,7 @@ function AmountPopup({ s0, s1, onSubmit, onClose, ac }) {
 }
 
 // ── Single player slot row ────────────────────────────────────────────────
-function SlotRow({ name, game, win, defaultName, editable, showTooltips, onSaveName, onSaveGame, onSaveWin, isWinner, isLoser, canPickWinner, onPickWinner, animDelay }) {
+function SlotRow({ name, game, win, defaultName, editable, showTooltips, onSaveName, onSaveGame, onSaveWin, isWinner, isLoser, canPickWinner, onPickWinner, animDelay, ot }) {
   return (
     <div style={{
       display:'flex', flexDirection:'column', gap:2,
@@ -227,7 +228,7 @@ function SlotRow({ name, game, win, defaultName, editable, showTooltips, onSaveN
           )}
           {isWinner && <Check size={11} style={{ color:'#34d399', flexShrink:0 }} />}
           {editable
-            ? <Tip label="Player Name" visible={showTooltips}>
+            ? <Tip label={ot?.playerName || 'Player Name'} visible={showTooltips}>
                 <EditableField value={name} onChange={onSaveName} placeholder={defaultName}
                   style={{ color: isWinner ? '#34d399' : isLoser ? '#666' : '#ffffff', textDecoration: isLoser ? 'line-through' : 'none' }}
                   inputStyle={{ width:72 }} />
@@ -254,7 +255,7 @@ function SlotRow({ name, game, win, defaultName, editable, showTooltips, onSaveN
 }
 
 // ── Bracket tree ──────────────────────────────────────────────────────────
-function BracketTree({ slots, slotsData, onSaveSlot, t, editable, showTooltips, champion, onSaveChampion, bracketWinners, onPickWinner, tournamentStatus, animating, animatedSlots }) {
+function BracketTree({ slots, slotsData, onSaveSlot, t, editable, showTooltips, champion, onSaveChampion, bracketWinners, onPickWinner, tournamentStatus, animating, animatedSlots, ot }) {
   const ac = `rgba(${t.accentColor},`
 
   const MATCH_H = 82, MATCH_W = 156, CONN_W = 32, MATCH_GAP = 10, CHAMP_W = 124, CHAMP_H = 66
@@ -343,7 +344,7 @@ function BracketTree({ slots, slotsData, onSaveSlot, t, editable, showTooltips, 
                       onSaveName={v => onSaveSlot(r,i,0,'name',v)} onSaveGame={v => onSaveSlot(r,i,0,'game',v)} onSaveWin={v => onSaveSlot(r,i,0,'win',v)}
                       isWinner={hasWinner && matchWinner===0} isLoser={hasWinner && matchWinner!==0}
                       canPickWinner={canPick} onPickWinner={() => onPickWinner(r,i,0)}
-                      animDelay={slotAnimDelay0} />
+                      animDelay={slotAnimDelay0} ot={ot} />
                   )}
                   <div style={{ height:1, background:`${ac}0.1)`, margin:'4px 0' }} />
                   {(r === 0 && !slot1Visible) ? (
@@ -354,7 +355,7 @@ function BracketTree({ slots, slotsData, onSaveSlot, t, editable, showTooltips, 
                       onSaveName={v => onSaveSlot(r,i,1,'name',v)} onSaveGame={v => onSaveSlot(r,i,1,'game',v)} onSaveWin={v => onSaveSlot(r,i,1,'win',v)}
                       isWinner={hasWinner && matchWinner===1} isLoser={hasWinner && matchWinner!==1}
                       canPickWinner={canPick} onPickWinner={() => onPickWinner(r,i,1)}
-                      animDelay={slotAnimDelay1} />
+                      animDelay={slotAnimDelay1} ot={ot} />
                   )}
                 </div>
               </div>
@@ -375,7 +376,7 @@ function BracketTree({ slots, slotsData, onSaveSlot, t, editable, showTooltips, 
         }}>
           <Trophy size={14} style={{ color: champion ? '#fbbf24' : t.textSecondary, opacity: champion ? 1 : 0.7, flexShrink:0 }} />
           {editable
-            ? <Tip label="Tournament Winner" visible={showTooltips}>
+            ? <Tip label={ot?.tournamentWinner || 'Tournament Winner'} visible={showTooltips}>
                 <EditableField value={champion || ''} onChange={onSaveChampion} placeholder="Champion..."
                   style={{ fontSize:'0.72em', fontWeight:700, color: champion ? '#34d399' : t.textMuted }}
                   inputStyle={{ width:88, textAlign:'center' }} />
@@ -396,6 +397,7 @@ export default function TournamentOverlay({ tournamentId, editable = false, show
   const [themeFromStore, setThemeFromStore] = useState(null)
   const t = { ...DEFAULT_THEME, ...(themeProp || themeFromStore) }
 
+  const [overlayLang, setOverlayLang] = useState('en')
   const [tournament, setTournament] = useState(null)
   const [amountPopup, setAmountPopup] = useState(null) // { round, matchIndex }
   const [animating, setAnimating] = useState(false)
@@ -410,6 +412,8 @@ export default function TournamentOverlay({ tournamentId, editable = false, show
     const localMode = localStorage.getItem('pfl_theme_mode'); getOnePublic('pfl_theme_mode', uid).then(v => { const mode = v || localMode;
       if (mode === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
     })
+    getOnePublic('overlay_lang', uid).then(v => { if (v) setOverlayLang(v) })
+    const localLang = localStorage.getItem('pfl_lang'); if (localLang) setOverlayLang(localLang)
   }, [uid, themeProp])
 
   const loadData = () => {
@@ -544,7 +548,9 @@ export default function TournamentOverlay({ tournamentId, editable = false, show
     setAmountPopup(null)
   }
 
-  if (!tournament) return <Placeholder text="No tournament found" />
+  const ot = getOverlayStrings(overlayLang)
+
+  if (!tournament) return <Placeholder text={ot.noTournament} />
 
   const slots = tournament.max_participants || 8
   const ac = `rgba(${t.accentColor},`
@@ -552,7 +558,7 @@ export default function TournamentOverlay({ tournamentId, editable = false, show
   const overlayScale = t.overlayScale || 1
   const status = tournament.status || 'join_open'
 
-  const statusLabels = { join_open: 'Waiting', animating: 'Drawing...', ongoing: 'Live', finished: 'Finished' }
+  const statusLabels = { join_open: ot.waiting, animating: ot.drawing, ongoing: ot.live, finished: ot.finished }
   const statusColors = { join_open: '#fbbf24', animating: '#fbbf24', ongoing: '#34d399', finished: '#818cf8' }
 
   // Get popup slot data
@@ -620,6 +626,7 @@ export default function TournamentOverlay({ tournamentId, editable = false, show
           tournamentStatus={status}
           animating={animating}
           animatedSlots={animatedSlots}
+          ot={ot}
         />
       </div>
 
@@ -631,6 +638,7 @@ export default function TournamentOverlay({ tournamentId, editable = false, show
           ac={ac}
           onSubmit={handleAmountSubmit}
           onClose={() => setAmountPopup(null)}
+          ot={ot}
         />
       )}
     </div>

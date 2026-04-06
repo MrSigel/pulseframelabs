@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getAllPublic, getOnePublic, onTableChange } from '../lib/store'
+import { getOverlayStrings } from './overlayI18n'
 
 const BADGE_COLORS = ['#ef4444', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899']
 
@@ -30,6 +31,7 @@ export default function HotwordsOverlay({ theme: themeProp }) {
   const [themeFromStore, setThemeFromStore] = useState(null)
   const t = { ...DEFAULT_THEME, ...(themeProp || themeFromStore) }
 
+  const [overlayLang, setOverlayLang] = useState('en')
   const [entries, setEntries] = useState([])
 
   useEffect(() => {
@@ -38,6 +40,8 @@ export default function HotwordsOverlay({ theme: themeProp }) {
     const localMode = localStorage.getItem('pfl_theme_mode'); getOnePublic('pfl_theme_mode', uid).then(v => { const mode = v || localMode;
       if (mode === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
     })
+    getOnePublic('overlay_lang', uid).then(v => { if (v) setOverlayLang(v) })
+    const localLang = localStorage.getItem('pfl_lang'); if (localLang) setOverlayLang(localLang)
   }, [uid, themeProp])
 
   const loadData = () => {
@@ -54,6 +58,7 @@ export default function HotwordsOverlay({ theme: themeProp }) {
 
   if (!entries.length) return <div style={{ color: '#444466', fontSize: 12, fontFamily: 'monospace', padding: 16 }}>No hot words yet</div>
 
+  const ot = getOverlayStrings(overlayLang)
   const top = entries.slice(0, t.maxEntries || 10)
   const ac = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
@@ -75,7 +80,7 @@ export default function HotwordsOverlay({ theme: themeProp }) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
         <span style={{ fontSize: 14 }}>🔥</span>
-        <span style={{ fontSize: 9, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700 }}>Hot Words</span>
+        <span style={{ fontSize: 9, color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700 }}>{ot.hotWords}</span>
         <span style={{ fontSize: 9, color: `rgba(${t.bgColor.split(',').map(() => '100').join(',')},0.4)`, marginLeft: 'auto' }}>{top.length} tracked</span>
       </div>
 

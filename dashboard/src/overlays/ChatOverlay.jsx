@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { getAllPublic, getOnePublic, onTableChange } from '../lib/store'
+import { getOverlayStrings } from './overlayI18n'
 
 export const DEFAULT_THEME = {
   bgColor:       '10,10,22',
@@ -42,6 +43,7 @@ export default function ChatOverlay({ theme: themeProp }) {
   const [themeFromStore, setThemeFromStore] = useState(null)
   const t = { ...DEFAULT_THEME, ...(themeProp || themeFromStore) }
 
+  const [overlayLang, setOverlayLang] = useState('en')
   const [messages, setMessages] = useState([])
   const bottomRef = useRef(null)
 
@@ -51,6 +53,8 @@ export default function ChatOverlay({ theme: themeProp }) {
     const localMode = localStorage.getItem('pfl_theme_mode'); getOnePublic('pfl_theme_mode', uid).then(v => { const mode = v || localMode;
       if (mode === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
     })
+    getOnePublic('overlay_lang', uid).then(v => { if (v) setOverlayLang(v) })
+    const localLang = localStorage.getItem('pfl_lang'); if (localLang) setOverlayLang(localLang)
   }, [uid, themeProp])
 
   const loadMessages = () => {
@@ -67,6 +71,7 @@ export default function ChatOverlay({ theme: themeProp }) {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior:'smooth' }) }, [messages])
 
+  const ot = getOverlayStrings(overlayLang)
   const ac         = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
   const overlayScale = t.overlayScale || 1
@@ -88,7 +93,7 @@ export default function ChatOverlay({ theme: themeProp }) {
       {/* Header */}
       <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:10, paddingBottom:8, borderBottom:`1px solid ${ac}0.15)` }}>
         <div style={{ width:6, height:6, borderRadius:'50%', background:`rgba(${t.accentColor},1)`, animation:'glow-pulse 2s ease-in-out infinite' }} />
-        <span style={{ fontSize:'0.6em', color: t.textMuted, textTransform:'uppercase', letterSpacing:'0.15em' }}>Live Chat</span>
+        <span style={{ fontSize:'0.6em', color: t.textMuted, textTransform:'uppercase', letterSpacing:'0.15em' }}>{ot.chatOverlay}</span>
         <span style={{ fontSize:'0.6em', color:`${ac}0.35)`, marginLeft:'auto' }}>{messages.length}</span>
       </div>
 

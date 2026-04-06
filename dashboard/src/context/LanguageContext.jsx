@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react'
+import { setOne } from '../lib/store'
 
 const LanguageContext = createContext(null)
 const STORAGE_KEY = 'pfl_lang'
@@ -162,6 +163,17 @@ const i18n = {
         items: ['OBS Studio', 'Streamlabs', 'Twitch', 'Kick', 'YouTube'],
       },
 
+      // Built for Casino Streamers
+      scenarios: {
+        label: 'Built for Casino Streamers', title: 'Your Stream, Supercharged',
+        items: [
+          { t: 'Bonushunt Night', d: 'Track every bonus buy-in live. Required X updates automatically. Profit calculated as wins roll in. Your viewers see it all in real-time.', icon: 'Gem' },
+          { t: 'Tournament Night', d: 'Run brackets for up to 32 players. The spinning wheel picks opponents. Amount-based winner system. Live bracket overlay for OBS.', icon: 'Trophy' },
+          { t: 'Viewer Engagement', d: 'Predictions, hot words, slot requests, points battles — every feature keeps your chat active and invested in every single spin.', icon: 'Target' },
+          { t: 'Boss Fight Gauntlet', d: 'One boss vs. multiple challengers. Sequential 1v1 duels with life system. Your viewers join via !join and the drama unfolds live.', icon: 'Sword' },
+        ],
+      },
+
       // Overlay Showcase
       overlayShowcase: {
         label: 'Overlays', title: 'See Your Stream Transform',
@@ -313,7 +325,7 @@ const i18n = {
       hotWords: 'Hot Words', predictions: 'Predictions', join: 'Join', chat: 'Chat',
       twitchBot: 'Twitch Bot', pointsBattle: 'Points Battle', streamPoints: 'Stream Points',
       website: 'Website', shop: 'Shop', credits: 'Credits',
-      settings: 'Settings', support: 'Support',
+      settings: 'Settings', support: 'Support', analytics: 'Analytics', recap: 'Stream Recap',
       lightMode: 'Light Mode', darkMode: 'Dark Mode', signOut: 'Sign out',
     },
 
@@ -354,6 +366,34 @@ const i18n = {
       subExpired: 'Your subscription has expired',
       paymentConfirmed: 'Credits added',
       planActivated: 'Plan activated',
+    },
+
+    // ── Analytics ─────────────────────────────────────────────────────
+    analytics: {
+      title: 'Analytics',
+      totalBonushunts: 'Total Bonushunts', totalProfit: 'Total Profit',
+      avgMultiplier: 'Avg. Multiplier', bestHunt: 'Best Hunt',
+      totalTournaments: 'Tournaments Played', totalWagered: 'Total Wagered',
+      biggestSession: 'Biggest Session', winRate: 'Win Rate',
+      bonushuntStats: 'Bonushunt Statistics', tournamentStats: 'Tournament Statistics',
+      wagerStats: 'Wager Statistics', profitOverTime: 'Profit Over Time',
+      noData: 'No data yet. Start using the dashboard to see analytics.',
+    },
+
+    // ── Recap ─────────────────────────────────────────────────────────
+    recap: {
+      title: 'Stream Recap',
+      selectDate: 'Select Date',
+      today: 'Today', last7: 'Last 7 Days', last30: 'Last 30 Days', allTime: 'All Time',
+      bonushuntRecap: 'Bonushunt Recap', tournamentRecap: 'Tournament Recap',
+      wagerRecap: 'Wager Recap',
+      totalBuyIn: 'Total Buy-In', totalWin: 'Total Win', profit: 'Profit',
+      bestSlot: 'Best Slot', worstSlot: 'Worst Slot',
+      tournamentWinner: 'Winner', prizePool: 'Prize Pool',
+      startBalance: 'Start Balance', endBalance: 'End Balance',
+      exportImage: 'Export as Image', exporting: 'Exporting...',
+      noRecapData: 'No stream data for this period.',
+      sessionSummary: 'Session Summary',
     },
 
     // ── Shop ──────────────────────────────────────────────────────────
@@ -840,6 +880,16 @@ const i18n = {
         items: ['OBS Studio', 'Streamlabs', 'Twitch', 'Kick', 'YouTube'],
       },
 
+      scenarios: {
+        label: 'Gemacht für Casino-Streamer', title: 'Dein Stream, aufgeladen',
+        items: [
+          { t: 'Bonushunt-Abend', d: 'Verfolge jeden Bonus-Einsatz live. Required X aktualisiert sich automatisch. Gewinn wird berechnet wenn Gewinne reinkommen. Deine Zuschauer sehen alles in Echtzeit.', icon: 'Gem' },
+          { t: 'Turnier-Abend', d: 'Brackets für bis zu 32 Spieler. Das Glücksrad wählt Gegner. Betragsbasiertes Gewinnsystem. Live-Bracket-Overlay für OBS.', icon: 'Trophy' },
+          { t: 'Zuschauer-Engagement', d: 'Vorhersagen, Hot Words, Slot-Anfragen, Punkte-Battles — jedes Feature hält deinen Chat aktiv und investiert in jeden Spin.', icon: 'Target' },
+          { t: 'Boss Fight Gauntlet', d: 'Ein Boss gegen mehrere Herausforderer. Sequentielle 1v1-Duelle mit Lebenssystem. Zuschauer treten per !join bei und das Drama entfaltet sich live.', icon: 'Sword' },
+        ],
+      },
+
       overlayShowcase: {
         label: 'Overlays', title: 'Sieh wie sich dein Stream verwandelt',
         sub: 'Professionelle Overlays die sich in Echtzeit aktualisieren. Klicke zum Vorschauen.',
@@ -984,7 +1034,7 @@ const i18n = {
       hotWords: 'Hot Words', predictions: 'Vorhersagen', join: 'Beitreten', chat: 'Chat',
       twitchBot: 'Twitch-Bot', pointsBattle: 'Punkte-Battle', streamPoints: 'Stream-Punkte',
       website: 'Webseite', shop: 'Shop', credits: 'Guthaben',
-      settings: 'Einstellungen', support: 'Support',
+      settings: 'Einstellungen', support: 'Support', analytics: 'Statistiken', recap: 'Stream-Zusammenfassung',
       lightMode: 'Hell-Modus', darkMode: 'Dunkel-Modus', signOut: 'Abmelden',
     },
 
@@ -1022,6 +1072,32 @@ const i18n = {
       subExpired: 'Dein Abo ist abgelaufen',
       paymentConfirmed: 'Credits gutgeschrieben',
       planActivated: 'Paket aktiviert',
+    },
+
+    analytics: {
+      title: 'Statistiken',
+      totalBonushunts: 'Bonushunts gesamt', totalProfit: 'Gesamtgewinn',
+      avgMultiplier: 'Ø Multiplikator', bestHunt: 'Bester Hunt',
+      totalTournaments: 'Turniere gespielt', totalWagered: 'Gesamt gewettet',
+      biggestSession: 'Größte Sitzung', winRate: 'Gewinnrate',
+      bonushuntStats: 'Bonushunt-Statistiken', tournamentStats: 'Turnier-Statistiken',
+      wagerStats: 'Wager-Statistiken', profitOverTime: 'Gewinn über Zeit',
+      noData: 'Noch keine Daten. Nutze das Dashboard um Statistiken zu sehen.',
+    },
+
+    recap: {
+      title: 'Stream-Zusammenfassung',
+      selectDate: 'Zeitraum wählen',
+      today: 'Heute', last7: 'Letzte 7 Tage', last30: 'Letzte 30 Tage', allTime: 'Gesamt',
+      bonushuntRecap: 'Bonushunt-Zusammenfassung', tournamentRecap: 'Turnier-Zusammenfassung',
+      wagerRecap: 'Wager-Zusammenfassung',
+      totalBuyIn: 'Gesamteinsatz', totalWin: 'Gesamtgewinn', profit: 'Gewinn',
+      bestSlot: 'Bester Slot', worstSlot: 'Schlechtester Slot',
+      tournamentWinner: 'Gewinner', prizePool: 'Preispool',
+      startBalance: 'Startguthaben', endBalance: 'Endguthaben',
+      exportImage: 'Als Bild exportieren', exporting: 'Exportiere...',
+      noRecapData: 'Keine Stream-Daten für diesen Zeitraum.',
+      sessionSummary: 'Sitzungsübersicht',
     },
 
     // ── Shop ──────────────────────────────────────────────────────────
@@ -1361,6 +1437,7 @@ export function LanguageProvider({ children }) {
     const next = lang === 'en' ? 'de' : 'en'
     setLang(next)
     localStorage.setItem(STORAGE_KEY, next)
+    setOne('overlay_lang', next)
   }
 
   const t = i18n[lang]

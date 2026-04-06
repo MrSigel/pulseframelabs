@@ -22,6 +22,8 @@ import Shop from './pages/Shop'
 import Settings from './pages/Settings'
 import Support from './pages/Support'
 import ResetPassword from './pages/ResetPassword'
+import Analytics from './pages/Analytics'
+import Recap from './pages/Recap'
 import StreamerPage from './pages/StreamerPage'
 import LandingPage from './pages/LandingPage'
 import OverlayPage from './pages/OverlayPage'
@@ -53,6 +55,8 @@ function ProtectedLayout() {
             <Route path="/shop"            element={<Shop />} />
             <Route path="/settings"        element={<Settings />} />
             <Route path="/support"         element={<Support />} />
+            <Route path="/analytics"       element={<Analytics />} />
+            <Route path="/recap"           element={<Recap />} />
             <Route path="/reset-password"  element={<ResetPassword />} />
             <Route path="*"                element={<Navigate to="/" replace />} />
           </Routes>

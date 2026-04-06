@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { LayoutDashboard, Gem, Trophy, Sword, MessageSquare, Bot, LogOut, Radio, Medal, Gauge, Sparkles, Flame, Target, ChevronDown, Globe, Coins, Swords, Sun, Moon, ShoppingCart, Settings, HelpCircle } from 'lucide-react'
+import { LayoutDashboard, Gem, Trophy, Sword, MessageSquare, Bot, LogOut, Radio, Medal, Gauge, Sparkles, Flame, Target, ChevronDown, Globe, Coins, Swords, Sun, Moon, ShoppingCart, Settings, HelpCircle, BarChart3, Clapperboard } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 import { useLang } from '../context/LanguageContext'
 import { useSubscription } from '../context/SubscriptionContext'
@@ -13,6 +13,8 @@ function useNavSections(ts) {
       items: [
         { path: '/', label: ts.dashboard, Icon: LayoutDashboard },
         { path: '/shop', label: ts.shop, Icon: ShoppingCart },
+        { path: '/analytics', label: ts.analytics, Icon: BarChart3 },
+        { path: '/recap', label: ts.recap, Icon: Clapperboard },
         { path: '/settings', label: ts.settings, Icon: Settings },
         { path: '/support', label: ts.support, Icon: HelpCircle },
       ],

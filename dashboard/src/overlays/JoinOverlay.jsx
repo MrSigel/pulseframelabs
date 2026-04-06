@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getAllPublic, getOnePublic, onTableChange } from '../lib/store'
 import { Users } from 'lucide-react'
+import { getOverlayStrings } from './overlayI18n'
 
 export const DEFAULT_THEME = {
   bgColor: '10,10,22', bgColorLight: '255,255,255', bgOpacity: 0.92, blur: 12,
@@ -20,6 +21,7 @@ export default function JoinOverlay({ theme: themeProp }) {
   const [themeFromStore, setThemeFromStore] = useState(null)
   const t = { ...DEFAULT_THEME, ...(themeProp || themeFromStore) }
 
+  const [overlayLang, setOverlayLang] = useState('en')
   const [session, setSession]         = useState(null)
   const [participants, setParticipants] = useState([])
   const [drawState, setDrawState]     = useState(null)
@@ -30,6 +32,8 @@ export default function JoinOverlay({ theme: themeProp }) {
     const localMode = localStorage.getItem('pfl_theme_mode'); getOnePublic('pfl_theme_mode', uid).then(v => { const mode = v || localMode;
       if (mode === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
     })
+    getOnePublic('overlay_lang', uid).then(v => { if (v) setOverlayLang(v) })
+    const localLang = localStorage.getItem('pfl_lang'); if (localLang) setOverlayLang(localLang)
   }, [uid, themeProp])
 
   const loadData = () => {
@@ -65,6 +69,7 @@ export default function JoinOverlay({ theme: themeProp }) {
     return () => clearInterval(iv)
   }, [uid])
 
+  const ot = getOverlayStrings(overlayLang)
   const ac         = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
   const overlayScale = t.overlayScale || 1
@@ -91,7 +96,7 @@ export default function JoinOverlay({ theme: themeProp }) {
         <div style={{ textAlign:'center', marginBottom:16 }}>
           <div style={{ fontSize:'1.4em', fontWeight:800, color:t.textPrimary, letterSpacing:'0.08em', textTransform:'uppercase' }}>
             <Users size={20} style={{ verticalAlign:'middle', marginRight:8, color:`rgba(${t.accentColor},0.8)` }} />
-            DRAWING...
+            {ot.drawing}
           </div>
         </div>
         <div style={{
@@ -117,7 +122,7 @@ export default function JoinOverlay({ theme: themeProp }) {
         <div style={{ textAlign:'center', marginBottom:16 }}>
           <div style={{ fontSize:'1.2em', fontWeight:800, color:t.textPrimary, letterSpacing:'0.08em', textTransform:'uppercase' }}>
             <Users size={20} style={{ verticalAlign:'middle', marginRight:8, color:`rgba(${t.accentColor},0.8)` }} />
-            WINNER
+            {ot.winner}
           </div>
         </div>
         <div style={{

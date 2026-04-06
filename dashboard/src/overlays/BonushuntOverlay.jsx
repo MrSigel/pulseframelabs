@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getAllPublic, getOnePublic, onTableChange, insert, update, remove } from '../lib/store'
 import { Plus, Trash2, Check } from 'lucide-react'
+import { getOverlayStrings } from './overlayI18n'
 
 export const DEFAULT_THEME = {
   bgColor:       '10,10,22',
@@ -143,6 +144,8 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
   const [themeFromStore, setThemeFromStore] = useState(null)
   const t = { ...DEFAULT_THEME, ...(themeProp || themeFromStore) }
 
+  const [overlayLang, setOverlayLang] = useState('en')
+
   const [params] = useSearchParams()
   const mode = params.get('mode') || 'normal'
   const [hunt, setHunt] = useState(null)
@@ -156,6 +159,8 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
     const localMode = localStorage.getItem('pfl_theme_mode'); getOnePublic('pfl_theme_mode', uid).then(v => { const mode = v || localMode;
       if (mode === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
     })
+    getOnePublic('overlay_lang', uid).then(v => { if (v) setOverlayLang(v) })
+    const localLang = localStorage.getItem('pfl_lang'); if (localLang) setOverlayLang(localLang)
   }, [uid, themeProp])
 
   const loadData = () => {
@@ -231,7 +236,9 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
     setHunt(h => ({ ...h, current_balance: newBal }))
   }
 
-  if (!hunt) return <Placeholder text="No bonus hunt found" />
+  const ot = getOverlayStrings(overlayLang)
+
+  if (!hunt) return <Placeholder text={ot.noSession} />
 
   const totalBuyIn = entries.reduce((s, e) => s + (e.buy_in || 0), 0)
   const totalWin   = entries.reduce((s, e) => s + (e.win || 0), 0)
@@ -257,14 +264,14 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
     return (
       <div style={{ fontFamily: t.fontFamily, background:`rgba(${t.bgColor},${t.bgOpacity})`, border:`1px solid ${ac}0.2)`, borderRadius: t.borderRadius, backdropFilter:`blur(${t.blur}px)`, padding:'14px 20px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:24, minWidth:480 }}>
         <div>
-          <div style={{ fontSize:'0.64em', color:`${ac}0.5)`, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:3 }}>Bonushunt</div>
+          <div style={{ fontSize:'0.64em', color:`${ac}0.5)`, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:3 }}>{ot.bonushunt}</div>
           <div style={{ fontSize:'1.15em', fontWeight:700, color: t.textPrimary }}>{hunt.name}</div>
         </div>
         {[
-          { l:'Games',      v: `${played}/${total}`,                        c: t.textPrimary },
-          { l:'Total Buy-In', v: totalBuyIn.toLocaleString(),               c: t.textSecondary },
-          { l:'Total Win',  v: totalWin.toLocaleString(),                   c: totalWin >= totalBuyIn ? t.positiveColor : t.negativeColor },
-          { l:'Required X', v: `${requiredX.toFixed(2)}x`,                  c: requiredX <= 100 ? t.positiveColor : t.negativeColor },
+          { l:ot.games,      v: `${played}/${total}`,                        c: t.textPrimary },
+          { l:ot.totalBuyIn, v: totalBuyIn.toLocaleString(),               c: t.textSecondary },
+          { l:ot.totalWin,  v: totalWin.toLocaleString(),                   c: totalWin >= totalBuyIn ? t.positiveColor : t.negativeColor },
+          { l:ot.requiredX, v: `${requiredX.toFixed(2)}x`,                  c: requiredX <= 100 ? t.positiveColor : t.negativeColor },
         ].map(s => (
           <div key={s.l} style={{ textAlign:'center' }}>
             <div style={{ fontSize:'0.64em', color: t.textMuted, textTransform:'uppercase', letterSpacing:'0.12em' }}>{s.l}</div>
@@ -277,12 +284,12 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
 
   // stat boxes to show
   const allStats = [
-    { l:'Games',       edField:null,              raw: null,                v: `${played}/${total}`,              c: t.textPrimary },
-    { l:'Start',       edField:'start_balance',   raw: hunt.start_balance||0, v:(hunt.start_balance||0).toLocaleString(), c: t.textSecondary },
-    { l:'Total Buy-In', edField:null,             raw: null,                v: totalBuyIn.toLocaleString(),       c: t.textSecondary },
-    { l:'Total Win',   edField:null,              raw: null,                v: totalWin.toLocaleString(),         c: totalWin >= totalBuyIn ? t.positiveColor : t.negativeColor, hide: !t.showTotalWin },
-    { l:'Required X',  edField:null,              raw: null,                v: `${requiredX.toFixed(2)}x`,        c: requiredX <= 100 ? t.positiveColor : t.negativeColor },
-    { l:'Profit',      edField:null,              raw: null,                v:(profit>=0?'+':'')+profit.toLocaleString(), c: profit>=0 ? t.positiveColor : t.negativeColor, hide: !t.showProfit },
+    { l:ot.games,       edField:null,              raw: null,                v: `${played}/${total}`,              c: t.textPrimary },
+    { l:ot.start,       edField:'start_balance',   raw: hunt.start_balance||0, v:(hunt.start_balance||0).toLocaleString(), c: t.textSecondary },
+    { l:ot.totalBuyIn, edField:null,             raw: null,                v: totalBuyIn.toLocaleString(),       c: t.textSecondary },
+    { l:ot.totalWin,   edField:null,              raw: null,                v: totalWin.toLocaleString(),         c: totalWin >= totalBuyIn ? t.positiveColor : t.negativeColor, hide: !t.showTotalWin },
+    { l:ot.requiredX,  edField:null,              raw: null,                v: `${requiredX.toFixed(2)}x`,        c: requiredX <= 100 ? t.positiveColor : t.negativeColor },
+    { l:ot.profit,      edField:null,              raw: null,                v:(profit>=0?'+':'')+profit.toLocaleString(), c: profit>=0 ? t.positiveColor : t.negativeColor, hide: !t.showProfit },
   ].filter(s => !s.hide)
 
   const rad   = Math.max(4, t.borderRadius - 4)
@@ -316,7 +323,7 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
             <div style={{ fontSize:'0.58em', color: t.textMuted, textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:2 }}>{s.l}</div>
             <div style={{ fontSize:'0.9em', fontWeight:700, color: s.c, fontVariantNumeric:'tabular-nums' }}>
               {editable && s.edField
-                ? <Tip label="Start Balance" visible={showTooltips}><EditableField value={s.raw} type="number" onChange={v => saveHuntField(s.edField, v)} style={{ fontSize:'1em', fontWeight:700, color: s.c }} inputStyle={{ fontSize:'0.85em', color: s.c, width:70, textAlign:'center', background:'transparent' }} /></Tip>
+                ? <Tip label={ot.startBalance} visible={showTooltips}><EditableField value={s.raw} type="number" onChange={v => saveHuntField(s.edField, v)} style={{ fontSize:'1em', fontWeight:700, color: s.c }} inputStyle={{ fontSize:'0.85em', color: s.c, width:70, textAlign:'center', background:'transparent' }} /></Tip>
                 : s.v}
             </div>
           </div>
@@ -348,7 +355,7 @@ export default function BonushuntOverlay({ huntId, editable = false, showTooltip
                   <span style={{ fontSize:'0.75em', fontWeight:700, color: multColor, fontVariantNumeric:'tabular-nums', minWidth:42, textAlign:'right' }}>{e.win > 0 ? `${mult.toFixed(2)}x` : '—'}</span>
                   {/* Win */}
                   {editable
-                    ? <Tip label="Enter win" visible={showTooltips}><EntryWinInput entry={e} onSave={saveWin} onDelete={deleteEntry} positiveColor={t.positiveColor} /></Tip>
+                    ? <Tip label={ot.enterWin} visible={showTooltips}><EntryWinInput entry={e} onSave={saveWin} onDelete={deleteEntry} positiveColor={t.positiveColor} /></Tip>
                     : <span style={{ fontSize:'0.85em', fontWeight:700, color: e.win > 0 ? t.positiveColor : t.textMuted, fontVariantNumeric:'tabular-nums', flexShrink:0 }}>{e.win > 0 ? `+${e.win.toLocaleString()}` : '—'}</span>
                   }
                 </div>

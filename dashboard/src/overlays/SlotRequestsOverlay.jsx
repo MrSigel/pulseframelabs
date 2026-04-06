@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getAllPublic, getOnePublic, onTableChange } from '../lib/store'
 import { Sparkles, Trophy } from 'lucide-react'
+import { getOverlayStrings } from './overlayI18n'
 
 export const DEFAULT_THEME = {
   bgColor:       '10,10,22',
@@ -30,6 +31,7 @@ export default function SlotRequestsOverlay({ theme: themeProp }) {
   const [themeFromStore, setThemeFromStore] = useState(null)
   const t = { ...DEFAULT_THEME, ...(themeProp || themeFromStore) }
 
+  const [overlayLang, setOverlayLang] = useState('en')
   const [requests, setRequests]   = useState([])
   const [config, setConfig]       = useState({})
 
@@ -39,6 +41,8 @@ export default function SlotRequestsOverlay({ theme: themeProp }) {
     const localMode = localStorage.getItem('pfl_theme_mode'); getOnePublic('pfl_theme_mode', uid).then(v => { const mode = v || localMode;
       if (mode === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
     })
+    getOnePublic('overlay_lang', uid).then(v => { if (v) setOverlayLang(v) })
+    const localLang = localStorage.getItem('pfl_lang'); if (localLang) setOverlayLang(localLang)
   }, [uid, themeProp])
 
   const loadData = () => {
@@ -55,6 +59,7 @@ export default function SlotRequestsOverlay({ theme: themeProp }) {
     return () => { off1(); clearInterval(interval) }
   }, [uid])
 
+  const ot = getOverlayStrings(overlayLang)
   const ac         = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
   const overlayScale = t.overlayScale || 1
@@ -82,7 +87,7 @@ export default function SlotRequestsOverlay({ theme: themeProp }) {
       <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12, paddingBottom:8, borderBottom:`1px solid ${ac}0.15)` }}>
         <div style={{ display:'flex', alignItems:'center', gap:8 }}>
           <Sparkles size={13} style={{ color: `rgba(${t.accentColor},0.7)` }} />
-          <span style={{ fontSize:'0.62em', color: t.textMuted, textTransform:'uppercase', letterSpacing:'0.15em' }}>Slot Requests</span>
+          <span style={{ fontSize:'0.62em', color: t.textMuted, textTransform:'uppercase', letterSpacing:'0.15em' }}>{ot.slotRequests}</span>
         </div>
         <div style={{ display:'flex', alignItems:'center', gap:6 }}>
           <span style={{ fontSize:'0.58em', color: t.textMuted, fontVariantNumeric:'tabular-nums' }}>{pendingRequests.length}</span>
@@ -113,7 +118,7 @@ export default function SlotRequestsOverlay({ theme: themeProp }) {
           }}>
             <Trophy size={18} style={{ color:'#fbbf24', flexShrink:0, filter:'drop-shadow(0 0 6px rgba(251,191,36,0.4))' }} />
             <div style={{ minWidth:0, flex:1 }}>
-              <div style={{ fontSize:'0.52em', color:'#fbbf24', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:3, fontWeight:700 }}>Winner</div>
+              <div style={{ fontSize:'0.52em', color:'#fbbf24', textTransform:'uppercase', letterSpacing:'0.12em', marginBottom:3, fontWeight:700 }}>{ot.winner}</div>
               <div style={{ fontSize:'0.88em', fontWeight:800, color: t.textPrimary, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', textShadow:'0 0 12px rgba(251,191,36,0.2)' }}>
                 {sel.game}
               </div>
@@ -127,7 +132,7 @@ export default function SlotRequestsOverlay({ theme: themeProp }) {
       {/* Request list */}
       {visible.length === 0 ? (
         <div style={{ fontSize:'0.7em', color: t.textMuted, textAlign:'center', padding:'12px 0' }}>
-          No requests — !sr GameName
+          {ot.noRequests} — !sr GameName
         </div>
       ) : (
         <div style={{ display:'flex', flexDirection:'column', gap:4 }}>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getAllPublic, getOnePublic, onTableChange } from '../lib/store'
 import { Medal } from 'lucide-react'
+import { getOverlayStrings } from './overlayI18n'
 
 export const DEFAULT_THEME = {
   bgColor:       '10,10,22',
@@ -49,6 +50,7 @@ export default function PersonalBestsOverlay({ theme: themeProp }) {
   const [themeFromStore, setThemeFromStore] = useState(null)
   const t = { ...DEFAULT_THEME, ...(themeProp || themeFromStore) }
 
+  const [overlayLang, setOverlayLang] = useState('en')
   const [bests, setBests] = useState([])
 
   useEffect(() => {
@@ -57,6 +59,8 @@ export default function PersonalBestsOverlay({ theme: themeProp }) {
     const localMode = localStorage.getItem('pfl_theme_mode'); getOnePublic('pfl_theme_mode', uid).then(v => { const mode = v || localMode;
       if (mode === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
     })
+    getOnePublic('overlay_lang', uid).then(v => { if (v) setOverlayLang(v) })
+    const localLang = localStorage.getItem('pfl_lang'); if (localLang) setOverlayLang(localLang)
   }, [uid, themeProp])
 
   const loadData = () => {
@@ -75,6 +79,7 @@ export default function PersonalBestsOverlay({ theme: themeProp }) {
     return () => { off1() }
   }, [uid])
 
+  const ot = getOverlayStrings(overlayLang)
   const ac         = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
   const overlayScale = t.overlayScale || 1
@@ -110,7 +115,7 @@ export default function PersonalBestsOverlay({ theme: themeProp }) {
       {/* Header */}
       <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:14, paddingBottom:8, borderBottom:`1px solid ${ac}0.15)` }}>
         <Medal size={14} style={{ color: '#fbbf24', opacity:0.8 }} />
-        <span style={{ fontSize:'0.62em', color: t.textMuted, textTransform:'uppercase', letterSpacing:'0.18em' }}>Personal Bests</span>
+        <span style={{ fontSize:'0.62em', color: t.textMuted, textTransform:'uppercase', letterSpacing:'0.18em' }}>{ot.personalBests}</span>
       </div>
 
       {/* Rows */}

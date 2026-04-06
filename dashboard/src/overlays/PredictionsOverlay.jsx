@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { getAllPublic, getOnePublic, onTableChange } from '../lib/store'
 import { Trophy, Target } from 'lucide-react'
+import { getOverlayStrings } from './overlayI18n'
 
 export const DEFAULT_THEME = {
   bgColor:       '10,10,22',
@@ -28,6 +29,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
   const [themeFromStore, setThemeFromStore] = useState(null)
   const t = { ...DEFAULT_THEME, ...(themeProp || themeFromStore) }
 
+  const [overlayLang, setOverlayLang] = useState('en')
   const [session, setSession]   = useState(null)
   const [entries, setEntries]   = useState([])
   const [round, setRound]       = useState(null)
@@ -39,6 +41,8 @@ export default function PredictionsOverlay({ theme: themeProp }) {
     const localMode = localStorage.getItem('pfl_theme_mode'); getOnePublic('pfl_theme_mode', uid).then(v => { const mode = v || localMode;
       if (mode === 'light' && !themeProp) { setThemeFromStore(prev => ({ ...(prev || {}), bgColor: DEFAULT_THEME.bgColorLight || '255,255,255', textPrimary: '#1a1714', textSecondary: '#6b6560', textMuted: '#9a9488' })) }
     })
+    getOnePublic('overlay_lang', uid).then(v => { if (v) setOverlayLang(v) })
+    const localLang = localStorage.getItem('pfl_lang'); if (localLang) setOverlayLang(localLang)
   }, [uid, themeProp])
 
   const loadGuess = () => {
@@ -82,6 +86,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
     return () => { off1(); off2(); off3(); off4() }
   }, [uid])
 
+  const ot = getOverlayStrings(overlayLang)
   const ac         = `rgba(${t.accentColor},`
   const glowShadow = t.glow ? `0 0 30px ${ac}0.12), inset 0 1px 0 rgba(255,255,255,0.03)` : 'none'
   const overlayScale = t.overlayScale || 1
@@ -129,7 +134,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, paddingBottom: 8, borderBottom: `1px solid ${ac}0.15)` }}>
           <Target size={14} style={{ color: `rgba(${t.accentColor},0.8)`, opacity: 0.8 }} />
-          <span style={{ fontSize: '0.62em', color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.18em' }}>Guess Balance</span>
+          <span style={{ fontSize: '0.62em', color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.18em' }}>{ot.guessingGame}</span>
           <span style={{
             marginLeft: 'auto', fontSize: '0.55em', fontWeight: 700, textTransform: 'uppercase',
             padding: '2px 8px', borderRadius: 6,
@@ -145,7 +150,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
         {session.status === 'finished' && session.target_number != null && (
           <>
             <div style={{ textAlign: 'center', marginBottom: 12 }}>
-              <span style={{ fontSize: '0.58em', color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.12em' }}>Target Value</span>
+              <span style={{ fontSize: '0.58em', color: t.textMuted, textTransform: 'uppercase', letterSpacing: '0.12em' }}>{ot.target}</span>
               <p style={{ fontSize: '1.4em', fontWeight: 700, color: t.textPrimary, margin: '4px 0 0' }}>
                 {session.target_number}
               </p>
@@ -190,7 +195,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
         {(session.status === 'open' || session.status === 'closed') && (
           <div style={{ textAlign: 'center', padding: '12px 0' }}>
             <span style={{ fontSize: '1.2em', fontWeight: 700, color: t.textPrimary }}>{entries.length}</span>
-            <span style={{ fontSize: '0.7em', color: t.textMuted, marginLeft: 6 }}>Guesses</span>
+            <span style={{ fontSize: '0.7em', color: t.textMuted, marginLeft: 6 }}>{ot.guesses}</span>
           </div>
         )}
       </div>
@@ -248,7 +253,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px' }}>
               {winnerA && <Trophy size={12} style={{ color: '#34d399', flexShrink: 0 }} />}
               <span style={{ fontSize: '0.72em', fontWeight: 600, color: winnerA ? '#34d399' : '#60a5fa', flex: 1 }}>
-                {round.option_a || 'Option A'}
+                {round.option_a || ot.optionA}
               </span>
               <span style={{ fontSize: '0.65em', color: t.textMuted, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
                 {votesA}
@@ -275,7 +280,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px' }}>
               {winnerB && <Trophy size={12} style={{ color: '#34d399', flexShrink: 0 }} />}
               <span style={{ fontSize: '0.72em', fontWeight: 600, color: winnerB ? '#34d399' : '#f87171', flex: 1 }}>
-                {round.option_b || 'Option B'}
+                {round.option_b || ot.optionB}
               </span>
               <span style={{ fontSize: '0.65em', color: t.textMuted, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
                 {votesB}
@@ -289,7 +294,7 @@ export default function PredictionsOverlay({ theme: themeProp }) {
 
         {/* Total votes */}
         <div style={{ textAlign: 'center', marginTop: 10 }}>
-          <span style={{ fontSize: '0.58em', color: t.textMuted }}>{total} Votes</span>
+          <span style={{ fontSize: '0.58em', color: t.textMuted }}>{total} {ot.votes}</span>
         </div>
       </div>
     )
